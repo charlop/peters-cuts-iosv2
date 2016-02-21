@@ -98,9 +98,8 @@ class ViewController: UIViewController {
         let params1 = ["user_name" : userName!, "user_phone" : phone!, "user_email" : email!] as Dictionary
         
         // TEST
-         let postParams = "user_name=testUser&user_phone=5551234567"
-         request.HTTPBody = postParams.dataUsingEncoding(NSUTF8StringEncoding)
-        
+         let postParams = "user_name=\(userName)&user_phone=\(phone)&user_email=\(email)"
+         request.HTTPBody = try! NSJSONSerialization.dataWithJSONObject(params1, options: [])
         
         // let params = ["user_name" : userName!, "user_phone" : phone!, "user_email" : email!] as Dictionary
         // let nsData:NSData = try! NSJSONSerialization.dataWithJSONObject(params, options: [])
@@ -133,7 +132,12 @@ class ViewController: UIViewController {
                 print("ERROR -> \(error)")
                 return
                 
-                           }
+            }
+            
+            if let httpResponse = response as? NSHTTPURLResponse {
+                print("responseCode \(httpResponse.statusCode)")
+            }
+            
             
             do {
                 let responseJSON = try NSJSONSerialization.JSONObjectWithData(data!, options: [])
@@ -148,11 +152,7 @@ class ViewController: UIViewController {
         
         task.resume()
         
-        
-        let uploadTask = NSURLSession.sharedSession().uploadTaskWithRequest(<#T##request: NSURLRequest##NSURLRequest#>, fromData: params1)
-        
-        
-        
+    
         /* request.setValue(<#T##value: AnyObject?##AnyObject?#>, forKey: <#T##String#>)  */
         // setValue:@"application/xml; charset=utf-8" forHTTPHeaderField:@"Content-Type"];
         
