@@ -1,0 +1,6 @@
+framework module Pods_Peters816 {
+  umbrella header "Pods-Peters816-umbrella.h"
+
+  export *
+  module * { export * }
+}
