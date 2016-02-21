@@ -74,7 +74,7 @@ class ViewController: UIViewController {
         
     }
     
-    // 
+    //
     
         // MARK: Actions
     
@@ -89,20 +89,23 @@ class ViewController: UIViewController {
         let request = NSMutableURLRequest(URL: url!)
         let session = NSURLSession.sharedSession()
         request.HTTPMethod = "POST"
+        // request.setValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
         session
         
         let userName = NSUserDefaults.standardUserDefaults().stringForKey("name")
         let phone = NSUserDefaults.standardUserDefaults().stringForKey("number")
         let email = NSUserDefaults.standardUserDefaults().stringForKey("email")
+        let params1 = ["user_name" : userName!, "user_phone" : phone!, "user_email" : email!] as Dictionary
         
         // TEST
-        // let postParams = "user_name=testUser&user_phone=5551234567"
-        // request.HTTPBody = postParams.dataUsingEncoding(NSUTF8StringEncoding)
+         let postParams = "user_name=testUser&user_phone=5551234567"
+         request.HTTPBody = postParams.dataUsingEncoding(NSUTF8StringEncoding)
         
-        request.setValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
-        let params = ["user_name" : userName!, "user_phone" : phone!, "user_email" : email!] as Dictionary
-        let nsData:NSData = try! NSJSONSerialization.dataWithJSONObject(params, options: [])
-        let Uploadrequest = NSURLSession.sharedSession().uploadTaskWithRequest(request: NSURLRequest, fromData: nsData)
+        
+        // let params = ["user_name" : userName!, "user_phone" : phone!, "user_email" : email!] as Dictionary
+        // let nsData:NSData = try! NSJSONSerialization.dataWithJSONObject(params, options: [])
+        // let Uploadrequest = NSURLSession.sharedSession().uploadTaskWithRequest(request: NSURLRequest, fromData: nsData)
+        // print ("error + \(NSURLResponse)()")
         
         
        /*
@@ -145,6 +148,8 @@ class ViewController: UIViewController {
         
         task.resume()
         
+        
+        let uploadTask = NSURLSession.sharedSession().uploadTaskWithRequest(<#T##request: NSURLRequest##NSURLRequest#>, fromData: params1)
         
         
         
