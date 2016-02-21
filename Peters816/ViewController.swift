@@ -89,17 +89,23 @@ class ViewController: UIViewController {
         let request = NSMutableURLRequest(URL: url!)
         let session = NSURLSession.sharedSession()
         request.HTTPMethod = "POST"
-        
+        session
         
         let userName = NSUserDefaults.standardUserDefaults().stringForKey("name")
         let phone = NSUserDefaults.standardUserDefaults().stringForKey("number")
         let email = NSUserDefaults.standardUserDefaults().stringForKey("email")
         
         // TEST
-        let postParams = "user_name=testUser&user_phone=5551234567"
-        request.HTTPBody = postParams.dataUsingEncoding(NSUTF8StringEncoding)
+        // let postParams = "user_name=testUser&user_phone=5551234567"
+        // request.HTTPBody = postParams.dataUsingEncoding(NSUTF8StringEncoding)
         
-        /*
+        request.setValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
+        let params = ["user_name" : userName!, "user_phone" : phone!, "user_email" : email!] as Dictionary
+        let nsData:NSData = try! NSJSONSerialization.dataWithJSONObject(params, options: [])
+        let Uploadrequest = NSURLSession.sharedSession().uploadTaskWithRequest(request: NSURLRequest, fromData: nsData)
+        
+        
+       /*
         
         let params = ["user_name" : userName!, "user_phone" : phone!, "user_email" : email!] as Dictionary
         
@@ -107,7 +113,7 @@ class ViewController: UIViewController {
         request.setValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
         do {
             request.HTTPBody = try NSJSONSerialization.dataWithJSONObject(params, options: []) // pass dictionary to nsdata object and set it as request body
-            print (request)
+            print (request.HTTPBody)
 
         } catch {
             print("Error -> \(error)")
