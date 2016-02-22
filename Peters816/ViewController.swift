@@ -54,15 +54,13 @@ class ViewController: UIViewController {
     }
     
     
-    func createLocalNotification() {
+    func createLocalNotification(nextActualNumber: Int) {
         
         
         let localNotification = UILocalNotification()
         let current_number = currentNumber.text
-        let next_number = nextNumber.text
         let currentActualNumber = Int(current_number!)
-        let nextActualNumber = Int(next_number!)
-        let smallerWindow = ((nextActualNumber!-2) - currentActualNumber!)
+        let smallerWindow = ((nextActualNumber-2) - currentActualNumber!)
         
         let seconds1 = smallerWindow*15*60 // int value
         let seconds2 = Double(seconds1)     // double value
@@ -95,35 +93,15 @@ class ViewController: UIViewController {
         let userName = NSUserDefaults.standardUserDefaults().stringForKey("name")
         let phone = NSUserDefaults.standardUserDefaults().stringForKey("number")
         let email = NSUserDefaults.standardUserDefaults().stringForKey("email")
-        let params1 = ["user_name" : userName!, "user_phone" : phone!, "user_email" : email!] as Dictionary
         
-        // TEST
-         let postParams = "user_name=\(userName)&user_phone=\(phone)&user_email=\(email)"
-         request.HTTPBody = try! NSJSONSerialization.dataWithJSONObject(params1, options: [])
+        print (userName!)
         
-        // let params = ["user_name" : userName!, "user_phone" : phone!, "user_email" : email!] as Dictionary
-        // let nsData:NSData = try! NSJSONSerialization.dataWithJSONObject(params, options: [])
-        // let Uploadrequest = NSURLSession.sharedSession().uploadTaskWithRequest(request: NSURLRequest, fromData: nsData)
-        // print ("error + \(NSURLResponse)()")
+                // TEST
+        
+         let postParams =  "user_name=\(userName!)&user_phone=\(phone!)&user_email=\(email!)"
+         request.HTTPBody = postParams.dataUsingEncoding(NSUTF8StringEncoding)
         
         
-       /*
-        
-        let params = ["user_name" : userName!, "user_phone" : phone!, "user_email" : email!] as Dictionary
-        
-        session
-        request.setValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
-        do {
-            request.HTTPBody = try NSJSONSerialization.dataWithJSONObject(params, options: []) // pass dictionary to nsdata object and set it as request body
-            print (request.HTTPBody)
-
-        } catch {
-            print("Error -> \(error)")
-        }
-
-        */
-        
-        // try! request.HTTPBody = NSJSONSerialization.dataWithJSONObject(params, options: []) // pass dictionary to nsdata object and set it as request body
         
         
         let task = NSURLSession.sharedSession().dataTaskWithRequest(request){ data,response,error in
@@ -136,13 +114,23 @@ class ViewController: UIViewController {
             
             if let httpResponse = response as? NSHTTPURLResponse {
                 print("responseCode \(httpResponse.statusCode)")
+                
             }
             
             
             do {
-                let responseJSON = try NSJSONSerialization.JSONObjectWithData(data!, options: [])
+                let responseJSON = try NSJSONSerialization.JSONObjectWithData(data!, options: []  )
                 print("Result -> \(responseJSON)")
-
+                let gotNumber = responseJSON["getId"] as! Int
+                
+              
+                
+               // print(gotNumber)
+                
+                
+              self.createLocalNotification(gotNumber)
+                
+                
                 } catch {
                 print("Error -> \(error)")
                     }
