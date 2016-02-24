@@ -34,8 +34,8 @@ class ViewController: UIViewController {
         currentNumber.text = readableData["current"].stringValue
         nextNumber.text = readableData["next"].stringValue
         
-        let next_Number = readableData["next"].int
-        let current_Number = readableData["current"].int
+        let next_Number = Int(nextNumber.text!)
+        let current_Number = Int(currentNumber.text!)
     
         
     
@@ -94,7 +94,7 @@ class ViewController: UIViewController {
         let phone = NSUserDefaults.standardUserDefaults().stringForKey("number")
         let email = NSUserDefaults.standardUserDefaults().stringForKey("email")
         
-        print (userName!)
+        // print (userName!)
         
                 // TEST
         
@@ -120,8 +120,11 @@ class ViewController: UIViewController {
             
             do {
                 let responseJSON = try NSJSONSerialization.JSONObjectWithData(data!, options: []  )
-                print("Result -> \(responseJSON)")
+                // print("Result -> \(responseJSON)")
                 let gotNumber = responseJSON["getId"] as! Int
+                let current_Number = Int(self.currentNumber.text!)
+                let gotTime = (gotNumber - current_Number!) * 15
+                
                 
               
                 
@@ -130,6 +133,21 @@ class ViewController: UIViewController {
                 
               self.createLocalNotification(gotNumber)
                 
+                
+                let alertController = UIAlertController(title: "Your Appointment", message: "You have received \(gotNumber) in the que. Your approximate wait time is \(gotTime)", preferredStyle: .Alert  )
+                
+                let cancelAction = UIAlertAction(title: "Cancel", style: .Cancel) { (action) in
+                    // ...
+                }
+                alertController.addAction(cancelAction)
+                
+                let OKAction = UIAlertAction(title: "OK", style: .Default) { (action) in
+                    // ...
+                }
+                alertController.addAction(OKAction)
+                
+                self.presentViewController(alertController, animated: true, completion: nil)
+               
                 
                 } catch {
                 print("Error -> \(error)")
@@ -151,6 +169,10 @@ class ViewController: UIViewController {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
        jsonParse()
+        
+       
+     
+            
         
         
     }
