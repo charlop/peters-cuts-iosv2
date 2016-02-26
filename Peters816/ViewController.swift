@@ -23,6 +23,7 @@ class ViewController: UIViewController {
     @IBOutlet weak var nextNumber: UILabel!
     @IBOutlet weak var waitTime: UILabel!
     @IBOutlet weak var enterOnce: UILabel!
+    @IBOutlet weak var staticApproxWait: UILabel!
     
     // MARK: json_parse
     
@@ -31,7 +32,16 @@ class ViewController: UIViewController {
         let url = NSURL(string: "http://peters816.comlu.com/lib/app_request.php")
         let jsonData = NSData(contentsOfURL: url!) as NSData!
         let readableData = JSON(data: jsonData, options: NSJSONReadingOptions.MutableContainers, error: nil)
-        currentNumber.text = readableData["current"].stringValue
+        
+        if ( Int(readableData["current"].stringValue) == -2){
+    
+            currentNumber.text = "0"
+            
+        } else {
+            
+            currentNumber.text = readableData["current"].stringValue
+        }
+        
         nextNumber.text = readableData["next"].stringValue
         
         let next_Number = Int(nextNumber.text!)
@@ -47,12 +57,13 @@ class ViewController: UIViewController {
         
        let subtraction =  ( next_Number! - current_Number! ) * 15
         
-        let wait_Time:String? = " Approx. wait-time is " + "\(subtraction)"  + " minutes"
+        let wait_Time:String? = " \(subtraction)"  + " minutes"
         waitTime.text = wait_Time
 
     
     }
     
+    // MARK: Set local notification
     
     func createLocalNotification(nextActualNumber: Int) {
         
@@ -72,7 +83,6 @@ class ViewController: UIViewController {
         
     }
     
-    //
     
         // MARK: Actions
     
@@ -120,40 +130,71 @@ class ViewController: UIViewController {
             
             do {
                 let responseJSON = try NSJSONSerialization.JSONObjectWithData(data!, options: []  )
-                // print("Result -> \(responseJSON)")
+                
+                print("Result -> \(responseJSON)")
+                
                 let gotNumber = responseJSON["getId"] as! Int
+                let messageReturned:String = responseJSON["message"] as! String
                 let current_Number = Int(self.currentNumber.text!)
                 let gotTime = (gotNumber - current_Number!) * 15
                 
+                if (messageReturned == "new"){
+                    
+                    dispatch_async(dispatch_get_main_queue(), {
+                        
+                        let alertController = UIAlertController(title: "Your Appointment", message: "You have received number \(gotNumber) in the que. Your approximate wait time is \(gotTime) minutes", preferredStyle: .Alert  )
+                        
+                        let cancelAction = UIAlertAction(title: "Cancel", style: .Cancel) { (action) in
+                            // ...
+                        }
+                        alertController.addAction(cancelAction)
+                        
+                        let OKAction = UIAlertAction(title: "OK", style: .Default) { (action) in
+                            // ...
+                        }
+                        alertController.addAction(OKAction)
+                        
+                        self.presentViewController(alertController, animated: true, completion: nil)
+                        
+                    })
+                    
+                } else if (messageReturned == "duplicate") {
+                    
+                    dispatch_async(dispatch_get_main_queue(), {
+                        
+                        let alertController = UIAlertController(title: "Your Appointment", message: "You already received an appointment with number \(gotNumber) in the que. Your approximate wait time is \(gotTime) minutes", preferredStyle: .Alert  )
+                        
+                        let cancelAction = UIAlertAction(title: "Cancel", style: .Cancel) { (action) in
+                            // ...
+                        }
+                        alertController.addAction(cancelAction)
+                        
+                        let OKAction = UIAlertAction(title: "OK", style: .Default) { (action) in
+                            // ...
+                        }
+                        alertController.addAction(OKAction)
+                        
+                        self.presentViewController(alertController, animated: true, completion: nil)
+                        
+                    })
+
+                    
+                }
                 
-              
                 
-               // print(gotNumber)
+              // print(gotNumber)
+              //  print (messageReturned)
                 
                 
               self.createLocalNotification(gotNumber)
                 
-                
-                let alertController = UIAlertController(title: "Your Appointment", message: "You have received \(gotNumber) in the que. Your approximate wait time is \(gotTime)", preferredStyle: .Alert  )
-                
-                let cancelAction = UIAlertAction(title: "Cancel", style: .Cancel) { (action) in
-                    // ...
-                }
-                alertController.addAction(cancelAction)
-                
-                let OKAction = UIAlertAction(title: "OK", style: .Default) { (action) in
-                    // ...
-                }
-                alertController.addAction(OKAction)
-                
-                self.presentViewController(alertController, animated: true, completion: nil)
-               
+              
                 
                 } catch {
                 print("Error -> \(error)")
                     }
         
-        
+                self.jsonParse() // refreshes the next number
             }
         
         task.resume()
@@ -169,6 +210,7 @@ class ViewController: UIViewController {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
        jsonParse()
+        NSTimer.scheduledTimerWithTimeInterval(180, target: self, selector: "jsonParse", userInfo: nil, repeats: true)
         
        
      
