@@ -9,6 +9,9 @@
 /* Begin PBXBuildFile section */
 		062E298C1C71267000D94DA9 /* jsonUserData.json in Resources */ = {isa = PBXBuildFile; fileRef = 062E298B1C71266F00D94DA9 /* jsonUserData.json */; };
 		062E298E1C71289200D94DA9 /* SwiftyJSON.swift in Sources */ = {isa = PBXBuildFile; fileRef = 062E298D1C71289200D94DA9 /* SwiftyJSON.swift */; };
+		0645282D1C80EF8D008479EA /* aboutViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0645282C1C80EF8D008479EA /* aboutViewController.swift */; };
+		0645282F1C80F2F2008479EA /* termsOfUseViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0645282E1C80F2F2008479EA /* termsOfUseViewController.swift */; };
+		064528311C80F32F008479EA /* privacyPolicyViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 064528301C80F32F008479EA /* privacyPolicyViewController.swift */; };
 		068176F01C6B908B00732B29 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 068176EF1C6B908B00732B29 /* AppDelegate.swift */; };
 		068176F21C6B908B00732B29 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 068176F11C6B908B00732B29 /* ViewController.swift */; };
 		068176F51C6B908B00732B29 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 068176F31C6B908B00732B29 /* Main.storyboard */; };
@@ -43,6 +46,9 @@
 /* Begin PBXFileReference section */
 		062E298B1C71266F00D94DA9 /* jsonUserData.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = jsonUserData.json; sourceTree = "<group>"; };
 		062E298D1C71289200D94DA9 /* SwiftyJSON.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SwiftyJSON.swift; sourceTree = "<group>"; };
+		0645282C1C80EF8D008479EA /* aboutViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = aboutViewController.swift; sourceTree = "<group>"; };
+		0645282E1C80F2F2008479EA /* termsOfUseViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = termsOfUseViewController.swift; sourceTree = "<group>"; };
+		064528301C80F32F008479EA /* privacyPolicyViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = privacyPolicyViewController.swift; sourceTree = "<group>"; };
 		068176EC1C6B908B00732B29 /* Peters816.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Peters816.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		068176EF1C6B908B00732B29 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		068176F11C6B908B00732B29 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -123,6 +129,9 @@
 				068176EF1C6B908B00732B29 /* AppDelegate.swift */,
 				062E298B1C71266F00D94DA9 /* jsonUserData.json */,
 				068176F11C6B908B00732B29 /* ViewController.swift */,
+				0645282E1C80F2F2008479EA /* termsOfUseViewController.swift */,
+				064528301C80F32F008479EA /* privacyPolicyViewController.swift */,
+				0645282C1C80EF8D008479EA /* aboutViewController.swift */,
 				06BBF3E31C70F44F008B2452 /* userInfoViewController.swift */,
 				062E298D1C71289200D94DA9 /* SwiftyJSON.swift */,
 				068176F31C6B908B00732B29 /* Main.storyboard */,
@@ -353,10 +362,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				064528311C80F32F008479EA /* privacyPolicyViewController.swift in Sources */,
 				06BBF3E41C70F44F008B2452 /* userInfoViewController.swift in Sources */,
 				068176F21C6B908B00732B29 /* ViewController.swift in Sources */,
 				068176F81C6B908B00732B29 /* Peters816.xcdatamodeld in Sources */,
+				0645282D1C80EF8D008479EA /* aboutViewController.swift in Sources */,
 				062E298E1C71289200D94DA9 /* SwiftyJSON.swift in Sources */,
+				0645282F1C80F2F2008479EA /* termsOfUseViewController.swift in Sources */,
 				0681772E1C6C295D00732B29 /* User.swift in Sources */,
 				068176F01C6B908B00732B29 /* AppDelegate.swift in Sources */,
 			);

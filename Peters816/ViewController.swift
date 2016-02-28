@@ -16,14 +16,16 @@ class ViewController: UIViewController {
     
     // MARK: Properties
     
-    @IBOutlet weak var logo: UIImageView! // whats the exclamation mark?
+   
+    @IBOutlet weak var banner: UIImageView!
     @IBOutlet weak var staticCurrentNumber: UILabel!
     @IBOutlet weak var currentNumber: UILabel!
     @IBOutlet weak var staticNextNumber: UILabel!
     @IBOutlet weak var nextNumber: UILabel!
     @IBOutlet weak var waitTime: UILabel!
-    @IBOutlet weak var enterOnce: UILabel!
+ 
     @IBOutlet weak var staticApproxWait: UILabel!
+  
     
     // MARK: json_parse
     
@@ -91,8 +93,53 @@ class ViewController: UIViewController {
         
     }
     
+    @IBAction func about(sender: UIButton) {
+    }
+    
+    @IBAction func termsOfUse(sender: UIButton) {
+    }
+    
+    
+    @IBAction func privacyPolicy(sender: UIButton) {
+    }
+    
+    
     @IBAction func getNumber(sender: UIButton) {
     
+   
+        var email:String
+            if (NSUserDefaults.standardUserDefaults().stringForKey("email") == nil){
+                email = "email@email.com"
+            } else {
+                email = NSUserDefaults.standardUserDefaults().stringForKey("email")!
+            }
+        
+            print (email)
+            
+            
+            
+            if (NSUserDefaults.standardUserDefaults().stringForKey("name") == nil ||
+                NSUserDefaults.standardUserDefaults().stringForKey("number") == nil) {
+                    
+                    dispatch_async(dispatch_get_main_queue(),
+                        {
+                            let alertController = UIAlertController(title: "Alert", message: "Please enter your information", preferredStyle: .Alert  )
+                            let cancelAction = UIAlertAction(title: "Cancel", style: .Cancel) { (action) in
+                            }
+                            alertController.addAction(cancelAction)
+                            let OKAction = UIAlertAction(title: "OK", style: .Default) { (action) in
+                            }
+                            alertController.addAction(OKAction)
+                            self.presentViewController(alertController, animated: true, completion: nil)
+
+                    })
+
+             return
+        }
+        
+        let userName:String = NSUserDefaults.standardUserDefaults().stringForKey("name")!
+        let phone:String = NSUserDefaults.standardUserDefaults().stringForKey("number")!
+        
         let url = NSURL(string: "http://peters816.comlu.com/lib/app_request.php")
         let request = NSMutableURLRequest(URL: url!)
         let session = NSURLSession.sharedSession()
@@ -100,50 +147,35 @@ class ViewController: UIViewController {
         // request.setValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
         session
         
-        let userName = NSUserDefaults.standardUserDefaults().stringForKey("name")
-        let phone = NSUserDefaults.standardUserDefaults().stringForKey("number")
-        let email = NSUserDefaults.standardUserDefaults().stringForKey("email")
-        
-        // print (userName!)
-        
-                // TEST
-        
-         let postParams =  "user_name=\(userName!)&user_phone=\(phone!)&user_email=\(email!)"
-         request.HTTPBody = postParams.dataUsingEncoding(NSUTF8StringEncoding)
         
         
         
+     
         
+        
+        
+        let postParams =  "user_name=\(userName)&user_phone=\(phone)&user_email=\(email)"
+        request.HTTPBody = postParams.dataUsingEncoding(NSUTF8StringEncoding)
+
         let task = NSURLSession.sharedSession().dataTaskWithRequest(request){ data,response,error in
             if error != nil{
-                
                 print("ERROR -> \(error)")
                 return
-                
             }
-            
             if let httpResponse = response as? NSHTTPURLResponse {
                 print("responseCode \(httpResponse.statusCode)")
-                
             }
-            
-            
             do {
                 let responseJSON = try NSJSONSerialization.JSONObjectWithData(data!, options: []  )
-                
-                print("Result -> \(responseJSON)")
-                
+                // print("Result -> \(responseJSON)")
                 let gotNumber = responseJSON["getId"] as! Int
                 let messageReturned:String = responseJSON["message"] as! String
                 let current_Number = Int(self.currentNumber.text!)
                 let gotTime = (gotNumber - current_Number!) * 15
                 
                 if (messageReturned == "new"){
-                    
                     dispatch_async(dispatch_get_main_queue(), {
-                        
                         let alertController = UIAlertController(title: "Your Appointment", message: "You have received number \(gotNumber) in the que. Your approximate wait time is \(gotTime) minutes", preferredStyle: .Alert  )
-                        
                         let cancelAction = UIAlertAction(title: "Cancel", style: .Cancel) { (action) in
                             // ...
                         }
@@ -153,57 +185,32 @@ class ViewController: UIViewController {
                             // ...
                         }
                         alertController.addAction(OKAction)
-                        
                         self.presentViewController(alertController, animated: true, completion: nil)
-                        
                     })
-                    
                 } else if (messageReturned == "duplicate") {
-                    
-                    dispatch_async(dispatch_get_main_queue(), {
-                        
+                    dispatch_async(dispatch_get_main_queue(),
+                        {
                         let alertController = UIAlertController(title: "Your Appointment", message: "You already received an appointment with number \(gotNumber) in the que. Your approximate wait time is \(gotTime) minutes", preferredStyle: .Alert  )
-                        
                         let cancelAction = UIAlertAction(title: "Cancel", style: .Cancel) { (action) in
                             // ...
                         }
                         alertController.addAction(cancelAction)
-                        
                         let OKAction = UIAlertAction(title: "OK", style: .Default) { (action) in
                             // ...
                         }
                         alertController.addAction(OKAction)
-                        
                         self.presentViewController(alertController, animated: true, completion: nil)
-                        
                     })
-
-                    
                 }
-                
-                
-              // print(gotNumber)
-              //  print (messageReturned)
-                
-                
-              self.createLocalNotification(gotNumber)
-                
-              
-                
+                        self.createLocalNotification(gotNumber)
                 } catch {
                 print("Error -> \(error)")
                     }
-        
                 self.jsonParse() // refreshes the next number
-            }
-        
+        }
         task.resume()
-        
-    
-        /* request.setValue(<#T##value: AnyObject?##AnyObject?#>, forKey: <#T##String#>)  */
-        // setValue:@"application/xml; charset=utf-8" forHTTPHeaderField:@"Content-Type"];
-        
     }
+    
     
 
     override func viewDidLoad() {
