@@ -355,7 +355,7 @@
                                             <constraint firstAttribute="height" constant="1520" id="zDi-Kk-G7f"/>
                                             <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="320" id="zIb-4y-r6P"/>
                                         </constraints>
-                                        <mutableString key="text">END-USER AGREEMENT TERMS AND CONDITIONS ("Terms")
+                                        <string key="text">END-USER AGREEMENT TERMS AND CONDITIONS ("Terms")
 Last updated: February 27, 2017
 By using the "Peters 816" mobile application ("app", or "service") operated by Peter's Barbershop ("us", "we", or "our"), you (the "user") agree to the Terms and Conditions ("Terms", "Terms and Conditions") outlined below. These Terms apply to all visitors, users and others who access or use the app. By accessing or using the app you agree to be bound by these Terms. If you disagree with any part of the terms then you may not access the Service.
 
@@ -375,7 +375,7 @@ We reserve the right, at our sole discretion, to modify or replace these Terms a
 By continuing to access or use our Service after those revisions become effective, you agree to be bound by the revised terms. If you do not agree to the new terms, please stop using the Service.
 
 CONTACT US
-If you have any questions about these Terms, please contact us.</mutableString>
+If you have any questions about these Terms, please contact us.</string>
                                         <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                         <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
                                         <variation key="default">
@@ -456,7 +456,7 @@ If you have any questions about these Terms, please contact us.</mutableString>
                                             <constraint firstAttribute="height" constant="1737" id="76k-65-uh1"/>
                                             <constraint firstAttribute="width" constant="350" id="xd2-wN-QgP"/>
                                         </constraints>
-                                        <mutableString key="text">This privacy policy has been compiled to better serve those who are concerned with how their 'Personally identifiable information' (PII) is being used online. PII, as used in privacy law and information security, is information that can be used on its own or with other information to identify, contact, or locate a single person, or to identify an individual in context. Please read our privacy policy carefully to get a clear understanding of how we collect, use, protect or otherwise handle your Personally Identifiable Information in accordance with our website.
+                                        <string key="text">This privacy policy has been compiled to better serve those who are concerned with how their 'Personally identifiable information' (PII) is being used online. PII, as used in privacy law and information security, is information that can be used on its own or with other information to identify, contact, or locate a single person, or to identify an individual in context. Please read our privacy policy carefully to get a clear understanding of how we collect, use, protect or otherwise handle your Personally Identifiable Information in accordance with our website.
 
 What personal information do we collect when you use the app?
 When making a reservation for your haircut, as appropriate, you may be asked to enter your name, email address, or phone number to help you with your experience. This information is optional and used to identify you when you visit the establishment. Your information is only transmitted when you request a reservation, and otherwise stays on your phone.
@@ -486,7 +486,7 @@ We collect your email address in order to send you notifications on your birthda
 To be in accordance with CANSPAM we agree to the following:
 If at any time you would like to unsubscribe from receiving future emails, you can email us and we will promptly remove you from ALL correspondence.
 
-Last Edited on 2016-02-27</mutableString>
+Last Edited on 2016-02-27</string>
                                         <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                         <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
                                         <variation key="default">
