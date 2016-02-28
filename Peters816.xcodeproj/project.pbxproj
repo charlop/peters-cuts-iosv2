@@ -22,6 +22,7 @@
 		068177131C6B908C00732B29 /* Peters816UITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 068177121C6B908C00732B29 /* Peters816UITests.swift */; };
 		0681772E1C6C295D00732B29 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0681772C1C6C295D00732B29 /* User.swift */; };
 		06BBF3E41C70F44F008B2452 /* userInfoViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06BBF3E31C70F44F008B2452 /* userInfoViewController.swift */; };
+		06E03E0C1C82733700D6D6D8 /* appBanner.png in Resources */ = {isa = PBXBuildFile; fileRef = 06E03E0B1C82733700D6D6D8 /* appBanner.png */; };
 		06F03BBE1C71259A0012C790 /* SwiftyJSON.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 06F03BBD1C71259A0012C790 /* SwiftyJSON.framework */; };
 		1A939095C089698B5CC5AB25 /* Pods_Peters816.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 321F95E5F5F128EC91E14F9F /* Pods_Peters816.framework */; };
 /* End PBXBuildFile section */
@@ -66,6 +67,7 @@
 		068177201C6C274200732B29 /* Peters816-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Peters816-Bridging-Header.h"; sourceTree = "<group>"; };
 		0681772C1C6C295D00732B29 /* User.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
 		06BBF3E31C70F44F008B2452 /* userInfoViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = userInfoViewController.swift; sourceTree = "<group>"; };
+		06E03E0B1C82733700D6D6D8 /* appBanner.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = appBanner.png; path = Assets.xcassets/appBanner.imageset/appBanner.png; sourceTree = "<group>"; };
 		06F03BBD1C71259A0012C790 /* SwiftyJSON.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftyJSON.framework; path = "Pods/../build/Debug-iphoneos/SwiftyJSON.framework"; sourceTree = "<group>"; };
 		321F95E5F5F128EC91E14F9F /* Pods_Peters816.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Peters816.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		3B043BD3EAD3119B196CB1E6 /* Pods-Peters816.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Peters816.release.xcconfig"; path = "Pods/Target Support Files/Pods-Peters816/Pods-Peters816.release.xcconfig"; sourceTree = "<group>"; };
@@ -136,6 +138,7 @@
 				062E298D1C71289200D94DA9 /* SwiftyJSON.swift */,
 				068176F31C6B908B00732B29 /* Main.storyboard */,
 				068176F91C6B908B00732B29 /* Assets.xcassets */,
+				06E03E0B1C82733700D6D6D8 /* appBanner.png */,
 				068176FB1C6B908B00732B29 /* LaunchScreen.storyboard */,
 				068176FE1C6B908B00732B29 /* Info.plist */,
 				068176F61C6B908B00732B29 /* Peters816.xcdatamodeld */,
@@ -288,6 +291,7 @@
 			files = (
 				062E298C1C71267000D94DA9 /* jsonUserData.json in Resources */,
 				068176FD1C6B908B00732B29 /* LaunchScreen.storyboard in Resources */,
+				06E03E0C1C82733700D6D6D8 /* appBanner.png in Resources */,
 				068176FA1C6B908B00732B29 /* Assets.xcassets in Resources */,
 				068176F51C6B908B00732B29 /* Main.storyboard in Resources */,
 			);
