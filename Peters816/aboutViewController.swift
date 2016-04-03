@@ -3,13 +3,13 @@
 //  Peters816
 //
 //  Created by spandan on 2016-02-10.
-//  Copyright © 2016 spandan. All rights reserved.
+//  Copyright © 2016 spandan jansari. All rights reserved.
 //
 
 import UIKit
 import CoreData
 import Foundation
-import SwiftyJSON
+
 
 class aboutViewController: UIViewController {
 
