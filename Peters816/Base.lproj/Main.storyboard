@@ -119,6 +119,9 @@
                             <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="8Hb-j0-Yay">
                                 <rect key="frame" x="40" y="360" width="520" height="30"/>
                                 <state key="normal" title="Cancel Appointment"/>
+                                <connections>
+                                    <action selector="cancelAppointment:" destination="BYZ-38-t0r" eventType="touchUpInside" id="jhw-d3-2uR"/>
+                                </connections>
                             </button>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
@@ -156,7 +159,9 @@
                     <navigationItem key="navigationItem" title="Peters Haircuts" id="zse-rR-BvM"/>
                     <connections>
                         <outlet property="banner" destination="Xvd-Sa-WDf" id="3Hz-Ub-JG0"/>
+                        <outlet property="cancelAppointment" destination="8Hb-j0-Yay" id="1xI-We-KmY"/>
                         <outlet property="currentNumber" destination="AUW-2K-c96" id="SCc-Xv-XmQ"/>
+                        <outlet property="getNumberButton" destination="hID-W2-0to" id="fmt-wC-JRb"/>
                         <outlet property="myNumberLabel" destination="aRz-X2-VEc" id="exa-jf-az9"/>
                         <outlet property="nextNumber" destination="YG7-NI-eek" id="VQc-DF-gew"/>
                         <outlet property="staticApproxWait" destination="H4S-Xo-SXh" id="FM2-Ge-LJW"/>

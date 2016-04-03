@@ -24,8 +24,9 @@ class ViewController: UIViewController {
     @IBOutlet weak var nextNumber: UILabel!
     @IBOutlet weak var waitTime: UILabel!
     @IBOutlet weak var staticApproxWait: UILabel!
-    @IBOutlet weak var getNumberButton: UIButton!
     @IBOutlet weak var myNumberLabel: UILabel!
+    @IBOutlet weak var getNumberButton: UIButton!
+    @IBOutlet weak var cancelAppointment: UIButton!
     
   
     // MARK: seconds to hours, minutes, seconds
@@ -103,6 +104,8 @@ class ViewController: UIViewController {
                     } // end of if date == todays_string_date
                 } // end of for statement
             } // end of results count IF statement
+      
+        
         } catch {                                               // end of do statement
             print ("error ... ")                                // replace/correct with correct error
         }
@@ -355,6 +358,82 @@ class ViewController: UIViewController {
     
     
     
+    @IBAction func cancelAppointment(sender: AnyObject) {
+        
+        
+        // fetch today's appointment
+        let appdel: AppDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
+        let context: NSManagedObjectContext = appdel.managedObjectContext
+        let dateFormatter = NSDateFormatter()
+        dateFormatter.dateStyle = .LongStyle
+        dateFormatter.timeStyle = .NoStyle
+        let todays_date = NSDate()
+        let todays_string_date:String = dateFormatter.stringFromDate(todays_date)
+        
+        do {
+            let request = NSFetchRequest (entityName: "Appointments")
+            let results = try context.executeFetchRequest(request)
+            if results.count > 0 {
+                
+                for items in results as! [NSManagedObject]{
+                    let date = items.valueForKey("date") as! String
+                    let number = items.valueForKey("number") as! String
+                    if date == todays_string_date {
+                        
+                        // send cancel request
+                        let url2 = NSURL(string: "http://peterscuts.com/lib/request_handler.php")
+                        let request = NSMutableURLRequest(URL: url2!)
+                        let session = NSURLSession.sharedSession()
+                        request.HTTPMethod = "POST"
+                        // request.setValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
+                        let customerId:String = number
+                        request.HTTPBody = customerId.dataUsingEncoding(NSUTF8StringEncoding)
+                        session
+                        let task = session.dataTaskWithRequest(request) {data, response, error  in
+                            if error != nil{
+                                print("ERROR -> \(error)")
+                                return
+                            }
+                            if let httpResponse = response as? NSHTTPURLResponse {
+                                // print("responseCode \(httpResponse.statusCode)")
+                            }
+                            do {
+                                let responseJSON = try NSJSONSerialization.JSONObjectWithData(data!, options: []  )
+                                // print("Result -> \(responseJSON)")
+                                let confirmation = responseJSON["jsondata"] as! String
+                                if confirmation == "" {
+                                    
+                                    // send pop up, appointment cancelled
+                                    dispatch_async(dispatch_get_main_queue(),
+                                        {
+                                            let alertController = UIAlertController(title: "Cancellation", message: "Your Appointment has been cancelled", preferredStyle: .Alert  )
+                                            let cancelAction = UIAlertAction(title: "Cancel", style: .Cancel) { (action) in
+                                                // ...
+                                            }
+                                        
+                                            let OKAction = UIAlertAction(title: "OK", style: .Default) { (action) in
+                                                // ...
+                                            }
+                                            alertController.addAction(OKAction)
+                                            self.presentViewController(alertController, animated: true, completion: nil)
+                                    })
+
+                                }
+                            } catch {
+                                print("Error -> \(error)")
+                            }
+                        } // end of task
+                        task.resume()
+                        
+                    
+                    } else {
+                        // print no appointments today
+                    }
+                    
+                    
+        
+        
+    } // end of cancelAppointment
     
     
     
