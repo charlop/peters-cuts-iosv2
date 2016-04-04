@@ -29,34 +29,37 @@ class ViewController: UIViewController {
         return (seconds / 3600, (seconds % 3600) / 60, (seconds % 3600) % 60)
     }
     
+    var firstNotificationStatus:Bool = false
+    var NowNotificationStatus:Bool = false
+    
     // MARK: 40 min notification setting
     func notificationSetting (input:String) -> (Bool){
         
-        var status:Bool
         if (input == "question") {
-            return status
+            return self.firstNotificationStatus
         } else if (input == "setON") {
-            status = true
-            return status
+            self.firstNotificationStatus = true
+            return self.firstNotificationStatus
         } else if (input == "setOFF") {
-            status = false
-            return status
+            self.firstNotificationStatus = false
+            return self.firstNotificationStatus
         }
+        return self.firstNotificationStatus // this return will not be used
     }
     
     // MARK: Now notification setting
     func NowNotificationSetting (input:String) -> (Bool){
         
-        var status:Bool
         if (input == "question") {
-            return status
+            return self.NowNotificationStatus
         } else if (input == "setON") {
-            status = true
-            return status
+            self.NowNotificationStatus = true
+            return self.NowNotificationStatus
         } else if (input == "setOFF") {
-            status = false
-            return status
+            self.NowNotificationStatus = false
+            return self.NowNotificationStatus
         }
+        return self.NowNotificationStatus // this return will not be used
     }
     
     // Mark: function to set the two numbers - current and next
@@ -67,13 +70,19 @@ class ViewController: UIViewController {
         let jsonData = NSData(contentsOfURL: url!) as NSData!
         let readableData = JSON(data: jsonData, options: NSJSONReadingOptions.MutableContainers, error: nil)
         if ( Int(readableData["current"].stringValue) == -2){
-            currentNumber.text = "0"
+            currentNumber.text = "error"
         } else {
             currentNumber.text = readableData["current"].stringValue
         }
+        if ( Int(readableData["next"].stringValue) == -2){
+            nextNumber.text = "error"
+        } else {
         nextNumber.text = readableData["next"].stringValue
+        }
     }
-        
+    
+    
+    
     // MARK: determine whether has an appointment for today , if not jsonParse()
     func is_there_an_appointment_for_today() {
         
@@ -134,7 +143,7 @@ class ViewController: UIViewController {
                                 if (count == 2) {
                                     
                                     let checkNotification = self.notificationSetting("question")
-                                    if (checkNotification == true) {
+                                    if (checkNotification == true) {                         // CHECK IF THE DEFAULT VALUE OF THE BOOL IS true ... IT SHOULD BE FALSE
                                         // do nothing. notification already set
                                     } else {
                                         // create notification that your appointment is up in 40 mins
@@ -174,6 +183,7 @@ class ViewController: UIViewController {
                         task.resume()
                     } else {                                            // end of if date == todays_string_date
 
+                        self.cancelAppointment.hidden = true
                         func jsonParse () {
                             
                             let url = NSURL(string: "http://peterscuts.com/lib/app_request.php")
@@ -328,13 +338,9 @@ class ViewController: UIViewController {
                 
                 if (messageReturned == "new"){
                     
-                    // some change
                   // create a pop alerting number
                     dispatch_async(dispatch_get_main_queue(), {
                         let alertController = UIAlertController(title: "Your Appointment", message: "You have received number \(gotNumber) in the que. Please check back in the app for updated waiting time. Also, a notification will be set 40 mins prior to your appointment.", preferredStyle: .Alert  )
-                        let cancelAction = UIAlertAction(title: "Cancel", style: .Cancel) { (action) in
-                            // ...
-                        }
                         let OKAction = UIAlertAction(title: "OK", style: .Default) { (action) in
                             // ...
                         }
@@ -369,12 +375,9 @@ class ViewController: UIViewController {
                     dispatch_async(dispatch_get_main_queue(),
                         {
                         let alertController = UIAlertController(title: "Your Appointment", message: "You already received an appointment with number \(gotNumber) in the que.", preferredStyle: .Alert  )
-                        let cancelAction = UIAlertAction(title: "Cancel", style: .Cancel) { (action) in
-                            // ...
-                        }
                         let OKAction = UIAlertAction(title: "OK", style: .Default) { (action) in
                             // ...
-                        }
+                            }
                         alertController.addAction(OKAction)
                         self.presentViewController(alertController, animated: true, completion: nil)
                     })
@@ -394,8 +397,6 @@ class ViewController: UIViewController {
     
     
     @IBAction func cancelAppointment(sender: AnyObject) {
-        
-        
         // fetch today's appointment
         let appdel: AppDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
         let context: NSManagedObjectContext = appdel.managedObjectContext
@@ -404,17 +405,14 @@ class ViewController: UIViewController {
         dateFormatter.timeStyle = .NoStyle
         let todays_date = NSDate()
         let todays_string_date:String = dateFormatter.stringFromDate(todays_date)
-        
         do {
             let request = NSFetchRequest (entityName: "Appointments")
             let results = try context.executeFetchRequest(request)
             if results.count > 0 {
-                
                 for items in results as! [NSManagedObject]{
                     let date = items.valueForKey("date") as! String
                     let number = items.valueForKey("number") as! String
                     if date == todays_string_date {
-                        
                         // send cancel request
                         let url2 = NSURL(string: "http://peterscuts.com/lib/request_handler.php")
                         let request = NSMutableURLRequest(URL: url2!)
@@ -426,7 +424,7 @@ class ViewController: UIViewController {
                         session
                         let task = session.dataTaskWithRequest(request) {data, response, error  in
                             if error != nil{
-                                print("ERROR -> \(error)")
+                                print("ERROR retrieving server confirmation")
                                 return
                             }
                             if let httpResponse = response as? NSHTTPURLResponse {
@@ -437,46 +435,46 @@ class ViewController: UIViewController {
                                 // print("Result -> \(responseJSON)")
                                 let confirmation = responseJSON["retVal"] as! String
                                 if confirmation == "T" {
-                                    
                                     // send pop up, appointment cancelled
                                     dispatch_async(dispatch_get_main_queue(),
                                         {
                                             let alertController = UIAlertController(title: "Appointment Cancelled", message: "Your Appointment has been cancelled.", preferredStyle: .Alert  )
-                                            let cancelAction = UIAlertAction(title: "Cancel", style: .Cancel) { (action) in
-                                                // ...
-                                            }
                                             let OKAction = UIAlertAction(title: "OK", style: .Default) { (action) in
                                                 // ...
                                             }
                                             alertController.addAction(OKAction)
                                             self.presentViewController(alertController, animated: true, completion: nil)
                                     })
-                                }
+                                } // end of if confirmation == "T"
                             } catch {
                                 print("Error -> \(error)")
                             }
                         } // end of task
                         task.resume()
-                        
-                        
                         // also delete the appointment from Core Data
+                        // ......
+                        
                         
                         
                     } else {                                    // end of if date == todays_string_date statement
-                        // print no appointments today
+                        // send pop up, you do not have an appointment to be cancelled
+                        dispatch_async(dispatch_get_main_queue(),
+                            {
+                                let alertController = UIAlertController(title: "Appointment Cancellation", message: "You do not have an appointment today to be cancelled.", preferredStyle: .Alert  )
+                                let OKAction = UIAlertAction(title: "OK", style: .Default) { (action) in
+                                    // ...
+                                }
+                                alertController.addAction(OKAction)
+                                self.presentViewController(alertController, animated: true, completion: nil)
+                        })
                     }
                 } // end of FOR statement
-            } catch {
-                print (error)
+            } // end of if count > 0
+        } catch {
+                print ("error for fetching core data")
             }
-            
-        
-        
     } // end of cancelAppointment
     
-    
-    
-
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
