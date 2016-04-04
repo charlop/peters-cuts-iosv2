@@ -328,7 +328,7 @@ class ViewController: UIViewController {
                 
                 if (messageReturned == "new"){
                     
-                    
+                    // some change
                   // create a pop alerting number
                     dispatch_async(dispatch_get_main_queue(), {
                         let alertController = UIAlertController(title: "Your Appointment", message: "You have received number \(gotNumber) in the que. Please check back in the app for updated waiting time. Also, a notification will be set 40 mins prior to your appointment.", preferredStyle: .Alert  )
