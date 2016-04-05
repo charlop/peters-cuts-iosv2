@@ -24,6 +24,24 @@ class ViewController: UIViewController {
     @IBOutlet weak var getNumberButton: UIButton!
     @IBOutlet weak var cancelAppointment: UIButton!
     
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        // Do any additional setup after loading the view, typically from a nib.
+        
+        is_there_an_appointment_for_today() // check if theres any appointment
+        NSTimer.scheduledTimerWithTimeInterval(10, target: self, selector: "is_there_an_appointment_for_today", userInfo: nil, repeats: true)
+        parseNumbers()
+        NSTimer.scheduledTimerWithTimeInterval(180, target: self, selector: "parseNumbers", userInfo: nil, repeats: true)
+    }
+    
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
+
+    
+    
     // MARK: seconds to hours, minutes, seconds
     func secondsToHoursMinutesSeconds (seconds : Int) -> (Int, Int, Int) {
         return (seconds / 3600, (seconds % 3600) / 60, (seconds % 3600) % 60)
@@ -95,6 +113,7 @@ class ViewController: UIViewController {
         dateFormatter.timeStyle = .NoStyle
         let todays_date = NSDate()
         let todays_string_date:String = dateFormatter.stringFromDate(todays_date)
+        print (todays_string_date)
 
         do {
             let request = NSFetchRequest (entityName: "Appointments")
@@ -184,6 +203,7 @@ class ViewController: UIViewController {
                     } else {                                            // end of if date == todays_string_date
 
                         self.cancelAppointment.hidden = true
+                        self.myNumberLabel.hidden = true
                         func jsonParse () {
                             
                             let url = NSURL(string: "http://peterscuts.com/lib/app_request.php")
@@ -475,26 +495,13 @@ class ViewController: UIViewController {
             }
     } // end of cancelAppointment
     
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
-        
-        is_there_an_appointment_for_today() // check if theres any appointment
-        NSTimer.scheduledTimerWithTimeInterval(180, target: self, selector: "is_there_an_appointment_for_today", userInfo: nil, repeats: true)
-        parseNumbers()
-        NSTimer.scheduledTimerWithTimeInterval(180, target: self, selector: "parseNumbers", userInfo: nil, repeats: true)
-    }
-
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
-    }
-
+    
   
     
     
     
     
     
-}
 
+
+}
