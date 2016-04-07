@@ -185,7 +185,7 @@ class ViewController: UIViewController {
                         task.resume()
                     } else {                                            // end of if date == todays_string_date
 
-                        self.cancelAppointment.hidden = false
+                        self.cancelAppointment.hidden = true
                         self.myNumberLabel.hidden = true
                         self.getNumberButton.hidden = false
                         
@@ -508,7 +508,11 @@ class ViewController: UIViewController {
                         let session = NSURLSession.sharedSession()
                         request.HTTPMethod = "POST"
                         // request.setValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
-                        let deleteid:String = items.valueForKey("number") as! String
+                        // first convert value for key into int without "optional" and than into a string
+                        let deleteidInt:Int = items.valueForKey("number") as! Int
+                        print (deleteidInt)
+                        let deleteid:String = String(deleteidInt)
+                        print (deleteid)
                         request.HTTPBody = deleteid.dataUsingEncoding(NSUTF8StringEncoding)
                         session
                         let task = session.dataTaskWithRequest(request) {data, response, error  in
