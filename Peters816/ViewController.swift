@@ -25,21 +25,7 @@ class ViewController: UIViewController {
     @IBOutlet weak var cancelAppointment: UIButton!
     
     
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
-        
-        is_there_an_appointment_for_today() // check if theres any appointment
-        NSTimer.scheduledTimerWithTimeInterval(10, target: self, selector: "is_there_an_appointment_for_today", userInfo: nil, repeats: true)
-        parseNumbers()
-        NSTimer.scheduledTimerWithTimeInterval(180, target: self, selector: "parseNumbers", userInfo: nil, repeats: true)
-    }
     
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
-    }
-
     
     
     // MARK: seconds to hours, minutes, seconds
@@ -57,6 +43,7 @@ class ViewController: UIViewController {
             return self.firstNotificationStatus
         } else if (input == "setON") {
             self.firstNotificationStatus = true
+            // print("\(firstNotificationStatus)")
             return self.firstNotificationStatus
         } else if (input == "setOFF") {
             self.firstNotificationStatus = false
@@ -83,20 +70,16 @@ class ViewController: UIViewController {
     // Mark: function to set the two numbers - current and next
     
     func parseNumbers () {
-        
+       
+        print ("readableData")
+
         let url = NSURL(string: "http://peterscuts.com/lib/app_request.php")
         let jsonData = NSData(contentsOfURL: url!) as NSData!
         let readableData = JSON(data: jsonData, options: NSJSONReadingOptions.MutableContainers, error: nil)
-        if ( Int(readableData["current"].stringValue) == -2){
-            currentNumber.text = "error"
-        } else {
-            currentNumber.text = readableData["current"].stringValue
-        }
-        if ( Int(readableData["next"].stringValue) == -2){
-            nextNumber.text = "error"
-        } else {
+        currentNumber.text = readableData["current"].stringValue
         nextNumber.text = readableData["next"].stringValue
-        }
+        
+ 
     }
     
     
@@ -113,8 +96,6 @@ class ViewController: UIViewController {
         dateFormatter.timeStyle = .NoStyle
         let todays_date = NSDate()
         let todays_string_date:String = dateFormatter.stringFromDate(todays_date)
-        print (todays_string_date)
-
         do {
             let request = NSFetchRequest (entityName: "Appointments")
             let results = try context.executeFetchRequest(request)
@@ -122,17 +103,19 @@ class ViewController: UIViewController {
                 for items in results as! [NSManagedObject]{
                     let date = items.valueForKey("date") as! String
                     let number = items.valueForKey("number") as! String
-                    print (date)
-                    print (number)
+                    print (date, number)
+                    
                     if date == todays_string_date {
                         // replace get number button(hide) with "Your appointment # ("number") today is " UILabel - make one
                         // replace staticApproxWait label with "Your approx wait time" label - make one?
                         // replace waitTime [until now with last number to php page] with ("number") to php page
                         self.getNumberButton.hidden = true
+                        self.myNumberLabel.hidden = false
+                        self.cancelAppointment.hidden = false
                         self.staticApproxWait.text = "Your approximate wait time is"
                         self.myNumberLabel.text = "Your appointment # is \(number) "
-                        
-                        // get the COUNT and update waitTime.text
+
+                        // MARK: COUNT for today's appointment and wait time
                         let url = NSURL(string: "http://peterscuts.com/lib/request_handler.php")
                         let request = NSMutableURLRequest(URL: url!)
                         let session = NSURLSession.sharedSession()
@@ -148,17 +131,17 @@ class ViewController: UIViewController {
                                 return
                             }
                             if let httpResponse = response as? NSHTTPURLResponse {
-                                // print("responseCode \(httpResponse.statusCode)")
+                                print("responseCode \(httpResponse.statusCode)")
                             }
                             do {
                                 let responseJSON = try NSJSONSerialization.JSONObjectWithData(data!, options: []  )
-                                // print("Result -> \(responseJSON)")
+                                print("Result -> \(responseJSON)")
                                 let count = responseJSON["retVal"] as! Int                  // retVal
-                                print ("\(count)")
                                 let waitTime_seconds = count * 20 * 60
-                                let (h,m,s) = ViewController().secondsToHoursMinutesSeconds(waitTime_seconds)
-                                ViewController().waitTime.text = "\(h) : \(m)"
-                                
+                                let (h,m,s) = self.secondsToHoursMinutesSeconds(waitTime_seconds)
+                                self.waitTime.text = "\(h) hrs : \(m) min"
+                          
+                                // MARK: Notifications
                                 if (count == 2) {
                                     
                                     let checkNotification = self.notificationSetting("question")
@@ -172,7 +155,7 @@ class ViewController: UIViewController {
                                         let seconds2 = Double(seconds1)     // double value
                                         localNotification.fireDate = NSDate(timeIntervalSinceNow: seconds2)
                                         localNotification.soundName = UILocalNotificationDefaultSoundName
-                                        localNotification.alertBody = "Your haircut appointment is in half hour!"
+                                        localNotification.alertBody = "Your haircut appointment #\(number)is in half hour!"
                                         UIApplication.sharedApplication().scheduleLocalNotification(localNotification)
                                         self.notificationSetting("setON")
                                         
@@ -189,7 +172,7 @@ class ViewController: UIViewController {
                                         let localNotificationNow = UILocalNotification()
                                         localNotificationNow.fireDate = NSDate(timeIntervalSinceNow: 0)           // change to 10 to approx wait time subtraction
                                         localNotificationNow.soundName = UILocalNotificationDefaultSoundName
-                                        localNotificationNow.alertBody = "Your haircut appointment is Now"
+                                        localNotificationNow.alertBody = "Your haircut appointment #\(number) is Now"
                                         UIApplication.sharedApplication().scheduleLocalNotification(localNotificationNow)
                                         self.NowNotificationSetting("setON")
                                         } // end of creating "Now" notification
@@ -202,8 +185,12 @@ class ViewController: UIViewController {
                         task.resume()
                     } else {                                            // end of if date == todays_string_date
 
-                        self.cancelAppointment.hidden = true
+                        self.cancelAppointment.hidden = false
                         self.myNumberLabel.hidden = true
+                        self.getNumberButton.hidden = false
+                        
+                        // MARK: Count for next new appointment and wait time
+                        
                         func jsonParse () {
                             
                             let url = NSURL(string: "http://peterscuts.com/lib/app_request.php")
@@ -222,18 +209,11 @@ class ViewController: UIViewController {
                             let next_Number = Int(nextNumber.text!)                             // will be used to get the wait time via count
                             let current_Number = Int(currentNumber.text!)
                             
-                            // APPROX_WAIT_TIME
-                            
-                            // without appointment using the count method and using the previous current_Number and next_Number = customerid
-                            
                             // set the max number as 'customerid' for count
                             let url2 = NSURL(string: "http://peterscuts.com/lib/request_handler.php")
                             let request = NSMutableURLRequest(URL: url2!)
                             let session = NSURLSession.sharedSession()
                             request.HTTPMethod = "POST"
-                            // request.setValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
-                            // var params = ["customerid":"\(number)"] as Dictionary<String, String>
-                            // print ("\(params)")
                             
                             let customerid:String = "customerid=\(next_Number)"
                             
@@ -253,7 +233,7 @@ class ViewController: UIViewController {
                                     let count = responseJSON["retVal"] as! Int                  // retVal
                                     let waitTime_seconds = count * 20 * 60
                                     let (h,m,s) = self.secondsToHoursMinutesSeconds(waitTime_seconds)
-                                    self.waitTime.text = "\(h) : \(m)"
+                                    self.waitTime.text = "\(h) hrs: \(m)mins"
                                     
                                 } catch {
                                     print("Error -> \(error)")
@@ -263,7 +243,68 @@ class ViewController: UIViewController {
                         } // end of jsonParse()
                     }
                 } // end of for statement
-            } // end of results count IF statement
+            } else {                        // end of if results.count > 0 statement
+                
+                self.getNumberButton.hidden = false
+
+                func jsonParse () {
+                    
+                    let url = NSURL(string: "http://peterscuts.com/lib/app_request.php")
+                    let jsonData = NSData(contentsOfURL: url!) as NSData!
+                    let readableData = JSON(data: jsonData, options: NSJSONReadingOptions.MutableContainers, error: nil)
+                    if ( Int(readableData["current"].stringValue) == -2){
+                        currentNumber.text = "error"
+                    } else {
+                        currentNumber.text = readableData["current"].stringValue
+                    }
+                    if ( Int(readableData["next"].stringValue) == -2){
+                        nextNumber.text = "error"
+                    } else {
+                        nextNumber.text = readableData["next"].stringValue
+                    }
+                    let next_Number:String = nextNumber.text!                             // will be used to get the wait time via count
+                    let current_Number = Int(currentNumber.text!)
+                    
+                    
+                    // set the max number as 'customerid' for count
+                    let url2 = NSURL(string: "http://peterscuts.com/lib/request_handler.php")
+                    let request = NSMutableURLRequest(URL: url2!)
+                    let session = NSURLSession.sharedSession()
+                    request.HTTPMethod = "POST"
+                    // request.setValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
+                    // var params = ["customerid":"\(number)"] as Dictionary<String, String>
+                    // print ("\(params)")
+                    
+                    let customerid = "customerid=\(next_Number)"
+                    print(customerid)
+                    request.HTTPBody = customerid.dataUsingEncoding(NSUTF8StringEncoding)
+                    session
+                    let task = session.dataTaskWithRequest(request) {data, response, error  in
+                        if error != nil{
+                            print("ERROR -> \(error)")
+                            return
+                        }
+                        if let httpResponse = response as? NSHTTPURLResponse {
+                            // print("responseCode \(httpResponse.statusCode)")
+                        }
+                        do {
+                            let responseJSON = try NSJSONSerialization.JSONObjectWithData(data!, options: []  )
+                            print("Result -> \(responseJSON)")
+                            let count = responseJSON["retVal"] as! Int                 // retVal
+                            let waitTime_seconds = count * 20 * 60
+                            print ("\(waitTime_seconds)")
+                            let (h,m,s) = self.secondsToHoursMinutesSeconds(waitTime_seconds)
+                            print (h, m)
+                            self.waitTime.text = "\(h)hrs: \(m)min"
+
+                        } catch {
+                            print("Error -> \(error)")
+                        }
+                    } // end of task
+                    task.resume()
+                } // end of jsonParse()
+                jsonParse()
+            }// end of results count IF statement
         } catch {                                               // end of do statement
             print ("error ... ")                                // replace/correct with correct error to try fetch request from core data
         }
@@ -291,7 +332,7 @@ class ViewController: UIViewController {
     
     @IBAction func getNumber(sender: UIButton) {
     
-   
+        
         var email:String
             if (NSUserDefaults.standardUserDefaults().stringForKey("email") == nil){
                 email = "email@email.com"
@@ -299,10 +340,6 @@ class ViewController: UIViewController {
                 email = NSUserDefaults.standardUserDefaults().stringForKey("email")!
             }
         
-            // print (email)
-            
-            
-            
             if (NSUserDefaults.standardUserDefaults().stringForKey("name") == nil ||
                 NSUserDefaults.standardUserDefaults().stringForKey("number") == nil) {
                     
@@ -344,14 +381,35 @@ class ViewController: UIViewController {
             }
             do {
                 let responseJSON = try NSJSONSerialization.JSONObjectWithData(data!, options: []  )
-            // print("Result -> \(responseJSON)")
+            // print ("Result -> \(responseJSON)")
                 let gotNumber = responseJSON["getId"] as! Int
                 let messageReturned:String = responseJSON["message"] as! String
                 
                 if (gotNumber == -2) {
-                    print ("insert did not succeed") // SET UP A POP UP NOTIFICATION
+                    dispatch_async(dispatch_get_main_queue(),
+                                   {
+                                    let alertController = UIAlertController(title: "Error", message: "There was an error communicating with the server", preferredStyle: .Alert  )
+                                    let cancelAction = UIAlertAction(title: "Cancel", style: .Cancel) { (action) in
+                                    }
+                                    alertController.addAction(cancelAction)
+                                    let OKAction = UIAlertAction(title: "OK", style: .Default) { (action) in
+                                    }
+                                    alertController.addAction(OKAction)
+                                    self.presentViewController(alertController, animated: true, completion: nil)
+                    }) // end of dispatch
                 } else if (gotNumber == -9) {
-                    print ("store if closed") // SET UP A POP UP NOTIFICATION
+                    dispatch_async(dispatch_get_main_queue(),
+                                   {
+                                    let alertController = UIAlertController(title: "Store Closed", message: "Store is closed.", preferredStyle: .Alert  )
+                                    let cancelAction = UIAlertAction(title: "Cancel", style: .Cancel) { (action) in
+                                    }
+                                    alertController.addAction(cancelAction)
+                                    let OKAction = UIAlertAction(title: "OK", style: .Default) { (action) in
+                                    }
+                                    alertController.addAction(OKAction)
+                                    self.presentViewController(alertController, animated: true, completion: nil)
+                    }) // end of dispatch
+
                 }
                 
                 // Wait time does not need to be updated here. it can be updated in the is_there_an_appointment_today() function
@@ -360,7 +418,7 @@ class ViewController: UIViewController {
                     
                   // create a pop alerting number
                     dispatch_async(dispatch_get_main_queue(), {
-                        let alertController = UIAlertController(title: "Your Appointment", message: "You have received number \(gotNumber) in the que. Please check back in the app for updated waiting time. Also, a notification will be set 40 mins prior to your appointment.", preferredStyle: .Alert  )
+                        let alertController = UIAlertController(title: "Your Appointment", message: "You have received number \(gotNumber) in the que. Please check back in the app for updated waiting time. Look for a notification 40 mins prior to the appointment", preferredStyle: .Alert  )
                         let OKAction = UIAlertAction(title: "OK", style: .Default) { (action) in
                             // ...
                         }
@@ -378,16 +436,22 @@ class ViewController: UIViewController {
                     dateFormatter.timeStyle = .NoStyle
                     let date = NSDate()
                     let string_date:String = dateFormatter.stringFromDate(date)
+                    // change got number int to string
+                    let gotNumberString = String(gotNumber)
                     
                     // insert date and number into entity
                     let addAppointment = NSEntityDescription.insertNewObjectForEntityForName("Appointments", inManagedObjectContext: context)
                     addAppointment.setValue(string_date, forKey: "date")
-                    addAppointment.setValue(gotNumber, forKey: "number")
+                    print (string_date)
+                    addAppointment.setValue(gotNumberString, forKey: "number")
                     do{
                         try context.save()
                     }catch {
                         print ("error saving data")
                     }
+                    
+               
+
                     // update the app look with  (which will replace the get number button and wait time)
                     self.is_there_an_appointment_for_today()
                     
@@ -411,13 +475,17 @@ class ViewController: UIViewController {
                 } // end of task
                 task.resume()
     } // of else statement (to having input name and number)
-    
+        self.getNumberButton.hidden = true
+
     } // end of get number function
     
     
     
     @IBAction func cancelAppointment(sender: AnyObject) {
         // fetch today's appointment
+        
+        print ("todays_string_date")
+
         let appdel: AppDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
         let context: NSManagedObjectContext = appdel.managedObjectContext
         let dateFormatter = NSDateFormatter()
@@ -430,16 +498,17 @@ class ViewController: UIViewController {
             let results = try context.executeFetchRequest(request)
             if results.count > 0 {
                 for items in results as! [NSManagedObject]{
-                    let date = items.valueForKey("date") as! String
-                    let number = items.valueForKey("number") as! String
-                    if date == todays_string_date {
+                    let date_string = items.valueForKey("date") as! String
+                    let number_string = items.valueForKey("number") as! String
+                    print (items.valueForKey("date"), items.valueForKey("number"))
+                    if date_string == todays_string_date {
                         // send cancel request
                         let url2 = NSURL(string: "http://peterscuts.com/lib/request_handler.php")
                         let request = NSMutableURLRequest(URL: url2!)
                         let session = NSURLSession.sharedSession()
                         request.HTTPMethod = "POST"
                         // request.setValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
-                        let deleteid:String = number
+                        let deleteid:String = items.valueForKey("number") as! String
                         request.HTTPBody = deleteid.dataUsingEncoding(NSUTF8StringEncoding)
                         session
                         let task = session.dataTaskWithRequest(request) {data, response, error  in
@@ -448,12 +517,13 @@ class ViewController: UIViewController {
                                 return
                             }
                             if let httpResponse = response as? NSHTTPURLResponse {
-                                // print("responseCode \(httpResponse.statusCode)")
+                                print("responseCode \(httpResponse.statusCode)")
                             }
                             do {
-                                let responseJSON = try NSJSONSerialization.JSONObjectWithData(data!, options: []  )
-                                // print("Result -> \(responseJSON)")
+                                let responseJSON = try NSJSONSerialization.JSONObjectWithData(data!, options: [])
+                                print("Result -> \(responseJSON)")
                                 let confirmation = responseJSON["retVal"] as! String
+                                print (confirmation)
                                 if confirmation == "T" {
                                     // send pop up, appointment cancelled
                                     dispatch_async(dispatch_get_main_queue(),
@@ -465,16 +535,36 @@ class ViewController: UIViewController {
                                             alertController.addAction(OKAction)
                                             self.presentViewController(alertController, animated: true, completion: nil)
                                     })
-                                } // end of if confirmation == "T"
+                                } else if confirmation == "F" {
+                                    
+                                    // send pop up, appointment cancelled
+                                    dispatch_async(dispatch_get_main_queue(),
+                                                   {
+                                                    let alertController = UIAlertController(title: "Appointment Cancelled", message: "Your Appointment was not cancelled.", preferredStyle: .Alert  )
+                                                    let OKAction = UIAlertAction(title: "OK", style: .Default) { (action) in
+                                                        // ...
+                                                    }
+                                                    alertController.addAction(OKAction)
+                                                    self.presentViewController(alertController, animated: true, completion: nil)
+                                    })
+                                }
                             } catch {
                                 print("Error -> \(error)")
                             }
                         } // end of task
                         task.resume()
-                        // also delete the appointment from Core Data
-                        // ......
                         
-                        
+                        context.deleteObject(items)
+                        do {
+                            try context.save()
+                        } catch {
+                            print ("ERROR -> \(error)")
+                        }
+                        if items.deleted {
+                            print ("Delete successful")
+                        } else {
+                            print ("Delete unsuccessful")
+                        }
                         
                     } else {                                    // end of if date == todays_string_date statement
                         // send pop up, you do not have an appointment to be cancelled
@@ -487,21 +577,46 @@ class ViewController: UIViewController {
                                 alertController.addAction(OKAction)
                                 self.presentViewController(alertController, animated: true, completion: nil)
                         })
-                    }
-                } // end of FOR statement
-            } // end of if count > 0
+                    } // end of else
+} // end of For items in result
+            } // end of if results.count >0
+        is_there_an_appointment_for_today()
+            self.myNumberLabel.hidden = true
+
         } catch {
-                print ("error for fetching core data")
-            }
-    } // end of cancelAppointment
-    
-    
-  
-    
-    
-    
-    
-    
+            print ("Cancellation failed.")
+        }// end of do
+    } // end of function
 
 
-}
+
+
+
+
+
+
+
+
+
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        // Do any additional setup after loading the view, typically from a nib.
+        
+        self.getNumberButton.hidden = true
+        self.myNumberLabel.hidden = true
+        self.cancelAppointment.hidden = false
+        
+        is_there_an_appointment_for_today() // check if theres any appointment
+        NSTimer.scheduledTimerWithTimeInterval(10, target: self, selector: "is_there_an_appointment_for_today", userInfo: nil, repeats: true)
+        parseNumbers()
+        NSTimer.scheduledTimerWithTimeInterval(10, target: self, selector: "parseNumbers", userInfo: nil, repeats: true)
+    }
+    
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
+
+    
+} // end of view controller
