@@ -579,10 +579,20 @@ class ViewController: UIViewController {
                         })
                     } // end of else
 } // end of For items in result
-            } // end of if results.count >0
-        is_there_an_appointment_for_today()
+            } else {   // end of if results.count >0
+                dispatch_async(dispatch_get_main_queue(),
+                               {
+                                let alertController = UIAlertController(title: "Appointment Cancellation", message: "All appointments deleted.", preferredStyle: .Alert  )
+                                let OKAction = UIAlertAction(title: "OK", style: .Default) { (action) in
+                                    // ...
+                                }
+                                alertController.addAction(OKAction)
+                                self.presentViewController(alertController, animated: true, completion: nil)
+                })
+                
+            }
+            is_there_an_appointment_for_today()
             self.myNumberLabel.hidden = true
-
         } catch {
             print ("Cancellation failed.")
         }// end of do
