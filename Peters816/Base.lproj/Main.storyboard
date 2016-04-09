@@ -3,6 +3,8 @@
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="10085"/>
+        <capability name="Alignment constraints to the first baseline" minToolsVersion="6.0"/>
+        <capability name="Alignment constraints with different attributes" minToolsVersion="5.1"/>
         <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
     </dependencies>
     <scenes>
@@ -19,32 +21,32 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="WaitTime" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="rkt-ms-ciA">
-                                <rect key="frame" x="264" y="263" width="72" height="21"/>
+                                <rect key="frame" x="264" y="245" width="72" height="21"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <color key="textColor" red="1" green="0.061523099774187906" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Currently number:" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="CfT-6c-JhG">
-                                <rect key="frame" x="40" y="294" width="88" height="12"/>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Current number:" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="CfT-6c-JhG">
+                                <rect key="frame" x="40" y="276" width="80" height="12"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="10"/>
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="24" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="AUW-2K-c96">
-                                <rect key="frame" x="40" y="311" width="40" height="41"/>
+                                <rect key="frame" x="40" y="293" width="40" height="41"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="34"/>
                                 <color key="textColor" red="0.98431372549019602" green="0.0" blue="0.14117647058823529" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
                                 <size key="shadowOffset" width="0.0" height="0.0"/>
                             </label>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Next number:" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="6BZ-MX-Rop">
-                                <rect key="frame" x="494" y="294" width="66" height="12"/>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Next available number:" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="6BZ-MX-Rop">
+                                <rect key="frame" x="450" y="276" width="110" height="12"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="10"/>
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="24" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="YG7-NI-eek">
-                                <rect key="frame" x="520" y="311" width="40" height="41"/>
+                                <rect key="frame" x="520" y="293" width="40" height="41"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="34"/>
                                 <color key="textColor" red="0.98431372549999996" green="0.0" blue="0.14117647059999999" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
@@ -77,7 +79,7 @@
                                 </connections>
                             </button>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Approximate wait time for next appointment is:" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="H4S-Xo-SXh">
-                                <rect key="frame" x="188" y="243" width="225" height="12"/>
+                                <rect key="frame" x="188" y="225" width="225" height="12"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="10"/>
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
@@ -92,11 +94,11 @@
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="hID-W2-0to">
-                                <rect key="frame" x="195" y="180" width="210" height="53"/>
+                                <rect key="frame" x="268" y="180" width="168" height="35"/>
                                 <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="34"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="19"/>
                                 <size key="titleShadowOffset" width="1" height="1"/>
-                                <state key="normal" title="Get a Number"/>
+                                <state key="normal" title="Get Appointment(s)"/>
                                 <connections>
                                     <action selector="getNumber:" destination="BYZ-38-t0r" eventType="touchUpInside" id="wp3-ah-C1d"/>
                                 </connections>
@@ -111,53 +113,73 @@
                                 </connections>
                             </button>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="myNumberLabel" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="aRz-X2-VEc">
-                                <rect key="frame" x="237" y="214" width="127" height="21"/>
+                                <rect key="frame" x="237" y="196" width="127" height="21"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="8Hb-j0-Yay">
-                                <rect key="frame" x="230" y="360" width="140" height="30"/>
+                                <rect key="frame" x="230" y="342" width="140" height="30"/>
                                 <state key="normal" title="Cancel Appointment"/>
                                 <connections>
                                     <action selector="cancelAppointment:" destination="BYZ-38-t0r" eventType="touchUpInside" id="jhw-d3-2uR"/>
                                 </connections>
                             </button>
+                            <stepper opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" continuous="NO" autorepeat="NO" value="1" minimumValue="1" maximumValue="4" translatesAutoresizingMaskIntoConstraints="NO" id="Vws-Nb-FbK">
+                                <rect key="frame" x="144" y="183" width="94" height="29"/>
+                                <connections>
+                                    <action selector="Stepper:" destination="BYZ-38-t0r" eventType="valueChanged" id="OFQ-jb-TgG"/>
+                                </connections>
+                            </stepper>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="1" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Wzs-3Q-UeD">
+                                <rect key="frame" x="246" y="183" width="16" height="25"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                         <constraints>
                             <constraint firstItem="aRz-X2-VEc" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="0Og-ho-Kby"/>
                             <constraint firstItem="rkt-ms-ciA" firstAttribute="top" secondItem="H4S-Xo-SXh" secondAttribute="bottom" constant="8" id="0y4-lG-SQa"/>
                             <constraint firstItem="CfT-6c-JhG" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" constant="20" id="1AJ-Me-1Vh"/>
+                            <constraint firstItem="hID-W2-0to" firstAttribute="leading" secondItem="Wzs-3Q-UeD" secondAttribute="trailing" constant="6" id="3h1-Md-MHk"/>
                             <constraint firstItem="H4S-Xo-SXh" firstAttribute="top" secondItem="aRz-X2-VEc" secondAttribute="bottom" constant="8" symbolic="YES" id="4r7-Ha-qia"/>
                             <constraint firstAttribute="trailingMargin" secondItem="YG7-NI-eek" secondAttribute="trailing" constant="20" id="67Y-hG-gOy"/>
+                            <constraint firstItem="Vws-Nb-FbK" firstAttribute="centerY" secondItem="hID-W2-0to" secondAttribute="centerY" id="FxF-aU-Y45"/>
                             <constraint firstItem="H4S-Xo-SXh" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="GHO-q6-RBq"/>
                             <constraint firstItem="6BZ-MX-Rop" firstAttribute="top" secondItem="rkt-ms-ciA" secondAttribute="bottom" constant="10" id="Gbx-gf-eGj"/>
+                            <constraint firstItem="Wzs-3Q-UeD" firstAttribute="centerY" secondItem="Vws-Nb-FbK" secondAttribute="centerY" id="HER-Hw-Tyh"/>
                             <constraint firstItem="hID-W2-0to" firstAttribute="top" secondItem="4My-pv-hlh" secondAttribute="bottom" constant="5" id="LZM-iC-ZZz"/>
                             <constraint firstItem="H4S-Xo-SXh" firstAttribute="top" secondItem="hID-W2-0to" secondAttribute="bottom" constant="10" id="Mfv-ap-3aZ"/>
                             <constraint firstItem="4My-pv-hlh" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" constant="10" id="OVC-qP-9cx"/>
                             <constraint firstItem="4My-pv-hlh" firstAttribute="top" secondItem="Xvd-Sa-WDf" secondAttribute="bottom" constant="5" id="Ojf-G7-AJq"/>
                             <constraint firstItem="Rms-cI-Izf" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="PRj-bq-ChD"/>
                             <constraint firstItem="Zmf-1n-51x" firstAttribute="top" secondItem="Xvd-Sa-WDf" secondAttribute="bottom" constant="5" id="Qyq-Fz-xNm"/>
-                            <constraint firstItem="hID-W2-0to" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="Rjo-Xy-9a1"/>
                             <constraint firstItem="Xvd-Sa-WDf" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" constant="10" id="UP4-gi-KpL"/>
                             <constraint firstAttribute="trailingMargin" secondItem="6BZ-MX-Rop" secondAttribute="trailing" constant="20" id="Ufy-Jl-Ris"/>
                             <constraint firstItem="YG7-NI-eek" firstAttribute="top" secondItem="6BZ-MX-Rop" secondAttribute="bottom" constant="5" id="Von-kV-udE"/>
                             <constraint firstItem="cCj-Ks-LVZ" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="Y5w-sd-5pi"/>
+                            <constraint firstItem="Wzs-3Q-UeD" firstAttribute="leading" secondItem="Vws-Nb-FbK" secondAttribute="trailing" constant="8" symbolic="YES" id="YgB-OX-um6"/>
                             <constraint firstItem="rkt-ms-ciA" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="a6k-pn-j2f"/>
                             <constraint firstItem="8Hb-j0-Yay" firstAttribute="top" secondItem="AUW-2K-c96" secondAttribute="bottom" constant="8" symbolic="YES" id="aeQ-Vw-z5n"/>
                             <constraint firstItem="AUW-2K-c96" firstAttribute="top" secondItem="CfT-6c-JhG" secondAttribute="bottom" constant="5" id="dTK-Fr-Tiw"/>
+                            <constraint firstItem="hID-W2-0to" firstAttribute="leading" secondItem="cCj-Ks-LVZ" secondAttribute="leading" id="eTh-4d-hfg"/>
+                            <constraint firstItem="Wzs-3Q-UeD" firstAttribute="baseline" secondItem="hID-W2-0to" secondAttribute="firstBaseline" id="hkp-Vd-EYY"/>
                             <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="Rms-cI-Izf" secondAttribute="bottom" constant="10" id="mhu-jp-2Hp"/>
+                            <constraint firstItem="Wzs-3Q-UeD" firstAttribute="baseline" secondItem="hID-W2-0to" secondAttribute="baseline" id="nSq-mw-ihF"/>
                             <constraint firstAttribute="trailingMargin" secondItem="Zmf-1n-51x" secondAttribute="trailing" constant="10" id="nuI-Un-iUi"/>
                             <constraint firstItem="AUW-2K-c96" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" constant="20" id="oAI-TC-4bt"/>
                             <constraint firstItem="8Hb-j0-Yay" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="pUU-mi-vYk"/>
                             <constraint firstItem="Rms-cI-Izf" firstAttribute="top" secondItem="cCj-Ks-LVZ" secondAttribute="bottom" constant="5" id="qn0-XN-TBg"/>
+                            <constraint firstItem="hID-W2-0to" firstAttribute="leading" secondItem="Vws-Nb-FbK" secondAttribute="trailing" constant="30" id="rOn-25-fNn"/>
                             <constraint firstItem="CfT-6c-JhG" firstAttribute="top" secondItem="rkt-ms-ciA" secondAttribute="bottom" constant="10" id="x47-gH-igD"/>
                             <constraint firstItem="Xvd-Sa-WDf" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="ypS-wY-cjY"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" title="Peters Haircuts" id="zse-rR-BvM"/>
                     <connections>
+                        <outlet property="Stepper" destination="Vws-Nb-FbK" id="SW4-Dk-dk7"/>
                         <outlet property="banner" destination="Xvd-Sa-WDf" id="3Hz-Ub-JG0"/>
                         <outlet property="cancelAppointment" destination="8Hb-j0-Yay" id="1xI-We-KmY"/>
                         <outlet property="currentNumber" destination="AUW-2K-c96" id="SCc-Xv-XmQ"/>
@@ -167,6 +189,7 @@
                         <outlet property="staticApproxWait" destination="H4S-Xo-SXh" id="FM2-Ge-LJW"/>
                         <outlet property="staticCurrentNumber" destination="CfT-6c-JhG" id="9xw-br-2gM"/>
                         <outlet property="staticNextNumber" destination="6BZ-MX-Rop" id="vmu-Rt-oNA"/>
+                        <outlet property="stepperLabel" destination="Wzs-3Q-UeD" id="fG4-uV-G7O"/>
                         <outlet property="waitTime" destination="rkt-ms-ciA" id="HnZ-Ze-JbK"/>
                     </connections>
                 </viewController>
