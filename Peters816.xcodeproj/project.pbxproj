@@ -258,7 +258,7 @@
 				TargetAttributes = {
 					068176EB1C6B908B00732B29 = {
 						CreatedOnToolsVersion = 7.2;
-						DevelopmentTeam = A75UK9VE4L;
+						DevelopmentTeam = 537H8HGN2J;
 						SystemCapabilities = {
 							com.apple.Push = {
 								enabled = 0;
@@ -539,7 +539,7 @@
 				);
 				INFOPLIST_FILE = Peters816/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = spandanj.Peters816cuts;
+				PRODUCT_BUNDLE_IDENTIFIER = chris.com.Peters816cuts2;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "Peters816-Bridging-Header.h";
@@ -562,7 +562,7 @@
 				);
 				INFOPLIST_FILE = Peters816/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = spandanj.Peters816cuts;
+				PRODUCT_BUNDLE_IDENTIFIER = chris.com.Peters816cuts2;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "Peters816-Bridging-Header.h";

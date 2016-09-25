@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="10116" systemVersion="15E65" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="YLG-Dd-5pg">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="10117" systemVersion="15F34" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="YLG-Dd-5pg">
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="10085"/>
@@ -361,13 +361,13 @@
                                 <nil key="highlightedColor"/>
                             </label>
                             <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Wxe-0v-gwy">
-                                <rect key="frame" x="125" y="105" width="350" height="400"/>
+                                <rect key="frame" x="175" y="105" width="250" height="400"/>
                                 <subviews>
                                     <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="XNN-oc-h9o">
-                                        <rect key="frame" x="0.0" y="0.0" width="350" height="1520"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="250" height="1520"/>
                                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                         <constraints>
-                                            <constraint firstAttribute="width" constant="350" id="2Bl-Zd-i7V"/>
+                                            <constraint firstAttribute="width" constant="250" id="2Bl-Zd-i7V"/>
                                             <constraint firstAttribute="height" constant="1520" id="zDi-Kk-G7f"/>
                                         </constraints>
                                         <string key="text">END-USER AGREEMENT TERMS AND CONDITIONS ("Terms")
@@ -398,7 +398,7 @@ If you have any questions about these Terms, please contact us.</string>
                                 <constraints>
                                     <constraint firstItem="XNN-oc-h9o" firstAttribute="leading" secondItem="Wxe-0v-gwy" secondAttribute="leading" id="0p8-08-yej"/>
                                     <constraint firstAttribute="height" constant="400" id="Gf0-nI-o5W"/>
-                                    <constraint firstAttribute="width" constant="350" id="Yuu-gN-weG"/>
+                                    <constraint firstAttribute="width" constant="250" id="Yuu-gN-weG"/>
                                     <constraint firstAttribute="bottom" secondItem="XNN-oc-h9o" secondAttribute="bottom" id="fmM-e3-amX"/>
                                     <constraint firstAttribute="trailing" secondItem="XNN-oc-h9o" secondAttribute="trailing" id="mf5-Cf-zMf"/>
                                     <constraint firstItem="XNN-oc-h9o" firstAttribute="top" secondItem="Wxe-0v-gwy" secondAttribute="top" id="nbf-R7-7b6"/>
@@ -440,7 +440,7 @@ If you have any questions about these Terms, please contact us.</string>
                                 <nil key="highlightedColor"/>
                             </label>
                             <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="BPA-e5-Wuf">
-                                <rect key="frame" x="125" y="105" width="350" height="400"/>
+                                <rect key="frame" x="175" y="105" width="250" height="400"/>
                                 <subviews>
                                     <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="CE4-kL-y1b">
                                         <rect key="frame" x="0.0" y="0.0" width="350" height="1737"/>
@@ -489,7 +489,7 @@ Last Edited on 2016-02-27</string>
                                     <constraint firstItem="CE4-kL-y1b" firstAttribute="top" secondItem="BPA-e5-Wuf" secondAttribute="top" id="Ysi-4D-xJH"/>
                                     <constraint firstAttribute="bottom" secondItem="CE4-kL-y1b" secondAttribute="bottom" id="hx8-Ap-g8s"/>
                                     <constraint firstAttribute="trailing" secondItem="CE4-kL-y1b" secondAttribute="trailing" id="mrg-8o-tfQ"/>
-                                    <constraint firstAttribute="width" constant="350" id="n5e-eT-Gjr"/>
+                                    <constraint firstAttribute="width" constant="250" id="n5e-eT-Gjr"/>
                                     <constraint firstAttribute="height" constant="400" id="woR-X3-lOr"/>
                                 </constraints>
                             </scrollView>

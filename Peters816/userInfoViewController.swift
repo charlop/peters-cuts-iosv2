@@ -30,6 +30,9 @@ class userInfoViewController: UIViewController {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         
+        let tap: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(userInfoViewController.dismissKeyboard))
+        view.addGestureRecognizer(tap)
+        
         let extname: String? = userDefaults.stringForKey("name")
         let extphone: String? = userDefaults.stringForKey("number")
         let extemail: String? = userDefaults.stringForKey("email")
@@ -46,6 +49,10 @@ class userInfoViewController: UIViewController {
         NSUserDefaults.standardUserDefaults().synchronize()
         
         
+    }
+    func dismissKeyboard() {
+        //Causes the view (or one of its embedded text fields) to resign the first responder status.
+        view.endEditing(true)
     }
     
     override func didReceiveMemoryWarning() {
