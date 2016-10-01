@@ -1,8 +1,3 @@
-//
-//  ViewController.swift
-//  Peters816
-//
-
 import UIKit
 import CoreData
 import Foundation
@@ -23,19 +18,21 @@ class ViewController: UIViewController {
     @IBOutlet weak var Stepper: UIStepper!
     @IBOutlet weak var stepperLabel: UILabel!
     
-    var APP_REQUEST_GET:NSMutableURLRequest!
+    var APP_REQUEST_NEXT_NUM:NSMutableURLRequest!
     var APP_REQUEST_GET_SESSION:NSURLSession!
     var APP_REQUEST_POST:NSMutableURLRequest!
     var APP_REQUEST_POST_SESSION:NSURLSession!
     var CUST_ETA_REQUEST:NSMutableURLRequest!
     var CUST_ETA_SESSION:NSURLSession!
-    var APP_REQUEST_URL:NSURL = NSURL(string: "http://peterscuts.com/lib/app_request.php")!
+    var APP_REQUEST_URL:NSURL = NSURL(string: "http://peterscuts.com/lib/app_request2.php")!
+    var REQUEST_HANDLER_URL:NSURL = NSURL(string: "http://peterscuts.com/lib/request_handler.php")!
     
     func getRequest() -> NSMutableURLRequest {
-        if(APP_REQUEST_GET == nil) {
-            APP_REQUEST_GET = NSMutableURLRequest(URL: APP_REQUEST_URL);
+        if(APP_REQUEST_NEXT_NUM == nil) {
+            APP_REQUEST_NEXT_NUM = NSMutableURLRequest(URL: APP_REQUEST_URL)
+                APP_REQUEST_NEXT_NUM.HTTPMethod = "POST"
         }
-        return APP_REQUEST_GET
+        return APP_REQUEST_NEXT_NUM
     }
     func getSession() -> NSURLSession {
         if(APP_REQUEST_GET_SESSION == nil) {
@@ -45,7 +42,7 @@ class ViewController: UIViewController {
     }
     func getAppRequestPostRequest() -> NSMutableURLRequest {
             if(APP_REQUEST_POST == nil) {
-                APP_REQUEST_POST = NSMutableURLRequest(URL: NSURL(string: "http://peterscuts.com/lib/app_request.php")!)
+                APP_REQUEST_POST = NSMutableURLRequest(URL: APP_REQUEST_URL)
                     APP_REQUEST_POST.HTTPMethod = "POST"
             }
             return APP_REQUEST_POST
@@ -58,7 +55,7 @@ class ViewController: UIViewController {
         }
     func getCustEtaRequest() -> NSMutableURLRequest {
             if(CUST_ETA_REQUEST == nil) {
-                CUST_ETA_REQUEST = NSMutableURLRequest(URL: NSURL(string: "http://peterscuts.com/lib/request_handler.php")!)
+                CUST_ETA_REQUEST = NSMutableURLRequest(URL: REQUEST_HANDLER_URL)
                 CUST_ETA_REQUEST.HTTPMethod = "POST"
             }
             return CUST_ETA_REQUEST
@@ -108,14 +105,15 @@ class ViewController: UIViewController {
         UIApplication.sharedApplication().scheduleLocalNotification(localNotification)
     }
     func parseNumbers() {
-        let url = NSURL(string: "http://peterscuts.com/lib/app_request.php")
-        let jsonData = NSData(contentsOfURL: url!)
+        let jsonData = NSData(contentsOfURL: APP_REQUEST_URL)
         let readableData = JSON(data: jsonData!, options: NSJSONReadingOptions.MutableContainers, error: nil)
         currentNumber.text = readableData["current"].stringValue
         nextNumber.text = readableData["next"].stringValue
     }
     func parseJSON() {
         // standard app request
+        let postParams =  "get_next_num=1" // number is not necessary, only post param key is needed
+        getRequest().HTTPBody = postParams.dataUsingEncoding(NSUTF8StringEncoding)
         let task1 = getSession().dataTaskWithRequest(getRequest()){ data,response,error in
             if error != nil{
                 print("ERROR -> \(error)")
@@ -124,24 +122,30 @@ class ViewController: UIViewController {
             do {
                 let responseJSON = try NSJSONSerialization.JSONObjectWithData(data!, options: []  )	as! [String: AnyObject]
                 
-                let current_Number:Int = responseJSON["current"] as! Int
-                let next_Number:Int = responseJSON["next"] as! Int
-                if ( current_Number == -2){
-                    self.currentNumber.text = "error"
-                } else {
-                    self.currentNumber.text = String(current_Number)
+                let curCustId:Int = responseJSON["id"] as! Int
+
+                if(curCustId < 0) {
+                    self.staticApproxWait.text = String(responseJSON["message"])
+                    self.waitTime.text = ""
+                    self.nextNumber.text = ""
+                } else if(curCustId >= 0) { // valid value received
+                    let currentEtaSec:Int = responseJSON["etaSec"] as! Int
+                    
+                    //
+                    // TODO: fix this next line, it keeps blowing things up
+                    //
+                    //let nextStartTime:String = responseJSON["start_ime"] as! String
+                    
+                    let (h,m) = self.secondsToHoursMinutesSeconds(currentEtaSec)
+                    
+                    self.waitTime.text = "\(h) hours \(m) minutes"
+                    self.staticApproxWait.text = "Approximate wait time for next appointment is:"
+                    self.nextNumber.text = String(curCustId)
+                } else { // unknown response
+                    self.staticApproxWait.text = "Service is down :("
+                    self.waitTime.text = ""
+                    self.nextNumber.text = ""
                 }
-                if ( next_Number == -2){
-                    self.nextNumber.text = "error"
-                } else {
-                    self.nextNumber.text = String(next_Number)
-                }
-                let etaMinutes:Int = responseJSON ["eta"] as! Int
-                let etaSeconds:Int = etaMinutes * 60
-                let (h,m) = self.secondsToHoursMinutesSeconds(etaSeconds)
-                self.waitTime.text = "\(h)hrs \(m)mins"
-                self.staticApproxWait.text = "Approximate wait time for next appointment is:"
-                
             } catch {
                 print ("Error connecting to the server")
             }
