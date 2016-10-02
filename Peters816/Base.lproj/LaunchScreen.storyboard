@@ -18,22 +18,10 @@
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" image="appBanner" translatesAutoresizingMaskIntoConstraints="NO" id="goF-iz-dls">
-                                <frame key="frameInset" minX="126" minY="74" width="350" height="72"/>
+                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="appBanner" translatesAutoresizingMaskIntoConstraints="NO" id="goF-iz-dls">
                                 <constraints>
                                     <constraint firstAttribute="width" constant="350" id="I7P-IE-k5X"/>
-                                    <constraint firstAttribute="width" constant="320" id="JX7-ci-0zJ"/>
                                 </constraints>
-                                <variation key="default">
-                                    <mask key="constraints">
-                                        <exclude reference="JX7-ci-0zJ"/>
-                                    </mask>
-                                </variation>
-                                <variation key="widthClass=compact">
-                                    <mask key="constraints">
-                                        <include reference="JX7-ci-0zJ"/>
-                                    </mask>
-                                </variation>
                             </imageView>
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>

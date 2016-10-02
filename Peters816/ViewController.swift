@@ -430,18 +430,23 @@ class ViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        /* TODO!!!!
+
         self.getNumberButton.hidden = true
         self.myNumberLabel.hidden = true
-        self.cancelAppointment.hidden = true
+ TODO!!!!!
+ self.cancelAppointment.hidden = true
         self.firstNotificationStatus = false
         self.nowNotificationStatus = false
         self.nextNotificationStatus = false
-        
+
         checkAppointmentForToday() // check if theres any appointment
         NSTimer.scheduledTimerWithTimeInterval(10, target: self, selector: #selector(ViewController.checkAppointmentForToday), userInfo: nil, repeats: true)
-        parseNumbers()
+
+ parseNumbers()
         NSTimer.scheduledTimerWithTimeInterval(10, target: self, selector: #selector(ViewController.parseNumbers), userInfo: nil, repeats: true)
-    }
+*/
+ }
     
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
