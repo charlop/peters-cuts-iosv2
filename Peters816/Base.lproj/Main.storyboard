@@ -28,7 +28,6 @@
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <state key="normal" title="About"/>
                                 <connections>
-                                    <action selector="about:" destination="BYZ-38-t0r" eventType="touchUpInside" id="bvK-fM-cAn"/>
                                     <segue destination="GeS-za-A05" kind="show" id="7fl-rv-o3b"/>
                                 </connections>
                             </button>
@@ -38,16 +37,10 @@
                                 <size key="titleShadowOffset" width="2.2250738585072014e-308" height="2.2250738585072014e-308"/>
                                 <state key="normal" title="My information"/>
                                 <connections>
-                                    <action selector="updateInfo:" destination="BYZ-38-t0r" eventType="touchUpInside" id="Ixl-NV-nMD"/>
                                     <segue destination="dYc-E4-BA1" kind="show" id="XSb-yA-g9n"/>
                                 </connections>
                             </button>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Hey, looking to get a haircut today?" textAlignment="center" lineBreakMode="wordWrap" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="vJB-xm-H8f" userLabel="greetingLabel">
-                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                <nil key="textColor"/>
-                                <nil key="highlightedColor"/>
-                            </label>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Wait time for next appointment is" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="H4S-Xo-SXh">
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Wait Time" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="H4S-Xo-SXh">
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <nil key="highlightedColor"/>
@@ -57,7 +50,7 @@
                                 <color key="textColor" red="1" green="0.061523099774187906" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Currently serving number" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="CfT-6c-JhG">
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Current #" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="CfT-6c-JhG">
                                 <fontDescription key="fontDescription" type="system" pointSize="19"/>
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <nil key="highlightedColor"/>
@@ -73,84 +66,63 @@
                                 <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="How many haircuts?" textAlignment="natural" lineBreakMode="tailTruncation" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="w3o-vL-yv8">
-                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="# of Haircuts" textAlignment="natural" lineBreakMode="tailTruncation" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="w3o-vL-yv8">
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <stepper opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" continuous="NO" autorepeat="NO" value="1" minimumValue="1" maximumValue="4" translatesAutoresizingMaskIntoConstraints="NO" id="Vws-Nb-FbK">
-                                <connections>
-                                    <action selector="Stepper:" destination="BYZ-38-t0r" eventType="valueChanged" id="OFQ-jb-TgG"/>
-                                </connections>
-                            </stepper>
+                            <stepper opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" continuous="NO" autorepeat="NO" value="1" minimumValue="1" maximumValue="4" translatesAutoresizingMaskIntoConstraints="NO" id="Vws-Nb-FbK"/>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="hID-W2-0to">
                                 <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="19"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="15"/>
                                 <size key="titleShadowOffset" width="1" height="1"/>
                                 <state key="normal" title="Get A Number!"/>
-                                <connections>
-                                    <action selector="getNumber:" destination="BYZ-38-t0r" eventType="touchUpInside" id="wp3-ah-C1d"/>
-                                </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="qmj-Ow-oGI">
-                                <fontDescription key="fontDescription" type="system" pointSize="19"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="15"/>
                                 <state key="normal" title="Make a Reservation"/>
                                 <connections>
                                     <segue destination="FUC-De-t0o" kind="show" id="E7v-0h-npg"/>
                                 </connections>
                             </button>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="4sp-Ub-mGx">
-                                <state key="normal" title="Call"/>
-                                <connections>
-                                    <action selector="call:" destination="GeS-za-A05" eventType="touchUpInside" id="mgd-lz-Vew"/>
-                                </connections>
-                            </button>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="mfe-BD-ebr">
-                                <state key="normal" title="Directions"/>
-                                <connections>
-                                    <action selector="directions:" destination="GeS-za-A05" eventType="touchUpInside" id="0NV-b9-24J"/>
-                                </connections>
-                            </button>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="myNumberLabel" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="aRz-X2-VEc">
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Hey, looking to get a haircut today?" textAlignment="center" lineBreakMode="wordWrap" numberOfLines="2" baselineAdjustment="alignBaselines" minimumFontSize="11" adjustsLetterSpacingToFitWidth="YES" translatesAutoresizingMaskIntoConstraints="NO" id="vJB-xm-H8f" userLabel="greetingLabel">
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="wordWrap" translatesAutoresizingMaskIntoConstraints="NO" id="L46-m5-SXV">
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <state key="normal" title="Cancel Reservation"/>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
-                            <constraint firstItem="aRz-X2-VEc" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="0Og-ho-Kby"/>
-                            <constraint firstItem="rkt-ms-ciA" firstAttribute="top" secondItem="H4S-Xo-SXh" secondAttribute="bottom" constant="8" id="0y4-lG-SQa"/>
+                            <constraint firstItem="rkt-ms-ciA" firstAttribute="top" secondItem="H4S-Xo-SXh" secondAttribute="bottom" id="0y4-lG-SQa"/>
                             <constraint firstItem="CfT-6c-JhG" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="1Qu-6D-PKU"/>
+                            <constraint firstItem="L46-m5-SXV" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="21W-uO-eF9"/>
                             <constraint firstItem="Wzs-3Q-UeD" firstAttribute="top" secondItem="w3o-vL-yv8" secondAttribute="bottom" constant="9.5" id="3a1-mf-vtp"/>
                             <constraint firstItem="w3o-vL-yv8" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="4TK-kB-Drm"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="qmj-Ow-oGI" secondAttribute="trailing" constant="10" id="6Rj-YU-UHG"/>
                             <constraint firstAttribute="trailingMargin" secondItem="vJB-xm-H8f" secondAttribute="trailing" constant="4" id="8vT-hE-0LF"/>
                             <constraint firstItem="vJB-xm-H8f" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="9gO-eN-QHK"/>
-                            <constraint firstItem="aRz-X2-VEc" firstAttribute="top" secondItem="Xvd-Sa-WDf" secondAttribute="bottom" constant="30" id="9k3-Vc-P81"/>
-                            <constraint firstItem="4sp-Ub-mGx" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" constant="10" id="Jm1-DY-MqZ"/>
-                            <constraint firstItem="hID-W2-0to" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="JsL-og-7QD"/>
+                            <constraint firstItem="hID-W2-0to" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" constant="10" id="GqI-Ty-DDQ"/>
                             <constraint firstItem="w3o-vL-yv8" firstAttribute="top" secondItem="qmj-Ow-oGI" secondAttribute="bottom" constant="30" id="JtZ-mi-NOu"/>
-                            <constraint firstItem="qmj-Ow-oGI" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="KJF-5o-JC3"/>
+                            <constraint firstItem="qmj-Ow-oGI" firstAttribute="top" secondItem="AUW-2K-c96" secondAttribute="bottom" constant="20" id="LXR-zW-Z9Y"/>
                             <constraint firstItem="Vws-Nb-FbK" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" constant="-10" id="NR5-BZ-Fsa"/>
-                            <constraint firstItem="mfe-BD-ebr" firstAttribute="top" secondItem="Zmf-1n-51x" secondAttribute="bottom" constant="8" symbolic="YES" id="NyI-h4-PAY"/>
                             <constraint firstItem="4My-pv-hlh" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" constant="10" id="OVC-qP-9cx"/>
                             <constraint firstItem="4My-pv-hlh" firstAttribute="top" secondItem="Xvd-Sa-WDf" secondAttribute="bottom" constant="5" id="Ojf-G7-AJq"/>
-                            <constraint firstItem="hID-W2-0to" firstAttribute="top" secondItem="AUW-2K-c96" secondAttribute="bottom" constant="30" id="QkJ-K0-fSK"/>
+                            <constraint firstItem="hID-W2-0to" firstAttribute="top" secondItem="AUW-2K-c96" secondAttribute="bottom" constant="20" id="QkJ-K0-fSK"/>
                             <constraint firstItem="Zmf-1n-51x" firstAttribute="top" secondItem="Xvd-Sa-WDf" secondAttribute="bottom" constant="5" id="Qyq-Fz-xNm"/>
-                            <constraint firstItem="4sp-Ub-mGx" firstAttribute="top" secondItem="4My-pv-hlh" secondAttribute="bottom" constant="8" symbolic="YES" id="Sux-X5-HP5"/>
                             <constraint firstItem="Xvd-Sa-WDf" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" constant="10" id="UP4-gi-KpL"/>
-                            <constraint firstItem="aRz-X2-VEc" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="YW5-Wr-IJu"/>
                             <constraint firstItem="Vws-Nb-FbK" firstAttribute="trailing" secondItem="Wzs-3Q-UeD" secondAttribute="leading" constant="-15" id="ZSk-7S-hak"/>
                             <constraint firstItem="rkt-ms-ciA" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="a6k-pn-j2f"/>
-                            <constraint firstItem="vJB-xm-H8f" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" constant="5" id="cTh-WV-u0n"/>
-                            <constraint firstItem="AUW-2K-c96" firstAttribute="top" secondItem="CfT-6c-JhG" secondAttribute="bottom" constant="5" id="dTK-Fr-Tiw"/>
-                            <constraint firstItem="qmj-Ow-oGI" firstAttribute="top" secondItem="hID-W2-0to" secondAttribute="bottom" constant="8" symbolic="YES" id="dq3-WO-TLL"/>
+                            <constraint firstItem="vJB-xm-H8f" firstAttribute="top" secondItem="Zmf-1n-51x" secondAttribute="bottom" constant="20" id="adf-4z-3ef"/>
+                            <constraint firstItem="AUW-2K-c96" firstAttribute="top" secondItem="CfT-6c-JhG" secondAttribute="bottom" id="dTK-Fr-Tiw"/>
                             <constraint firstItem="H4S-Xo-SXh" firstAttribute="top" secondItem="vJB-xm-H8f" secondAttribute="bottom" constant="20" id="h4u-p5-Gt9"/>
-                            <constraint firstAttribute="trailingMargin" secondItem="mfe-BD-ebr" secondAttribute="trailing" constant="10" id="j8e-uc-XZe"/>
                             <constraint firstItem="H4S-Xo-SXh" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="jjR-o2-xfE"/>
                             <constraint firstAttribute="trailingMargin" secondItem="Zmf-1n-51x" secondAttribute="trailing" constant="10" id="nuI-Un-iUi"/>
                             <constraint firstItem="Vws-Nb-FbK" firstAttribute="top" secondItem="w3o-vL-yv8" secondAttribute="bottom" constant="5" id="nz4-hh-aPe"/>
-                            <constraint firstItem="vJB-xm-H8f" firstAttribute="top" secondItem="mfe-BD-ebr" secondAttribute="bottom" constant="20" id="op3-VH-hMV"/>
+                            <constraint firstItem="L46-m5-SXV" firstAttribute="top" secondItem="AUW-2K-c96" secondAttribute="bottom" constant="40" id="uLB-vQ-3qL"/>
                             <constraint firstItem="AUW-2K-c96" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="x31-cW-Cji"/>
                             <constraint firstItem="CfT-6c-JhG" firstAttribute="top" secondItem="rkt-ms-ciA" secondAttribute="bottom" constant="10" id="x47-gH-igD"/>
                             <constraint firstItem="Xvd-Sa-WDf" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="ypS-wY-cjY"/>
@@ -159,9 +131,11 @@
                     <navigationItem key="navigationItem" title="Peters Haircuts" id="zse-rR-BvM"/>
                     <connections>
                         <outlet property="Stepper" destination="Vws-Nb-FbK" id="SW4-Dk-dk7"/>
+                        <outlet property="cancelAppointment" destination="L46-m5-SXV" id="qtB-uy-bfq"/>
                         <outlet property="currentNumber" destination="AUW-2K-c96" id="SCc-Xv-XmQ"/>
-                        <outlet property="getNumberButton" destination="hID-W2-0to" id="fmt-wC-JRb"/>
-                        <outlet property="myNumberLabel" destination="aRz-X2-VEc" id="exa-jf-az9"/>
+                        <outlet property="getNumberButton" destination="hID-W2-0to" id="2tp-Lr-4iq"/>
+                        <outlet property="greetingLabel" destination="vJB-xm-H8f" id="GZR-F9-amI"/>
+                        <outlet property="myNumberLabel" destination="CfT-6c-JhG" id="Qpz-vZ-R0b"/>
                         <outlet property="staticApproxWait" destination="H4S-Xo-SXh" id="FM2-Ge-LJW"/>
                         <outlet property="stepperLabel" destination="Wzs-3Q-UeD" id="fG4-uV-G7O"/>
                         <outlet property="waitTime" destination="rkt-ms-ciA" id="HnZ-Ze-JbK"/>
@@ -351,7 +325,7 @@
                         <autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES" flexibleMaxX="YES" flexibleMinY="YES" heightSizable="YES" flexibleMaxY="YES"/>
                         <subviews>
                             <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" fixedFrame="YES" preservesSuperviewLayoutMargins="YES" layoutMarginsFollowReadableWidth="YES" bounces="NO" alwaysBounceVertical="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Wxe-0v-gwy">
-                                <frame key="frameInset" minX="0.0%" minY="100.00%" width="320" height="524"/>
+                                <rect key="frame" x="0.0" y="45" width="320" height="524"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMinY="YES" flexibleMaxY="YES"/>
                                 <subviews>
                                     <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleAspectFit" fixedFrame="YES" preservesSuperviewLayoutMargins="YES" layoutMarginsFollowReadableWidth="YES" editable="NO" translatesAutoresizingMaskIntoConstraints="NO" id="XNN-oc-h9o">
@@ -545,7 +519,7 @@ Last Edited on 2016-02-27</string>
         <image name="logo" width="446" height="267"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="oeQ-68-ORB"/>
+        <segue reference="V9R-fw-aPR"/>
         <segue reference="7fl-rv-o3b"/>
     </inferredMetricsTieBreakers>
 </document>

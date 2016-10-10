@@ -29,6 +29,19 @@ class ViewController: UIViewController {
     var APP_REQUEST_URL:NSURL = NSURL(string: "http://peterscuts.com/lib/app_request2.php")!
     var REQUEST_HANDLER_URL:NSURL = NSURL(string: "http://peterscuts.com/lib/request_handler.php")!
     
+    let noInfoGreeting:String = "Welcome to Peter's, Please set your information to make reservations."
+    let existingUserGreeting:String = ", looking to get a haircut?"
+    let unknownErrorGreeting:String = "Not sure what happened there...Still need a haircut?"
+    let forIssuesAlert:String = "For issues, please call Peter (519) 816-2887"
+    let unknownDeleteAlert:String = "Something's not right...Please call Peter (519) 816-2887"
+    let defaultWaitTime:String = "Wait Time"
+    let serverErrorGreeting:String = "Service is down :( Please call Peter (519) 816-2887"
+    let yourEtaLabel:String = "Your haircut is in"
+    let yourNowLabel:String = "Your appointment is now!"
+    let enterYourInfo:String = "Please enter your information."
+    let custWaitTime:String = "Your Wait Time"
+    let multCustWaitTime:String = "THIS NEEDS TO BE DONE STILL TOO."
+    
     func getRequest() -> NSMutableURLRequest {
         if(APP_REQUEST_NEXT_NUM == nil) {
             APP_REQUEST_NEXT_NUM = NSMutableURLRequest(URL: APP_REQUEST_URL)
@@ -107,37 +120,73 @@ class ViewController: UIViewController {
         UIApplication.sharedApplication().scheduleLocalNotification(localNotification)
     }
     
-    // Returns the wait time, if id input is 0, get the overall wait time
+    // Get the list of user IDs in local storage
+    func getIds() -> [Int] {
+        let curUserIds:[Int] = userDefaults.objectForKey("dailyIdArray") as? [Int] ?? [Int]()
+        if(curUserIds.count < 1) {
+            return [Int]()
+        }
+        
+        var validIds = [Int]()
+        for i in 1...curUserIds.count {
+            if(curUserIds[i] > 0) {
+                validIds.insert(curUserIds[i], atIndex: i)
+            }
+        }
+        return validIds
+    }
+    
+    // Returns the wait time
     func getWaitTime() {
-        // Getting the overall wait time
-        let postParams =  "get_next_num=1" // number is not necessary, only post param key is needed
+        var postParams:String = "get_next_num=1" // number is not necessary, only post param key is needed
+        // Check if user has any existing appointments
+        let userValidIds:[Int] = getIds()
+        if(userValidIds.count > 0) { // User has at least 1 appointment
+            let uName = userDefaults.stringForKey("name")! as String
+            let uPhone = userDefaults.stringForKey("number")! as String
+            postParams = "etaName=\(uName)&etaPhone=\(uPhone)"
+        }
+        
         getRequest().HTTPBody = postParams.dataUsingEncoding(NSUTF8StringEncoding)
         let task1 = getSession().dataTaskWithRequest(getRequest()){ data,response,error in
             if error != nil{
-                // TODO: handle http response error
+                self.greetingLabel.text = self.serverErrorGreeting
+                return
             }
             do {
-                let responseJSON = try NSJSONSerialization.JSONObjectWithData(data!, options: []  )	as! [String: AnyObject]
+                let responseJSON = try NSJSONSerialization.JSONObjectWithData(data!, options: []  )	as! [[String: AnyObject]]
                 
-                let curCustId:Int = responseJSON["id"] as! Int
+                let curEtaMins = responseJSON[0]["etaMins"] as! Int
                 
-                if(curCustId < 0) { // Store is closed or invalid mySQL response
-                    self.staticApproxWait.text = String(responseJSON["message"])
+                // This needs to be fixed -- wrong address...
+                //let curCustId:Int = responseJSON["id"] as! Int
+
+                if(curEtaMins < 0) { // Store is closed or invalid mySQL response
+                    self.staticApproxWait.text = String(responseJSON[0]["message"])
                     self.waitTime.text = ""
                     self.nextNumber.text = ""
-                } else if(curCustId >= 0) { // valid value received
-                    let currentEtaMin:Int = responseJSON["etaMins"] as! Int
+                } else if(curEtaMins >= 0) { // valid value received
+                    let etaHrs:Int = Int(curEtaMins/60)
+                    let etaMins:Int = curEtaMins % 60
+                    if(etaHrs > 0) {
+                        self.waitTime.text = "\(etaHrs) hours \(etaMins) minutes"
+                    } else {
+                        self.waitTime.text = "\(etaMins) minutes"
+                    }
                     
-                    //
-                    // TODO: fix this next line, it keeps blowing things up
-                    //
-                    let etaHrs:Int = Int(currentEtaMin/60)
-                    let etaMins:Int = currentEtaMin % 60
-                    self.waitTime.text = "\(etaHrs) hours \(etaMins) minutes"
-                    self.staticApproxWait.text = "Approximate wait time for next appointment is:"
+                    if(userValidIds.count == 0) { // Customer doesn't have a number
+                        self.staticApproxWait.text = self.defaultWaitTime
+                        self.showHideGetNumber(true)
+                    } else if(userValidIds.count == 1) { // Customer has 1 appointment
+                        self.staticApproxWait.text = self.custWaitTime
+                        self.showHideGetNumber(true)
+                    } else { // Customer has multiple appointments
+                        self.staticApproxWait.text = self.multCustWaitTime
+                        self.showHideGetNumber(true)
+                    }
                 } else { // unknown response
                     // TODO: try to use the 'message' value
-                    self.staticApproxWait.text = "Service is down :("
+                    self.greetingLabel.text = self.serverErrorGreeting
                     self.waitTime.text = ""
                     self.nextNumber.text = ""
                 }
@@ -160,38 +209,34 @@ class ViewController: UIViewController {
             do {
                 let responseJSON = try NSJSONSerialization.JSONObjectWithData(data!, options: []  )	as! [String: AnyObject]
                 
+                let curCustEtaMins:Int = responseJSON["etaMins"] as! Int
                 let curCustId:Int = responseJSON["id"] as! Int
 
-                if(curCustId < 0) {
+                if(curCustEtaMins < 0) {
                     self.staticApproxWait.text = String(responseJSON["message"])
                     self.waitTime.text = ""
                     self.nextNumber.text = ""
-                } else if(curCustId >= 0) { // valid value received
-                    let currentEtaSec:Int = responseJSON["etaSec"] as! Int
-                    
-                    //
-                    // TODO: fix this next line, it keeps blowing things up
-                    //
-                    //let nextStartTime:String = responseJSON["start_ime"] as! String
-                    
-                    let (h,m) = self.secondsToHoursMinutesSeconds(currentEtaSec)
-                    
+                } else if(curCustEtaMins >= 0) { // valid value received
+                    let h:Int = Int(curCustEtaMins/60)
+                    let m:Int = curCustEtaMins % 60
                     self.waitTime.text = "\(h) hours \(m) minutes"
-                    self.staticApproxWait.text = "Approximate wait time for next appointment is:"
+    self.staticApproxWait.text = self.defaultWaitTime
+                    
+                    // TODO: HOW IS THIS ENTIRE FUNCTION ACTUALLY BEING USED???
                     self.nextNumber.text = String(curCustId)
                 } else { // unknown response
-                    self.staticApproxWait.text = "Service is down :("
+                    self.staticApproxWait.text = self.serverErrorGreeting
                     self.waitTime.text = ""
                     self.nextNumber.text = ""
                 }
             } catch {
-                print ("Error connecting to the server")
+                // TODO: handle error            
             }
         }// end of task1
         task1.resume()
-        self.getNumberButton.hidden = false
-        self.stepperLabel.hidden = false
-        self.Stepper.hidden = false
+        
+        // TODO: this next line is probably not needed in this spot
+        showHideGetNumber(true)
     } // end of parseJSON()
     
     // Check if user has an appointment to decide which view to present
@@ -221,7 +266,7 @@ class ViewController: UIViewController {
                     // TODO: valid eta response received, present it to the user
                     // Might be all done?
                     self.showHideGetNumber(false)
-                    self.staticApproxWait.text = "Your haircut is in"
+                    self.staticApproxWait.text = self.yourEtaLabel
                     let etaHrs: Int? = Int(etaMinsResponse/60);
                     let etaMins: Int? = etaMinsResponse % 60;
                     self.waitTime.text = "\(etaHrs) hrs \(etaMins) min"
@@ -246,12 +291,12 @@ class ViewController: UIViewController {
                     self.createLocalNotification("ID", time: "in 40 mins") //TODO: ID is just a placeholder
                     self.fortyMinutesNotification("setON")
                 } else {
-                    self.waitTime.text = "Your appointment is Now"
+                    self.waitTime.text = self.yourNowLabel
                     self.createLocalNotification("ID", time: "Now") // TODO: ID is just a placeholder
                     self.NowNotification("setON")
                     dispatch_async(dispatch_get_main_queue(),
                     {
-                        let alertController = UIAlertController(title: "Rush to your appointment!", message: "Your Appointment is Now", preferredStyle: .Alert  )
+                        let alertController = UIAlertController(title: "You're Up!", message: self.yourNowLabel, preferredStyle: .Alert  )
                         let OKAction = UIAlertAction(title: "OK", style: .Default) { (action) in}
                         alertController.addAction(OKAction)
                         self.presentViewController(alertController, animated: true, completion: nil)
@@ -268,12 +313,12 @@ class ViewController: UIViewController {
     func showHideGetNumber(showGetNum: Bool) {
         if(showGetNum == true) { // Show the get a number options, hide cancel button
             self.getNumberButton.hidden = false
-            self.myNumberLabel.hidden = true
+            self.myNumberLabel.hidden = false
             self.cancelAppointment.hidden = true
             self.Stepper.hidden = false
         } else if(showGetNum == false) {
             self.getNumberButton.hidden = true
-            self.myNumberLabel.hidden = false
+            self.myNumberLabel.hidden = true
             self.cancelAppointment.hidden = false
             self.Stepper.hidden = true
         }
@@ -289,14 +334,13 @@ class ViewController: UIViewController {
         if (NSUserDefaults.standardUserDefaults().stringForKey("name") == nil || NSUserDefaults.standardUserDefaults().stringForKey("number") == nil) {
             dispatch_async(dispatch_get_main_queue(),
                            {
-                            let alertController = UIAlertController(title: "Alert", message: "Please enter your information", preferredStyle: .Alert  )
+                            let alertController = UIAlertController(title: "Alert", message: self.enterYourInfo, preferredStyle: .Alert  )
                             let OKAction = UIAlertAction(title: "OK", style: .Default) { (action) in }
                             alertController.addAction(OKAction)
                             self.presentViewController(alertController, animated: true, completion: nil)
             }) // end of dispatch
             return
         }
-        
         // TODO: make sure user doesn't already have an appointment?
         
         // First get the stepper value from label, default 1
@@ -361,7 +405,6 @@ class ViewController: UIViewController {
                         alertController.addAction(OKAction)
                         self.presentViewController(alertController, animated: true, completion: nil)
                     })
- 
                     // TODO: does anything else need to be added to defaultstorage?
                     } catch {
                         //TODO: handle error!!
@@ -385,7 +428,7 @@ class ViewController: UIViewController {
             // Prompt customer to confirm they want to delete
             dispatch_async(dispatch_get_main_queue(),
                            {
-                            let alertController = UIAlertController(title: "Are You Sure", message: "Cancel Appointments?", preferredStyle: .Alert  )
+                            let alertController = UIAlertController(title: "Confirmation", message: "Cancel Appointments?", preferredStyle: .Alert  )
                             let OKAction = UIAlertAction(title: "OK", style: .Default) { (action) in }
                             let cancelAction = UIAlertAction(title: "Cancel", style: .Cancel) { (action) in
                                 return;
@@ -406,7 +449,7 @@ class ViewController: UIViewController {
                     if(delResult > 0) { // Delete succeeded
                         dispatch_async(dispatch_get_main_queue(),
                                        {
-                                        let alertController = UIAlertController(title: "Appointment Cancelled", message: "For issues, please call Peter (519) 816-2887", preferredStyle: .Alert  )
+                                        let alertController = UIAlertController(title: "Appointment Cancelled", message: self.forIssuesAlert, preferredStyle: .Alert  )
                                         let OKAction = UIAlertAction(title: "OK", style: .Default) { (action) in }
                                         alertController.addAction(OKAction)
                                         self.presentViewController(alertController, animated: true, completion: nil)
@@ -414,7 +457,7 @@ class ViewController: UIViewController {
                     } else { // Delete did not succeed
                         dispatch_async(dispatch_get_main_queue(),
                                        {
-                                        let alertController = UIAlertController(title: "Error", message: "Somethign went wrong! Please call Peter (519) 816-2887", preferredStyle: .Alert  )
+                                        let alertController = UIAlertController(title: "Error", message: self.unknownDeleteAlert, preferredStyle: .Alert  )
                                         let OKAction = UIAlertAction(title: "OK", style: .Default) { (action) in }
                                         alertController.addAction(OKAction)
                                         self.presentViewController(alertController, animated: true, completion: nil)
@@ -427,7 +470,7 @@ class ViewController: UIViewController {
             task.resume()
 
         } else { // Customer doesn't have a local ID currently
-            self.greetingLabel.text = "Not sure what happened there...Still need a haircut?"
+            self.greetingLabel.text = unknownErrorGreeting
         }
         self.userDefaults.setObject([-1,-1,-1,-1], forKey: "dailyIdArray")
         self.showHideGetNumber(true)
@@ -439,14 +482,13 @@ class ViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        let extname: String? = userDefaults.stringForKey("name")
-
-        if(extname == nil) {
-            self.greetingLabel.text = "Welcome to Peter's, Please set your information before reserving an appointment."
+        
+        if(userDefaults.stringForKey("name") == nil) {
+            self.greetingLabel.text = noInfoGreeting
         } else {
-            self.greetingLabel.text = "Hey \(extname), looking to get a haircut?"
+            self.greetingLabel.text = "Hey \(userDefaults.stringForKey("name")!)" + existingUserGreeting
+
         }
-        self.greetingLabel.text = "Hey"
         
         // TODO: Removing following code...this should be handled elsewhere already
         /*
@@ -461,10 +503,8 @@ class ViewController: UIViewController {
         self.nextNotificationStatus = false
 
         // TODO: why do we check every 10 seconds?? Shouldn't this be known from delete and app_request2 response?
-        // removing NSTimer call, I don't think it's needed.
         checkForExistingAppointment() // check if theres any appointment
-        // NSTimer.scheduledTimerWithTimeInterval(10, target: self, selector: #selector(ViewController.checkAppointmentForToday), userInfo: nil, repeats: true)
-
+        
         // TODO: this should receive the customer's id if it exists; 0 if they don't have one.
         getWaitTime()
         NSTimer.scheduledTimerWithTimeInterval(10, target: self, selector: #selector(ViewController.getWaitTime), userInfo: nil, repeats: true)
