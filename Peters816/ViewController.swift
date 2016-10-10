@@ -12,13 +12,16 @@ class ViewController: UIViewController {
     @IBOutlet weak var staticApproxWait: UILabel!
     @IBOutlet weak var myNumberLabel: UILabel!
     @IBOutlet weak var getNumberButton: UIButton!
-    @IBOutlet weak var cancelAppointment: UIButton!
+    //@IBOutlet weak var cancelAppointment: UIButton!
     @IBOutlet weak var Stepper: UIStepper!
     @IBOutlet weak var stepperLabel: UILabel!
     @IBOutlet weak var greetingLabel: UILabel!
 
     let userDefaults = NSUserDefaults.standardUserDefaults()
-
+    
+    // MARK: Actions -- doesn't seem like these are needed
+    //@IBAction func updateInfo(sender: UIButton) { }
+    //@IBAction func about(sender: UIButton) { }
     
     var APP_REQUEST_NEXT_NUM:NSMutableURLRequest!
     var APP_REQUEST_GET_SESSION:NSURLSession!
@@ -129,7 +132,7 @@ class ViewController: UIViewController {
         
         var validIds = [Int]()
         for i in 1...curUserIds.count {
-            if(curUserIds[i] > 0) {
+            if(curUserIds[i-1] > 0) {
                 validIds.insert(curUserIds[i], atIndex: i)
             }
         }
@@ -160,7 +163,7 @@ class ViewController: UIViewController {
                 
                 // This needs to be fixed -- wrong address...
                 //let curCustId:Int = responseJSON["id"] as! Int
-
+                // Not showing current # anywhere though. Is it needed really?
                 if(curEtaMins < 0) { // Store is closed or invalid mySQL response
                     self.staticApproxWait.text = String(responseJSON[0]["message"])
                     self.waitTime.text = ""
@@ -311,23 +314,19 @@ class ViewController: UIViewController {
     }
     
     func showHideGetNumber(showGetNum: Bool) {
-        if(showGetNum == true) { // Show the get a number options, hide cancel button
+        // TODO: flipped these for a little debug - verify
+        if(true) { // Show the get a number options, hide cancel button
             self.getNumberButton.hidden = false
             self.myNumberLabel.hidden = false
-            self.cancelAppointment.hidden = true
+            //self.cancelAppointment.hidden = false
             self.Stepper.hidden = false
-        } else if(showGetNum == false) {
-            self.getNumberButton.hidden = true
-            self.myNumberLabel.hidden = true
-            self.cancelAppointment.hidden = false
-            self.Stepper.hidden = true
+        //} else {
+            self.getNumberButton.hidden = false
+            self.myNumberLabel.hidden = false
+            //self.cancelAppointment.hidden = false
+            self.Stepper.hidden = false
         }
     }
-    // MARK: Actions
-    @IBAction func updateInfo(sender: UIButton) { }
-    @IBAction func about(sender: UIButton) { }
-    @IBAction func termsOfUse(sender: UIButton) { }
-    @IBAction func privacyPolicy(sender: UIButton) { }
     
     @IBAction func getNumber(sender: UIButton) {
         // User info does not exist
@@ -364,6 +363,7 @@ class ViewController: UIViewController {
             let task = getAppRequestPostSession().dataTaskWithRequest(getAppRequestPostRequest()){ data,response,error in
                 if error != nil {
                     // TODO: handle error
+                    // Show an alert. Maybe move that out to a separate function because it repeats so much
                     return
                 }
                 do {
@@ -414,7 +414,7 @@ class ViewController: UIViewController {
         self.showHideGetNumber(true)
     } // end of getNumber function
     
-    @IBAction func cancelAppointment(sender: AnyObject) {
+    @IBAction func cancelAppointment(sender: UIButton) {
         // TODO: dailyIdArray!!!
         let custId :Int = userDefaults.integerForKey("dailyId")
         let extname: String? = userDefaults.stringForKey("name")
@@ -490,7 +490,7 @@ class ViewController: UIViewController {
 
         }
         
-        // TODO: Removing following code...this should be handled elsewhere already
+        // TODO: Most elements should be hidden while things load. Minimize # of occurrences of this
         /*
         self.myNumberLabel.hidden = true
         self.getNumberButton.hidden = true

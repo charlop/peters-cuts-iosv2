@@ -45,7 +45,7 @@
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="WaitTime" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="rkt-ms-ciA">
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="..." textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="rkt-ms-ciA">
                                 <fontDescription key="fontDescription" type="system" pointSize="22"/>
                                 <color key="textColor" red="1" green="0.061523099774187906" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <nil key="highlightedColor"/>
@@ -55,7 +55,7 @@
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="24" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="AUW-2K-c96">
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="..." textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="AUW-2K-c96">
                                 <fontDescription key="fontDescription" type="system" pointSize="34"/>
                                 <color key="textColor" red="0.98431372549019602" green="0.0" blue="0.14117647058823529" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <nil key="highlightedColor"/>
@@ -71,12 +71,19 @@
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <stepper opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" continuous="NO" autorepeat="NO" value="1" minimumValue="1" maximumValue="4" translatesAutoresizingMaskIntoConstraints="NO" id="Vws-Nb-FbK"/>
+                            <stepper opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" continuous="NO" autorepeat="NO" value="1" minimumValue="1" maximumValue="4" translatesAutoresizingMaskIntoConstraints="NO" id="Vws-Nb-FbK">
+                                <connections>
+                                    <action selector="StepperWithSender:" destination="BYZ-38-t0r" eventType="touchDown" id="nep-So-6vr"/>
+                                </connections>
+                            </stepper>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="hID-W2-0to">
                                 <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="15"/>
                                 <size key="titleShadowOffset" width="1" height="1"/>
                                 <state key="normal" title="Get A Number!"/>
+                                <connections>
+                                    <action selector="getNumberWithSender:" destination="BYZ-38-t0r" eventType="touchUpInside" id="ijc-2y-60J"/>
+                                </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="qmj-Ow-oGI">
                                 <fontDescription key="fontDescription" type="system" pointSize="15"/>
@@ -93,6 +100,9 @@
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="wordWrap" translatesAutoresizingMaskIntoConstraints="NO" id="L46-m5-SXV">
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <state key="normal" title="Cancel Reservation"/>
+                                <connections>
+                                    <action selector="cancelAppointmentWithSender:" destination="BYZ-38-t0r" eventType="touchUpInside" id="ppl-nM-ERE"/>
+                                </connections>
                             </button>
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
@@ -131,9 +141,8 @@
                     <navigationItem key="navigationItem" title="Peters Haircuts" id="zse-rR-BvM"/>
                     <connections>
                         <outlet property="Stepper" destination="Vws-Nb-FbK" id="SW4-Dk-dk7"/>
-                        <outlet property="cancelAppointment" destination="L46-m5-SXV" id="qtB-uy-bfq"/>
                         <outlet property="currentNumber" destination="AUW-2K-c96" id="SCc-Xv-XmQ"/>
-                        <outlet property="getNumberButton" destination="hID-W2-0to" id="2tp-Lr-4iq"/>
+                        <outlet property="getNumberButton" destination="hID-W2-0to" id="9Jf-q7-CyZ"/>
                         <outlet property="greetingLabel" destination="vJB-xm-H8f" id="GZR-F9-amI"/>
                         <outlet property="myNumberLabel" destination="CfT-6c-JhG" id="Qpz-vZ-R0b"/>
                         <outlet property="staticApproxWait" destination="H4S-Xo-SXh" id="FM2-Ge-LJW"/>
@@ -229,9 +238,6 @@
                         <outlet property="emailField" destination="lqd-Kb-TDI" id="nOn-9Y-VLN"/>
                         <outlet property="nameField" destination="Ta9-s3-fLJ" id="OkB-6U-GrY"/>
                         <outlet property="phoneField" destination="gQ0-ie-I2D" id="XYD-hP-LB1"/>
-                        <outlet property="staticEnterEmail" destination="zY7-zY-umo" id="rNq-eI-YWa"/>
-                        <outlet property="staticEnterName" destination="QkE-HD-O7h" id="rLU-k0-uHg"/>
-                        <outlet property="staticEnterPhone" destination="QLg-cA-6ep" id="WFv-nX-IbA"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="xIW-qr-gry" userLabel="First Responder" sceneMemberID="firstResponder"/>

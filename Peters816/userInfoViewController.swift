@@ -9,6 +9,9 @@ class userInfoViewController: UIViewController {
 
     let userDefaults = NSUserDefaults.standardUserDefaults()
     
+    //@IBAction func termsOfUse(sender: UIButton) { }
+    //@IBAction func privacyPolicy(sender: UIButton) { }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
