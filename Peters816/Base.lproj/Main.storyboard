@@ -42,7 +42,7 @@
                                     <segue destination="dYc-E4-BA1" kind="show" id="XSb-yA-g9n"/>
                                 </connections>
                             </button>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Hey [NAME], looking to get a haircut today?" textAlignment="center" lineBreakMode="wordWrap" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="vJB-xm-H8f">
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Hey, looking to get a haircut today?" textAlignment="center" lineBreakMode="wordWrap" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="vJB-xm-H8f" userLabel="greetingLabel">
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
@@ -159,12 +159,10 @@
                     <navigationItem key="navigationItem" title="Peters Haircuts" id="zse-rR-BvM"/>
                     <connections>
                         <outlet property="Stepper" destination="Vws-Nb-FbK" id="SW4-Dk-dk7"/>
-                        <outlet property="banner" destination="Xvd-Sa-WDf" id="3Hz-Ub-JG0"/>
                         <outlet property="currentNumber" destination="AUW-2K-c96" id="SCc-Xv-XmQ"/>
                         <outlet property="getNumberButton" destination="hID-W2-0to" id="fmt-wC-JRb"/>
                         <outlet property="myNumberLabel" destination="aRz-X2-VEc" id="exa-jf-az9"/>
                         <outlet property="staticApproxWait" destination="H4S-Xo-SXh" id="FM2-Ge-LJW"/>
-                        <outlet property="staticCurrentNumber" destination="CfT-6c-JhG" id="9xw-br-2gM"/>
                         <outlet property="stepperLabel" destination="Wzs-3Q-UeD" id="fG4-uV-G7O"/>
                         <outlet property="waitTime" destination="rkt-ms-ciA" id="HnZ-Ze-JbK"/>
                     </connections>
@@ -357,10 +355,10 @@
                                 <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMinY="YES" flexibleMaxY="YES"/>
                                 <subviews>
                                     <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleAspectFit" fixedFrame="YES" preservesSuperviewLayoutMargins="YES" layoutMarginsFollowReadableWidth="YES" editable="NO" translatesAutoresizingMaskIntoConstraints="NO" id="XNN-oc-h9o">
-                                        <rect key="frame" x="2" y="-10" width="315" height="532"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="315" height="532"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMinY="YES" flexibleMaxY="YES"/>
                                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                        <mutableString key="text">END-USER AGREEMENT TERMS AND CONDITIONS ("Terms") 
+                                        <string key="text">END-USER AGREEMENT TERMS AND CONDITIONS ("Terms") 
 Last updated: February 27, 2016
 By using the "Peters 816" mobile application ("app", or "service") operated by Peter's Barbershop ("us", "we", or "our"), you (the "user") agree to the Terms and Conditions ("Terms", "Terms and Conditions") outlined below. These Terms apply to all visitors, users and others who access or use the app. By accessing or using the app you agree to be bound by these Terms. If you disagree with any part of the terms then you may not access the Service.
 
@@ -380,7 +378,7 @@ We reserve the right, at our sole discretion, to modify or replace these Terms a
 By continuing to access or use our Service after those revisions become effective, you agree to be bound by the revised terms. If you do not agree to the new terms, please stop using the Service.
 
 CONTACT US
-If you have any questions about these Terms, please contact us.</mutableString>
+If you have any questions about these Terms, please contact us.</string>
                                         <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                         <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
                                     </textView>
@@ -429,7 +427,7 @@ If you have any questions about these Terms, please contact us.</mutableString>
                                         <rect key="frame" x="0.0" y="0.0" width="320" height="492"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                        <mutableString key="text">PRIVACY POLICY
+                                        <string key="text">PRIVACY POLICY
 This privacy policy has been compiled to better serve those who are concerned with how their 'Personally identifiable information' (PII) is being used online. PII, as used in privacy law and information security, is information that can be used on its own or with other information to identify, contact, or locate a single person, or to identify an individual in context. Please read our privacy policy carefully to get a clear understanding of how we collect, use, protect or otherwise handle your Personally Identifiable Information in accordance with our website.
 
 What personal information do we collect when you use the app?
@@ -460,7 +458,7 @@ We collect your email address in order to send you notifications on your birthda
 To be in accordance with CANSPAM we agree to the following:
 If at any time you would like to unsubscribe from receiving future emails, you can email us and we will promptly remove you from ALL correspondence.
 
-Last Edited on 2016-02-27</mutableString>
+Last Edited on 2016-02-27</string>
                                         <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                         <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
                                     </textView>
@@ -522,7 +520,7 @@ Last Edited on 2016-02-27</mutableString>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
                                         <navigationBar contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="ItG-qo-bFj">
-                                            <frame key="frameInset" minX="-8" minY="-9" height="44" maxX="8"/>
+                                            <frame key="frameInset" minX="-9" minY="-9" height="44" maxX="9"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
                                             <items>
                                                 <navigationItem title="Reservation" id="9Df-EI-bor"/>
@@ -547,7 +545,7 @@ Last Edited on 2016-02-27</mutableString>
         <image name="logo" width="446" height="267"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="7fl-rv-o3b"/>
         <segue reference="oeQ-68-ORB"/>
+        <segue reference="7fl-rv-o3b"/>
     </inferredMetricsTieBreakers>
 </document>

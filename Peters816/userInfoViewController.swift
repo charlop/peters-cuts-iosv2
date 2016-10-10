@@ -3,11 +3,8 @@ import CoreData
 import Foundation
 
 class userInfoViewController: UIViewController {
-    @IBOutlet weak var staticEnterName: UILabel!
     @IBOutlet weak var nameField: UITextField!
-    @IBOutlet weak var staticEnterPhone: UILabel!
     @IBOutlet weak var phoneField: UITextField!
-    @IBOutlet weak var staticEnterEmail: UILabel!
     @IBOutlet weak var emailField: UITextField!
 
     let userDefaults = NSUserDefaults.standardUserDefaults()
@@ -47,5 +44,7 @@ class userInfoViewController: UIViewController {
         userDefaults.setObject(nameField.text, forKey: "name")
         userDefaults.setObject(phoneField.text, forKey: "number")
         userDefaults.setObject(emailField.text, forKey: "email")
+        userDefaults.setObject([-1,-1,-1,-1], forKey: "dailyIdArray")
+        userDefaults.setObject(0, forKey: "numRes");
     }
 }
