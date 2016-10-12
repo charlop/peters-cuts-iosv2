@@ -47,7 +47,11 @@ class userInfoViewController: UIViewController {
         userDefaults.setObject(nameField.text, forKey: "name")
         userDefaults.setObject(phoneField.text, forKey: "number")
         userDefaults.setObject(emailField.text, forKey: "email")
-        userDefaults.setObject([-1,-1,-1,-1], forKey: "dailyIdArray")
+        
+        // Wiping out only invalid idArrays
+        if(userDefaults.arrayForKey("dailyIdArray")?.count != 4) {
+            userDefaults.setObject([-1,-1,-1,-1], forKey: "dailyIdArray")
+        }
         userDefaults.setObject(0, forKey: "numRes");
     }
 }

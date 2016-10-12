@@ -82,7 +82,7 @@
                                 <size key="titleShadowOffset" width="1" height="1"/>
                                 <state key="normal" title="Get A Number!"/>
                                 <connections>
-                                    <action selector="getNumberWithSender:" destination="BYZ-38-t0r" eventType="touchUpInside" id="ijc-2y-60J"/>
+                                    <action selector="getNumberWithSender:" destination="BYZ-38-t0r" eventType="touchUpInside" id="KKY-eN-0Fw"/>
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="qmj-Ow-oGI">
@@ -141,10 +141,12 @@
                     <navigationItem key="navigationItem" title="Peters Haircuts" id="zse-rR-BvM"/>
                     <connections>
                         <outlet property="Stepper" destination="Vws-Nb-FbK" id="SW4-Dk-dk7"/>
+                        <outlet property="cancelAppointment" destination="L46-m5-SXV" id="QFQ-YG-8lk"/>
                         <outlet property="currentNumber" destination="AUW-2K-c96" id="SCc-Xv-XmQ"/>
                         <outlet property="getNumberButton" destination="hID-W2-0to" id="9Jf-q7-CyZ"/>
                         <outlet property="greetingLabel" destination="vJB-xm-H8f" id="GZR-F9-amI"/>
                         <outlet property="myNumberLabel" destination="CfT-6c-JhG" id="Qpz-vZ-R0b"/>
+                        <outlet property="reservationButton" destination="qmj-Ow-oGI" id="mT7-WK-vki"/>
                         <outlet property="staticApproxWait" destination="H4S-Xo-SXh" id="FM2-Ge-LJW"/>
                         <outlet property="stepperLabel" destination="Wzs-3Q-UeD" id="fG4-uV-G7O"/>
                         <outlet property="waitTime" destination="rkt-ms-ciA" id="HnZ-Ze-JbK"/>
@@ -331,7 +333,7 @@
                         <autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES" flexibleMaxX="YES" flexibleMinY="YES" heightSizable="YES" flexibleMaxY="YES"/>
                         <subviews>
                             <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" fixedFrame="YES" preservesSuperviewLayoutMargins="YES" layoutMarginsFollowReadableWidth="YES" bounces="NO" alwaysBounceVertical="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Wxe-0v-gwy">
-                                <rect key="frame" x="0.0" y="45" width="320" height="524"/>
+                                <rect key="frame" x="0.0" y="48" width="320" height="524"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMinY="YES" flexibleMaxY="YES"/>
                                 <subviews>
                                     <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleAspectFit" fixedFrame="YES" preservesSuperviewLayoutMargins="YES" layoutMarginsFollowReadableWidth="YES" editable="NO" translatesAutoresizingMaskIntoConstraints="NO" id="XNN-oc-h9o">
@@ -493,7 +495,7 @@ Last Edited on 2016-02-27</string>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <prototypes>
                             <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" id="zee-h1-k7e">
-                                <rect key="frame" x="0.0" y="92" width="320" height="44"/>
+                                <rect key="frame" x="0.0" y="28" width="320" height="44"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="zee-h1-k7e" id="1Oq-Qq-Rgp">
                                     <frame key="frameInset" width="320" height="43"/>
@@ -525,7 +527,7 @@ Last Edited on 2016-02-27</string>
         <image name="logo" width="446" height="267"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="V9R-fw-aPR"/>
         <segue reference="7fl-rv-o3b"/>
+        <segue reference="oeQ-68-ORB"/>
     </inferredMetricsTieBreakers>
 </document>
