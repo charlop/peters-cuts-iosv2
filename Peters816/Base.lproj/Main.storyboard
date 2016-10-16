@@ -174,17 +174,17 @@
                                 </constraints>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits"/>
+                                <connections>
+                                    <action selector="validateNameWithSender:" destination="dYc-E4-BA1" eventType="editingDidEnd" id="36H-ua-XW7"/>
+                                </connections>
                             </textField>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Please enter your phone number (10 digits):" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="QLg-cA-6ep">
-                                <fontDescription key="fontDescription" type="system" pointSize="10"/>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Please enter your phone number:" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="QLg-cA-6ep">
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Please enter your Email (optional):" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="zY7-zY-umo">
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="25" id="Qac-7B-8uD"/>
-                                </constraints>
-                                <fontDescription key="fontDescription" type="system" pointSize="10"/>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Please enter your email (optional):" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="zY7-zY-umo">
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
@@ -196,7 +196,7 @@
                                 <textInputTraits key="textInputTraits"/>
                             </textField>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Please enter your name:" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="QkE-HD-O7h">
-                                <fontDescription key="fontDescription" type="system" pointSize="10"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
@@ -206,8 +206,11 @@
                                 </constraints>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits"/>
+                                <connections>
+                                    <action selector="validatePhoneWithSender:" destination="dYc-E4-BA1" eventType="editingDidEnd" id="nFH-HI-1Wy"/>
+                                </connections>
                             </textField>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="m0n-gq-rfq">
+                            <button opaque="NO" contentMode="scaleToFill" enabled="NO" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="m0n-gq-rfq">
                                 <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="34"/>
                                 <size key="titleShadowOffset" width="1" height="1"/>
@@ -217,34 +220,51 @@
                                     <segue destination="YLG-Dd-5pg" kind="show" id="TSK-y4-cXQ"/>
                                 </connections>
                             </button>
+                            <label hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Name cannot be blank!" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="x6t-d0-Xce">
+                                <fontDescription key="fontDescription" type="system" pointSize="10"/>
+                                <color key="textColor" red="0.86438733339309692" green="0.12296979874372482" blue="0.098276637494564056" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Phone cannot be blank!" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="fVr-r8-EFf">
+                                <fontDescription key="fontDescription" type="system" pointSize="10"/>
+                                <color key="textColor" red="0.86438733339309692" green="0.12296979874372482" blue="0.098276637494564056" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
                             <constraint firstItem="Ta9-s3-fLJ" firstAttribute="top" secondItem="QkE-HD-O7h" secondAttribute="bottom" constant="5" id="0Vq-Td-21N"/>
-                            <constraint firstItem="QLg-cA-6ep" firstAttribute="top" secondItem="Ta9-s3-fLJ" secondAttribute="bottom" constant="10" id="3Yr-No-Cc9"/>
+                            <constraint firstItem="zY7-zY-umo" firstAttribute="top" secondItem="fVr-r8-EFf" secondAttribute="bottom" constant="10" id="3KT-Qa-k1r"/>
                             <constraint firstItem="Ta9-s3-fLJ" firstAttribute="centerX" secondItem="YyY-IG-ja6" secondAttribute="centerX" id="4FG-h8-sZ5"/>
                             <constraint firstItem="zY7-zY-umo" firstAttribute="centerX" secondItem="YyY-IG-ja6" secondAttribute="centerX" id="4N9-Jd-fr3"/>
+                            <constraint firstItem="QLg-cA-6ep" firstAttribute="top" secondItem="x6t-d0-Xce" secondAttribute="bottom" constant="10" id="GyS-MC-kuf"/>
                             <constraint firstItem="m0n-gq-rfq" firstAttribute="centerX" secondItem="YyY-IG-ja6" secondAttribute="centerX" id="NcX-Xy-7HA"/>
                             <constraint firstItem="m0n-gq-rfq" firstAttribute="top" secondItem="lqd-Kb-TDI" secondAttribute="bottom" constant="20" id="W0q-gH-u4c"/>
+                            <constraint firstItem="x6t-d0-Xce" firstAttribute="centerX" secondItem="YyY-IG-ja6" secondAttribute="centerX" id="X1N-Kf-yVN"/>
+                            <constraint firstItem="fVr-r8-EFf" firstAttribute="centerX" secondItem="YyY-IG-ja6" secondAttribute="centerX" id="c59-G6-QQG"/>
                             <constraint firstItem="gQ0-ie-I2D" firstAttribute="centerX" secondItem="YyY-IG-ja6" secondAttribute="centerX" id="dTY-ac-dxm"/>
                             <constraint firstItem="QkE-HD-O7h" firstAttribute="centerX" secondItem="YyY-IG-ja6" secondAttribute="centerX" id="dlf-H2-Ew5"/>
                             <constraint firstItem="lqd-Kb-TDI" firstAttribute="centerX" secondItem="YyY-IG-ja6" secondAttribute="centerX" id="fHG-ig-fws"/>
-                            <constraint firstItem="zY7-zY-umo" firstAttribute="top" secondItem="gQ0-ie-I2D" secondAttribute="bottom" constant="10" id="fnl-fe-Hy4"/>
                             <constraint firstItem="gQ0-ie-I2D" firstAttribute="top" secondItem="QLg-cA-6ep" secondAttribute="bottom" constant="5" id="gVU-AW-ox0"/>
                             <constraint firstItem="QkE-HD-O7h" firstAttribute="top" secondItem="Pko-jl-QgS" secondAttribute="bottom" constant="8" id="jIO-Q6-rKZ"/>
                             <constraint firstItem="QLg-cA-6ep" firstAttribute="centerX" secondItem="YyY-IG-ja6" secondAttribute="centerX" id="mZa-U8-UQI"/>
+                            <constraint firstItem="x6t-d0-Xce" firstAttribute="top" secondItem="Ta9-s3-fLJ" secondAttribute="bottom" constant="5" id="qdD-sA-1oI"/>
+                            <constraint firstItem="fVr-r8-EFf" firstAttribute="top" secondItem="gQ0-ie-I2D" secondAttribute="bottom" constant="5" id="s7H-oo-QHr"/>
                             <constraint firstItem="lqd-Kb-TDI" firstAttribute="top" secondItem="zY7-zY-umo" secondAttribute="bottom" constant="5" id="uDF-eL-bOJ"/>
                         </constraints>
                     </view>
                     <connections>
                         <outlet property="emailField" destination="lqd-Kb-TDI" id="nOn-9Y-VLN"/>
                         <outlet property="nameField" destination="Ta9-s3-fLJ" id="OkB-6U-GrY"/>
+                        <outlet property="nameInvalidLabel" destination="x6t-d0-Xce" id="zPH-LP-gj4"/>
                         <outlet property="phoneField" destination="gQ0-ie-I2D" id="XYD-hP-LB1"/>
+                        <outlet property="phoneInvalidLabel" destination="fVr-r8-EFf" id="sxM-cW-AXT"/>
+                        <outlet property="saveButton" destination="m0n-gq-rfq" id="V2Y-Ke-gNe"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="xIW-qr-gry" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="2300" y="1015"/>
+            <point key="canvasLocation" x="2298.75" y="1014.0845070422536"/>
         </scene>
         <!--About View Controller-->
         <scene sceneID="gZU-Pr-cV4">
@@ -495,7 +515,7 @@ Last Edited on 2016-02-27</string>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <prototypes>
                             <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" id="zee-h1-k7e">
-                                <rect key="frame" x="0.0" y="28" width="320" height="44"/>
+                                <rect key="frame" x="0.0" y="92" width="320" height="44"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="zee-h1-k7e" id="1Oq-Qq-Rgp">
                                     <frame key="frameInset" width="320" height="43"/>

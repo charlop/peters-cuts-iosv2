@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="11232" systemVersion="15G1004" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+    <entity name="Haircut" parentEntity="User" syncable="YES">
+        <attribute name="cust_id" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="reservation_ind" optional="YES" attributeType="Boolean" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="start_time" optional="YES" attributeType="Date" usesScalarValueType="NO" syncable="YES"/>
+    </entity>
+    <entity name="User" representedClassName=".CoreDAL" syncable="YES" codeGenerationType="class">
+        <attribute name="gid" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="name" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="num_haircuts" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="phone" optional="YES" attributeType="String" syncable="YES"/>
+        <relationship name="cust_info" optional="YES" toMany="YES" minCount="1" maxCount="4" deletionRule="Cascade" ordered="YES" destinationEntity="Haircut" syncable="YES"/>
+    </entity>
+    <elements>
+        <element name="User" positionX="-236" positionY="63" width="128" height="120"/>
+        <element name="Haircut" positionX="-54" positionY="45" width="128" height="90"/>
+    </elements>
+</model>

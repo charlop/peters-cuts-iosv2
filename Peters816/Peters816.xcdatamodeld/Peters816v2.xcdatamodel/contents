@@ -1,17 +1,19 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<model userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="10171" systemVersion="15E65" minimumToolsVersion="Automatic">
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="11232" systemVersion="15G1004" minimumToolsVersion="Xcode 7.3" sourceLanguage="Objective-C" userDefinedModelVersionIdentifier="">
     <entity name="Appointments" syncable="YES">
-        <attribute name="date" attributeType="String" syncable="YES"/>
-        <attribute name="number" attributeType="String" syncable="YES"/>
-        <attribute name="status" attributeType="String" syncable="YES"/>
+        <attribute name="id" attributeType="Integer 16" defaultValueString="-1" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="reservationInd" attributeType="Boolean" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="start_time" attributeType="Date" usesScalarValueType="NO" syncable="YES"/>
     </entity>
-    <entity name="User" representedClassName="User" syncable="YES">
+    <entity name="UserInfo" representedClassName="User" syncable="YES">
         <attribute name="email" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="name" optional="YES" attributeType="String" syncable="YES"/>
-        <attribute name="phone" optional="YES" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
+        <attribute name="num_haircuts" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="phone" optional="YES" attributeType="String" syncable="YES"/>
+        <relationship name="userRel" optional="YES" toMany="YES" minCount="1" maxCount="4" deletionRule="Cascade" ordered="YES" destinationEntity="Appointments" syncable="YES"/>
     </entity>
     <elements>
         <element name="Appointments" positionX="-63" positionY="0" width="128" height="90"/>
-        <element name="User" positionX="-63" positionY="-18" width="128" height="90"/>
+        <element name="UserInfo" positionX="-63" positionY="-18" width="128" height="120"/>
     </elements>
 </model>

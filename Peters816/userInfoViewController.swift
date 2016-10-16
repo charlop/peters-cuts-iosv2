@@ -7,7 +7,13 @@ class userInfoViewController: UIViewController {
     @IBOutlet weak var phoneField: UITextField!
     @IBOutlet weak var emailField: UITextField!
 
-    let userDefaults = NSUserDefaults.standardUserDefaults()
+    @IBOutlet weak var nameInvalidLabel: UILabel!
+    @IBOutlet weak var phoneInvalidLabel: UILabel!
+    @IBOutlet weak var saveButton: UIButton!
+    
+    let userDefaults = User()
+    var nameValid = false
+    var phoneValid = false
     
     //@IBAction func termsOfUse(sender: UIButton) { }
     //@IBAction func privacyPolicy(sender: UIButton) { }
@@ -19,21 +25,57 @@ class userInfoViewController: UIViewController {
         let tap: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(userInfoViewController.dismissKeyboard))
         view.addGestureRecognizer(tap)
         
-        let extname: String? = userDefaults.stringForKey("name")
-        let extphone: String? = userDefaults.stringForKey("number")
-        let extemail: String? = userDefaults.stringForKey("email")
-        if extname != nil {
+        userDefaults.getUserDetails()
+        
+        let extname: String? = userDefaults.name
+        let extphone: String? = userDefaults.phone
+        let extemail: String? = userDefaults.email
+        if(extname != nil && extname != "") {
             nameField.text = extname
+            nameValid=true
         }
-        if extphone != nil {
+        if (extphone != nil && extphone != "") {
             phoneField.text = extphone
+            phoneValid = true
         }
         if extemail != nil {
             emailField.text = extemail
         }
-        
-        NSUserDefaults.standardUserDefaults().synchronize()
+        if(phoneValid && nameValid) {
+            saveButton.enabled=true
+        }
     }
+    
+    // On namefield change
+    @IBAction func validateNameWithSender(sender: UITextField) {
+        if(nameField.text == nil) {
+            nameInvalidLabel.hidden = false
+            saveButton.enabled=false
+            nameValid = false
+        } else {
+            nameValid = true
+            if(nameValid && phoneValid) {
+                saveButton.enabled=true
+            }
+            nameInvalidLabel.hidden = true
+        }
+    }
+    
+    @IBAction func validatePhoneWithSender(sender: UITextField) {
+        if(phoneField.text == nil) {
+            phoneInvalidLabel.hidden = false
+            saveButton.enabled=false
+            phoneValid = false
+        } else {
+            phoneValid = true
+            if(nameValid && phoneValid) {
+                saveButton.enabled=true
+            }
+            phoneInvalidLabel.hidden = true
+        }
+        
+    }
+    
     func dismissKeyboard() {
         //Causes the view (or one of its embedded text fields) to resign the first responder status.
         view.endEditing(true)
@@ -44,14 +86,15 @@ class userInfoViewController: UIViewController {
     }
     
     @IBAction func saveButton(sender: UIButton) {
-        userDefaults.setObject(nameField.text, forKey: "name")
-        userDefaults.setObject(phoneField.text, forKey: "number")
-        userDefaults.setObject(emailField.text, forKey: "email")
-        
-        // Wiping out only invalid idArrays
-        if(userDefaults.arrayForKey("dailyIdArray")?.count != 4) {
-            userDefaults.setObject([-1,-1,-1,-1], forKey: "dailyIdArray")
+        if let name = nameField.text {
+            if let phone = phoneField.text {
+                userDefaults.saveUserDetails(name, inPhone: phone, inEmail: emailField.text)
+                return
+            } else {
+                phoneInvalidLabel.hidden = false
+            }
+        } else {
+            nameInvalidLabel.hidden = false
         }
-        userDefaults.setObject(0, forKey: "numRes");
     }
 }

@@ -7,14 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		062E298C1C71267000D94DA9 /* jsonUserData.json in Resources */ = {isa = PBXBuildFile; fileRef = 062E298B1C71266F00D94DA9 /* jsonUserData.json */; };
 		0645282D1C80EF8D008479EA /* aboutViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0645282C1C80EF8D008479EA /* aboutViewController.swift */; };
 		0645282F1C80F2F2008479EA /* termsOfUseViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0645282E1C80F2F2008479EA /* termsOfUseViewController.swift */; };
 		064528311C80F32F008479EA /* privacyPolicyViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 064528301C80F32F008479EA /* privacyPolicyViewController.swift */; };
 		068176F01C6B908B00732B29 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 068176EF1C6B908B00732B29 /* AppDelegate.swift */; };
 		068176F21C6B908B00732B29 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 068176F11C6B908B00732B29 /* ViewController.swift */; };
 		068176F51C6B908B00732B29 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 068176F31C6B908B00732B29 /* Main.storyboard */; };
-		068176F81C6B908B00732B29 /* Peters816.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 068176F61C6B908B00732B29 /* Peters816.xcdatamodeld */; };
 		068176FA1C6B908B00732B29 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 068176F91C6B908B00732B29 /* Assets.xcassets */; };
 		068176FD1C6B908B00732B29 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 068176FB1C6B908B00732B29 /* LaunchScreen.storyboard */; };
 		068177081C6B908C00732B29 /* Peters816Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 068177071C6B908C00732B29 /* Peters816Tests.swift */; };
@@ -24,9 +22,9 @@
 		06E03E0C1C82733700D6D6D8 /* appBanner.png in Resources */ = {isa = PBXBuildFile; fileRef = 06E03E0B1C82733700D6D6D8 /* appBanner.png */; };
 		06F03BBE1C71259A0012C790 /* SwiftyJSON.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 06F03BBD1C71259A0012C790 /* SwiftyJSON.framework */; };
 		1A939095C089698B5CC5AB25 /* Pods_Peters816.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 321F95E5F5F128EC91E14F9F /* Pods_Peters816.framework */; };
+		435308A41DB067FB00C56608 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0681772C1C6C295D00732B29 /* User.swift */; };
+		435308A51DB067FC00C56608 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0681772C1C6C295D00732B29 /* User.swift */; };
 		A6F207451CB83BF8000C1BA5 /* SwiftyJSON.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6F207441CB83BF8000C1BA5 /* SwiftyJSON.swift */; };
-		A6F207461CB83F5B000C1BA5 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 068176EF1C6B908B00732B29 /* AppDelegate.swift */; };
-		A6F207471CB83F5C000C1BA5 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 068176EF1C6B908B00732B29 /* AppDelegate.swift */; };
 		A6F207481CB83F69000C1BA5 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 068176F11C6B908B00732B29 /* ViewController.swift */; };
 		A6F207491CB83F69000C1BA5 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 068176F11C6B908B00732B29 /* ViewController.swift */; };
 /* End PBXBuildFile section */
@@ -49,7 +47,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		062E298B1C71266F00D94DA9 /* jsonUserData.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = jsonUserData.json; sourceTree = "<group>"; };
 		0645282C1C80EF8D008479EA /* aboutViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = aboutViewController.swift; sourceTree = "<group>"; };
 		0645282E1C80F2F2008479EA /* termsOfUseViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = termsOfUseViewController.swift; sourceTree = "<group>"; };
 		064528301C80F32F008479EA /* privacyPolicyViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = privacyPolicyViewController.swift; sourceTree = "<group>"; };
@@ -57,7 +54,6 @@
 		068176EF1C6B908B00732B29 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		068176F11C6B908B00732B29 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		068176F41C6B908B00732B29 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
-		068176F71C6B908B00732B29 /* Peters816.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Peters816.xcdatamodel; sourceTree = "<group>"; };
 		068176F91C6B908B00732B29 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		068176FC1C6B908B00732B29 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		068176FE1C6B908B00732B29 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -68,8 +64,7 @@
 		068177121C6B908C00732B29 /* Peters816UITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Peters816UITests.swift; sourceTree = "<group>"; };
 		068177141C6B908C00732B29 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		068177201C6C274200732B29 /* Peters816-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Peters816-Bridging-Header.h"; sourceTree = "<group>"; };
-		0681772C1C6C295D00732B29 /* User.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
-		06847FE71CC0A14D009F2B7A /* Peters816v2.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Peters816v2.xcdatamodel; sourceTree = "<group>"; };
+		0681772C1C6C295D00732B29 /* User.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = User.swift; path = ../User.swift; sourceTree = "<group>"; };
 		06BBF3E31C70F44F008B2452 /* userInfoViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = userInfoViewController.swift; sourceTree = "<group>"; };
 		06E03E0B1C82733700D6D6D8 /* appBanner.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = appBanner.png; path = Assets.xcassets/appBanner.imageset/appBanner.png; sourceTree = "<group>"; };
 		06F03BBD1C71259A0012C790 /* SwiftyJSON.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftyJSON.framework; path = "Pods/../build/Debug-iphoneos/SwiftyJSON.framework"; sourceTree = "<group>"; };
@@ -109,7 +104,6 @@
 		068176E31C6B908B00732B29 = {
 			isa = PBXGroup;
 			children = (
-				0681772C1C6C295D00732B29 /* User.swift */,
 				068176EE1C6B908B00732B29 /* Peters816 */,
 				068177061C6B908C00732B29 /* Peters816Tests */,
 				068177111C6B908C00732B29 /* Peters816UITests */,
@@ -134,8 +128,8 @@
 			isa = PBXGroup;
 			children = (
 				068176EF1C6B908B00732B29 /* AppDelegate.swift */,
-				062E298B1C71266F00D94DA9 /* jsonUserData.json */,
 				068176F11C6B908B00732B29 /* ViewController.swift */,
+				0681772C1C6C295D00732B29 /* User.swift */,
 				0645282E1C80F2F2008479EA /* termsOfUseViewController.swift */,
 				064528301C80F32F008479EA /* privacyPolicyViewController.swift */,
 				0645282C1C80EF8D008479EA /* aboutViewController.swift */,
@@ -146,7 +140,6 @@
 				06E03E0B1C82733700D6D6D8 /* appBanner.png */,
 				068176FB1C6B908B00732B29 /* LaunchScreen.storyboard */,
 				068176FE1C6B908B00732B29 /* Info.plist */,
-				068176F61C6B908B00732B29 /* Peters816.xcdatamodeld */,
 			);
 			path = Peters816;
 			sourceTree = "<group>";
@@ -300,7 +293,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				062E298C1C71267000D94DA9 /* jsonUserData.json in Resources */,
 				068176FD1C6B908B00732B29 /* LaunchScreen.storyboard in Resources */,
 				06E03E0C1C82733700D6D6D8 /* appBanner.png in Resources */,
 				068176FA1C6B908B00732B29 /* Assets.xcassets in Resources */,
@@ -380,7 +372,6 @@
 				064528311C80F32F008479EA /* privacyPolicyViewController.swift in Sources */,
 				06BBF3E41C70F44F008B2452 /* userInfoViewController.swift in Sources */,
 				068176F21C6B908B00732B29 /* ViewController.swift in Sources */,
-				068176F81C6B908B00732B29 /* Peters816.xcdatamodeld in Sources */,
 				0645282D1C80EF8D008479EA /* aboutViewController.swift in Sources */,
 				0645282F1C80F2F2008479EA /* termsOfUseViewController.swift in Sources */,
 				A6F207451CB83BF8000C1BA5 /* SwiftyJSON.swift in Sources */,
@@ -394,8 +385,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				A6F207481CB83F69000C1BA5 /* ViewController.swift in Sources */,
-				A6F207461CB83F5B000C1BA5 /* AppDelegate.swift in Sources */,
 				068177081C6B908C00732B29 /* Peters816Tests.swift in Sources */,
+				435308A41DB067FB00C56608 /* User.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -404,8 +395,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				A6F207491CB83F69000C1BA5 /* ViewController.swift in Sources */,
-				A6F207471CB83F5C000C1BA5 /* AppDelegate.swift in Sources */,
 				068177131C6B908C00732B29 /* Peters816UITests.swift in Sources */,
+				435308A51DB067FC00C56608 /* User.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -669,20 +660,6 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
-
-/* Begin XCVersionGroup section */
-		068176F61C6B908B00732B29 /* Peters816.xcdatamodeld */ = {
-			isa = XCVersionGroup;
-			children = (
-				06847FE71CC0A14D009F2B7A /* Peters816v2.xcdatamodel */,
-				068176F71C6B908B00732B29 /* Peters816.xcdatamodel */,
-			);
-			currentVersion = 06847FE71CC0A14D009F2B7A /* Peters816v2.xcdatamodel */;
-			path = Peters816.xcdatamodeld;
-			sourceTree = "<group>";
-			versionGroupType = wrapper.xcdatamodel;
-		};
-/* End XCVersionGroup section */
 	};
 	rootObject = 068176E41C6B908B00732B29 /* Project object */;
 }
