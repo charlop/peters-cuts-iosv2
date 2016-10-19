@@ -20,7 +20,7 @@ class User {
     
     func getUserDetails() {
             name = userDefaults.stringForKey("name")
-            phone = userDefaults.stringForKey("number")
+            phone = userDefaults.stringForKey("phone")
             email = userDefaults.stringForKey("email")
             expireAfter = userDefaults.integerForKey("expiryDate")
         
@@ -37,6 +37,7 @@ class User {
         } else {
             // No recent appointments, clear out the local data
             userDefaults.removeObjectForKey("expiryDate")
+            userDefaults.synchronize()
         }
     }
     
@@ -44,21 +45,26 @@ class User {
     func addNumber(newIds :NSDictionary) {
         // Clear out anything stored locally
         userDefaults.removeObjectForKey("cust_id_dict")
-        
         if let tmpDict :[Int: Double] = (newIds as! [Int : Double]) {
-            let udNSDict = [String: NSDate]() as NSDictionary
+            var tmpUdNSDict : [String: NSDate] = Dictionary()
+            //let udNSDict = [String: AnyObject]() as NSDictionary
             for(key,value) in tmpDict {
                 // This is the appointment start time adjusting for hour shift
                 let date = NSDate(timeIntervalSinceNow: value)
                 cust_ids.updateValue(date, forKey: key)
-                udNSDict.setValue(date, forKey: String(key))
+                tmpUdNSDict.updateValue(date, forKey: String(key))
+                //udNSDict.setValue(date, forKey: String(key))
             }
             idsValidBool = true
             let date = NSDate()
             let calendar = NSCalendar.currentCalendar()
             expireAfter = calendar.components([.Day], fromDate: date).day
             userDefaults.setObject(expireAfter, forKey: "expiryDate")
+            
+            let udNSDict = tmpUdNSDict as NSDictionary
             userDefaults.setObject(udNSDict, forKey: "cust_id_dict")
+            userDefaults.synchronize()
+
         }
     }
     // TODOs
@@ -71,6 +77,8 @@ class User {
         self.expireAfter = 0
         userDefaults.setObject(nil, forKey: "cust_id_dict")
         userDefaults.setObject(0, forKey: "expiryDate")
+        userDefaults.synchronize()
+
         idsValidBool = false
     }
     func getEta() -> (Int, Int) {
@@ -112,11 +120,12 @@ class User {
     
     func saveUserDetails(inName: String, inPhone: String, inEmail: String?=nil) {
         removeAllNumbers()
-        name = inName
-        phone = inPhone
-        email = inEmail
-        userDefaults.setObject(name, forKey: "name")
-        userDefaults.setObject(phone, forKey: "phone")
-        userDefaults.setObject(email, forKey: "email")
+        self.name = inName
+        self.phone = inPhone
+        self.email = inEmail
+        self.userDefaults.setObject(inName, forKey: "name")
+        self.userDefaults.setObject(inPhone, forKey: "phone")
+        self.userDefaults.setObject(inEmail, forKey: "email")
+        self.userDefaults.synchronize()
     }
 }

@@ -22,6 +22,7 @@
 		06E03E0C1C82733700D6D6D8 /* appBanner.png in Resources */ = {isa = PBXBuildFile; fileRef = 06E03E0B1C82733700D6D6D8 /* appBanner.png */; };
 		06F03BBE1C71259A0012C790 /* SwiftyJSON.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 06F03BBD1C71259A0012C790 /* SwiftyJSON.framework */; };
 		1A939095C089698B5CC5AB25 /* Pods_Peters816.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 321F95E5F5F128EC91E14F9F /* Pods_Peters816.framework */; };
+		4312CA121DB6FCCA00972F38 /* ReservationViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4312CA111DB6FCCA00972F38 /* ReservationViewController.swift */; };
 		435308A41DB067FB00C56608 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0681772C1C6C295D00732B29 /* User.swift */; };
 		435308A51DB067FC00C56608 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0681772C1C6C295D00732B29 /* User.swift */; };
 		A6F207451CB83BF8000C1BA5 /* SwiftyJSON.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6F207441CB83BF8000C1BA5 /* SwiftyJSON.swift */; };
@@ -70,6 +71,7 @@
 		06F03BBD1C71259A0012C790 /* SwiftyJSON.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftyJSON.framework; path = "Pods/../build/Debug-iphoneos/SwiftyJSON.framework"; sourceTree = "<group>"; };
 		321F95E5F5F128EC91E14F9F /* Pods_Peters816.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Peters816.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		3B043BD3EAD3119B196CB1E6 /* Pods-Peters816.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Peters816.release.xcconfig"; path = "Pods/Target Support Files/Pods-Peters816/Pods-Peters816.release.xcconfig"; sourceTree = "<group>"; };
+		4312CA111DB6FCCA00972F38 /* ReservationViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReservationViewController.swift; sourceTree = "<group>"; };
 		4AFC8A50D26D5152225E485A /* Pods-Peters816.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Peters816.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Peters816/Pods-Peters816.debug.xcconfig"; sourceTree = "<group>"; };
 		A6F207441CB83BF8000C1BA5 /* SwiftyJSON.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SwiftyJSON.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -140,6 +142,7 @@
 				06E03E0B1C82733700D6D6D8 /* appBanner.png */,
 				068176FB1C6B908B00732B29 /* LaunchScreen.storyboard */,
 				068176FE1C6B908B00732B29 /* Info.plist */,
+				4312CA111DB6FCCA00972F38 /* ReservationViewController.swift */,
 			);
 			path = Peters816;
 			sourceTree = "<group>";
@@ -371,6 +374,7 @@
 			files = (
 				064528311C80F32F008479EA /* privacyPolicyViewController.swift in Sources */,
 				06BBF3E41C70F44F008B2452 /* userInfoViewController.swift in Sources */,
+				4312CA121DB6FCCA00972F38 /* ReservationViewController.swift in Sources */,
 				068176F21C6B908B00732B29 /* ViewController.swift in Sources */,
 				0645282D1C80EF8D008479EA /* aboutViewController.swift in Sources */,
 				0645282F1C80F2F2008479EA /* termsOfUseViewController.swift in Sources */,

@@ -47,8 +47,9 @@ class userInfoViewController: UIViewController {
     }
     
     // On namefield change
-    @IBAction func validateNameWithSender(sender: UITextField) {
-        if(nameField.text == nil) {
+    @IBAction func validateNameWithSenderWithSender(sender: AnyObject) {
+        // TODO: maybe name must have criteria?
+        if(nameField.text == nil || nameField.text == "") {
             nameInvalidLabel.hidden = false
             saveButton.enabled=false
             nameValid = false
@@ -61,8 +62,8 @@ class userInfoViewController: UIViewController {
         }
     }
     
-    @IBAction func validatePhoneWithSender(sender: UITextField) {
-        if(phoneField.text == nil) {
+    @IBAction func validatePhoneWithSenderWithSender(sender: AnyObject) {
+        if(phoneField.text == nil || phoneField.text == "") {
             phoneInvalidLabel.hidden = false
             saveButton.enabled=false
             phoneValid = false
@@ -85,11 +86,10 @@ class userInfoViewController: UIViewController {
         // Dispose of any resources that can be recreated.
     }
     
-    @IBAction func saveButton(sender: UIButton) {
+    @IBAction func saveButtonAction(sender: AnyObject) {
         if let name = nameField.text {
             if let phone = phoneField.text {
                 userDefaults.saveUserDetails(name, inPhone: phone, inEmail: emailField.text)
-                return
             } else {
                 phoneInvalidLabel.hidden = false
             }
