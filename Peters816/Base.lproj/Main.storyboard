@@ -515,8 +515,8 @@ Last Edited on 2016-02-27</string>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <prototypes>
-                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" id="zee-h1-k7e">
-                                <rect key="frame" x="0.0" y="92" width="320" height="44"/>
+                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="reservationCell" id="zee-h1-k7e">
+                                <rect key="frame" x="0.0" y="28" width="320" height="44"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="zee-h1-k7e" id="1Oq-Qq-Rgp">
                                     <frame key="frameInset" width="320" height="43"/>
@@ -534,8 +534,7 @@ Last Edited on 2016-02-27</string>
                             </tableViewCell>
                         </prototypes>
                         <connections>
-                            <outlet property="dataSource" destination="FUC-De-t0o" id="53d-eL-Dbb"/>
-                            <outlet property="delegate" destination="FUC-De-t0o" id="m0e-TE-he8"/>
+                            <outlet property="dataSource" destination="FUC-De-t0o" id="Ndo-nh-zOc"/>
                         </connections>
                     </tableView>
                 </tableViewController>

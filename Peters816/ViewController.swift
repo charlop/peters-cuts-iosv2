@@ -18,12 +18,9 @@ class ViewController: UIViewController {
     @IBOutlet weak var numHaircutsStatic: UILabel!
     @IBOutlet weak var greetingLabel: UILabel!
     
-    var GET_ETA_REQUEST:NSMutableURLRequest!
-    var GET_ETA_SESSION:NSURLSession!
-    var GET_NUMBER_POST_REQUEST:NSMutableURLRequest!
-    var GET_NUMBER_POST_SESSION:NSURLSession!
-    var APP_REQUEST_URL:NSURL = NSURL(string: "http://peterscuts.com/lib/app_request2.php")!
-    
+    let postController = PostController()
+    var initPerformed = false
+
     let userDefaults = User()
     var errFlag = 0
     
@@ -42,51 +39,7 @@ class ViewController: UIViewController {
     let loadingInitGreeting:String = " Loading the latest schedule..."
     let hasLocalNumberGreeting:String = "Loading your latest appointment info"
     let generalGreeting:String = "How's it going"
-    
-    // this value will change based on the post request needed (i.e. etaName / etaPhone)
-    // todo -- this is ugly, move the possible values into an array and access them that way...
-    var getEtaPostParams = "get_next_num=1" // number not necessary, only post key needed
-    var postHasNumber = false
-    // todo -- seriously, this is disgusting!!
-    func setEtaPostParams(nameParam:String?=nil, phoneParam:String?=nil) {
-        if let setName = nameParam {
-            if let setPhone = phoneParam {
-                getEtaPostParams = "etaName=\(setName)&etaPhone=\(setPhone)"
-                postHasNumber=true
-                return
-            }
-        }
-        getEtaPostParams = "get_next_num=1"
-        postHasNumber = false
-    }
-    func getEtaPostRequest() -> NSMutableURLRequest {
-        if(GET_ETA_REQUEST == nil) {
-            GET_ETA_REQUEST = NSMutableURLRequest(URL: APP_REQUEST_URL)
-                GET_ETA_REQUEST.HTTPMethod = "POST"
-        }
-        return GET_ETA_REQUEST
-    }
-    func getEtaPostSession() -> NSURLSession {
-        if(GET_ETA_SESSION == nil) {
-            GET_ETA_SESSION = NSURLSession.sharedSession()
-        }
-        return GET_ETA_SESSION
-    }
-    func getNumberPostRequest() -> NSMutableURLRequest {
-            if(GET_NUMBER_POST_REQUEST == nil) {
-                GET_NUMBER_POST_REQUEST = NSMutableURLRequest(URL: APP_REQUEST_URL)
-                    GET_NUMBER_POST_REQUEST.HTTPMethod = "POST"
-            }
-            return GET_NUMBER_POST_REQUEST
-        }
-    func getNumberPostSession() -> NSURLSession {
-            if(GET_NUMBER_POST_SESSION == nil) {
-                GET_NUMBER_POST_SESSION = NSURLSession.sharedSession()
-            }
-            return GET_NUMBER_POST_SESSION
-    }
-//TODO::: CHECK FOR DATA CONNECTION; ALERT IF FALSE
-    
+    let sign_up_label:String = "Enter your information before you can reserve a number"
     
     // notification statuses
     var firstNotificationStatus:Bool = false
@@ -122,27 +75,84 @@ class ViewController: UIViewController {
         UIApplication.sharedApplication().scheduleLocalNotification(localNotification)
     }
     
+    // Handle errors here whenever possible
+    func handleError(errorId : Int, errorAction : String) {
+        if(errFlag > 2) {
+            self.sendNotification("Fail", messageText: CONSTS.GET_ERROR_TEXT(errorId))
+            errFlag = 0
+        }
+        errFlag += 1
+        return
+        
+        // THOUGHT STARTERS
+            // THIS NEEDS TO BE AN INTEGER RESPONSE PERHAPS??
+            // TODO: error hadnling
+            //self.sendNotification("Fail...", messageText: getNumResponseError as! Int)
+            // TODO: set the wait time or any session parameters here??
+            //self.sendNotification("Hey!", messageText: "")
+            //userDefaults.removeAllNumbers()
+        //return
+    }
+    
+    
     // Returns the wait time
     func getWaitTime() {
         // Check if user has any existing appointments
+        var etaResponse = postController.getEta()
+        if let etaResponseError = etaResponse["error"] {
+            let (errorFatalBool, errorAction) = CONSTS.GET_ERROR_ACTION(etaResponseError as! Int)
+            if(errorFatalBool) { // i.e. error codes -1,2,9
+                self.handleError(etaResponseError as! Int, errorAction: errorAction)
+            } else {
+                // Non-fatal errors possible: 34,35,36
+                dispatch_async(dispatch_get_main_queue(), { self.greetingLabel.text = CONSTS.GET_ERROR_TEXT(etaResponseError as! Int) })
+                self.hideGetNumber(false)
+            }
+        }
         
+        // User has an existing number
+        if(initPerformed == false) {
+            if let unwrappedName = userDefaults.name {
+                if let hasNumUnwrapped = etaResponse["hasNumBool"] {
+                    var greetingLabelSelected = ""
+                    let hasNumBool = hasNumUnwrapped as! Bool
+                    if(hasNumBool) {
+                        greetingLabelSelected = self.haircut_upcoming_label
+                    } else {
+                        greetingLabelSelected = self.existingUserGreeting
+                    }
+                    dispatch_async(dispatch_get_main_queue(), { self.greetingLabel.text = "Hey \(unwrappedName), \(greetingLabelSelected)" })
+                    self.hideGetNumber(hasNumBool)
+                }
+            } else {
+                dispatch_async(dispatch_get_main_queue(), { self.greetingLabel.text = "Hey, \(self.sign_up_label)" })
+            }
+        }
+        
+        // TODO: Not showing current # anywhere though. Is it needed really?
+
+        var etaMinsVal = etaResponse["etaMinsArray"] as! [Int: Double]
+        let etaHrs = Int(etaMinsVal[0]! / 60)
+        let etaMins = Int(etaMinsVal[0]! % 60)
+        if(etaHrs == 0) {
+            dispatch_async(dispatch_get_main_queue(), { self.waitTime.text = String(etaMins) + " minutes" })
+        } else {
+            dispatch_async(dispatch_get_main_queue(), { self.waitTime.text = String (etaHrs) + " hours " + String(etaMins) + " minutes" })
+        }
+        initPerformed = true
+
+        
+// TODO: this can be removed, just make sure any errors are addressed with the "error" handler
+        /*
         getEtaPostRequest().HTTPBody = getEtaPostParams.dataUsingEncoding(NSUTF8StringEncoding)
         let task1 = getEtaPostSession().dataTaskWithRequest(getEtaPostRequest()){ data,response,error in
-            if error != nil {
-                if(self.errFlag > 1) {
-                    dispatch_async(dispatch_get_main_queue(), { self.greetingLabel.text = self.serverErrorGreeting })
-                    self.errFlag = 0
-                    return
-                }
-                self.errFlag += 1
-            }
+
             do {
                 let responseJSON = try NSJSONSerialization.JSONObjectWithData(data!, options: []  ) as! [[String: AnyObject]]
                 
                 let curEtaMins = responseJSON[0]["etaMins"] as! Int
                 
-                // TODO: Not showing current # anywhere though. Is it needed really?
-                
+         
                 if(curEtaMins <= 0) { // Store is closed or invalid mySQL response
                     // TODO this should still return something useful for the user...
                     if(self.userDefaults.idsValidBool) {
@@ -196,18 +206,22 @@ class ViewController: UIViewController {
             }
         }// end of task1
         task1.resume()
+ */
     }
 
     // Check if user has an appointment to decide which view to present
     func checkForExistingAppointment(inName:String?=nil) {
-        var uName = ""
         if let savedName = inName {
             self.greetingLabel.text = "Hey \(savedName), \(self.existingUserGreeting) \(self.loadingInitGreeting)"
-            uName = savedName
+            if let savedPhone = userDefaults.phone {
+                postController.setEtaPostParam(savedName, phoneParam: savedPhone)
+            } else {
+                postController.setEtaPostParam()
+            }
             if(userDefaults.idsValidBool) { // User has at least 1 appointment
                 let etaLocal :(Int, Int) = userDefaults.getEta()
 
-                // dispatch async might not be needed??
+                // TODO dispatch async might not be needed??
                 dispatch_async(dispatch_get_main_queue(),
                 {
                     if (etaLocal.0 == 0) {
@@ -221,71 +235,16 @@ class ViewController: UIViewController {
                 })
             }
             // pass in the name and phone to see if appointments exist
-            self.setEtaPostParams(userDefaults.name, phoneParam: userDefaults.phone)
         } else {
-            self.greetingLabel.text = noInfoGreeting + loadingInitGreeting
             sendNotification("Hey!", messageText: self.signUpText)
+            postController.setEtaPostParam()
         }
         
-        getEtaPostRequest().HTTPBody = self.getEtaPostParams.dataUsingEncoding(NSUTF8StringEncoding)
-        
-        let task = getEtaPostSession().dataTaskWithRequest(getEtaPostRequest()){ data,response,error in
-            if error != nil{
-                dispatch_async(dispatch_get_main_queue(), { self.sendNotification("Fail", messageText: self.serverErrorGreeting) })
-                return
-            }
-            do {
-                let responseJSON = try NSJSONSerialization.JSONObjectWithData(data!, options: []  ) as! [[String: AnyObject]]
+        self.getWaitTime()
 
-                let etaMinsResponse: Int = responseJSON[0]["etaMins"] as! Int
-  
-                if(etaMinsResponse > 0) {
-                    let hasNumInd :Int = responseJSON[0]["hasNum"] as! Int
-                    
-                    if(hasNumInd > 0) { // user already has a number
-                        self.hideGetNumber(true)
-                        var custIdArray = [Int: Double]()
-                        
-                        // Update the local IDs
-                        for i in 1...responseJSON.count {
-                            let etaDouble = responseJSON[i-1]["etaMins"] as! Double
-                            custIdArray.updateValue(etaDouble, forKey: responseJSON[i-1]["id"] as! Int)
-                        }
-                        self.userDefaults.addNumber(custIdArray)
-                        dispatch_async(dispatch_get_main_queue(), { self.greetingLabel.text = "Hey \(uName), \(self.haircut_upcoming_label)" })
-                    } else {
-                        // TODO: user does not have a number
-                        self.hideGetNumber(false)
-                        self.userDefaults.removeAllNumbers()
-                        self.setEtaPostParams() // make sure other functions don't think user has valid number
-
-                        dispatch_async(dispatch_get_main_queue(), { self.greetingLabel.text = "Hey \(uName), \(self.existingUserGreeting)" })
-                    }
-                    let etaHrs: Int = Int(etaMinsResponse/60);
-                    let etaMins: Int = etaMinsResponse % 60;
-                    if(etaHrs == 0) {
-                        dispatch_async(dispatch_get_main_queue(), { self.waitTime.text = String(etaMins) + " minutes" })
-                    } else {
-                        dispatch_async(dispatch_get_main_queue(), { self.waitTime.text = String (etaHrs) + " hours " + String(etaMins) + " minutes" })
-                    }
-                } else { // no rows returned
-                    self.hideGetNumber(false)
-                    self.userDefaults.removeAllNumbers()
-                    
-                    // TODO: other messages need to be set here!!
-                    // TODO: below line will wrap 'message' in optional()
-                        if let unwrappedGreetingLabel = responseJSON[0]["message"] {
-                            dispatch_async(dispatch_get_main_queue(), { self.greetingLabel.text =  String(unwrappedGreetingLabel) })
-                        } else {
-                            if(self.errFlag > 1) {
-                                self.sendNotification("Ooh...", messageText: self.serverErrorGreeting)
-                                self.hideGetNumber(false)
-                                self.errFlag = 0
-                            } else {
-                                self.errFlag += 1
-                            }
-                        }
-                }
+ 
+ 
+ 
 
                 // TODO: figure out how to handle notifications. I don't think this is the best way to track whether a notification has been set
                 // This should only go in the first IF block
@@ -305,17 +264,7 @@ class ViewController: UIViewController {
                         self.presentViewController(alertController, animated: true, completion: nil)
                     }) // end of dispatch
                 }*/
-            } catch {
-                if(self.errFlag > 1) {
-                    self.sendNotification("Ooh...", messageText: self.serverErrorGreeting)
-                    self.hideGetNumber(false)
-                    self.errFlag = 0
-                } else {
-                    self.errFlag += 1
-                }
-             }
-        }
-        task.resume()
+
     }
     
     func hideGetNumber(hideGetNum: Bool) {
@@ -351,7 +300,7 @@ class ViewController: UIViewController {
                         let OKAction = UIAlertAction(title: "OK", style: .Default) { (action) in
                             if let unrwappedAltAction = alternateAction {
                                 if(unrwappedAltAction == "Cancel") {
-                                    self.cancelAppointmentReally()
+                                    self.processCancellation()
                                 }
                             }
                         }
@@ -369,11 +318,16 @@ class ViewController: UIViewController {
     @IBAction func getNumberWithSender(sender: UIButton) {
         // User info does not exist
         var userName = ""
-        var phone = ""
+        var userPhone = ""
+        var email:String = ""
+
         if let unwrappedName = self.userDefaults.name {
             if let unwrappedPhone = self.userDefaults.phone {
+                if (userDefaults.email != nil){
+                    email = "&user_email=" + userDefaults.email!
+                }
                 userName = unwrappedName
-                phone = unwrappedPhone
+                userPhone = unwrappedPhone
             } else {
                 self.sendNotification("Not so fast...", messageText: self.signUpText)
                 return
@@ -383,70 +337,62 @@ class ViewController: UIViewController {
             return
         }
         
-        // First get the stepper value from label, default 1
-        var stepperCount:Int=1
+        // Get the stepper value from label, default 1
+        var stepperCount:Int = 1
         if(Int(stepperLabel.text!) > 0) {
-            stepperCount=Int(stepperLabel.text!)!
+            stepperCount = Int(stepperLabel.text!)!
         }
-        var email:String = ""
-        if (userDefaults.email != nil){
-            email = "&user_email=" + userDefaults.email!
+        
+        let getNumResponse = postController.getNumber(userName, inPhone: userPhone, numRes: stepperCount, inEmailParm: email)
+
+        if let getNumResponseError = getNumResponse["error"] {
+            // Possible values: 1,2,7,9
+            let (errorFatalBool, errorAction) = CONSTS.GET_ERROR_ACTION(getNumResponseError as! Int)
+            if(errorFatalBool) {
+                self.handleError(getNumResponseError as! Int, errorAction: errorAction)
+                return
+            } else {
+                // Non-fatal errors possible: 7
+                if(errorAction == "DUPLICATE") {
+                    self.hideGetNumber(true)
+                    self.initPerformed = false // re-initialize local IDs
+                    dispatch_async(dispatch_get_main_queue(), { self.greetingLabel.text = CONSTS.GET_ERROR_TEXT(getNumResponseError as! Int) })
+                } else {
+                    self.handleError(getNumResponseError as! Int, errorAction: errorAction)
+                    return // treat as fatal
+                }
+            }
+        }
+        
+        // Successfully acquired numbers
+        // Long term TODO: this can track all appointments with slight modification. One day...
+        let getNumResponseArray = getNumResponse["getNumArray"] as! [Int: Double]
+        userDefaults.addNumber(getNumResponseArray)
+        
+        var etaHrsMinsText = ""
+        if let firstEtaObj = getNumResponseArray.first {
+            let firstEtaMins = firstEtaObj.1
+            if(firstEtaMins >= 60) {
+                etaHrsMinsText = String(Int(firstEtaMins / 60)) + " hours "
+            }
+            etaHrsMinsText += String(Int(firstEtaMins % 60)) + " minutes"
         }
 
-        var postParams =  "user_name=\(userName)&user_phone=\(phone)\(email)"
+        let alertText = "Your next haircut is in \(etaHrsMinsText)"
+        dispatch_async(dispatch_get_main_queue(), { self.greetingLabel.text = "\(userName), \(alertText)" })
+
+        var notificationText = "Nice! Your haircut is in "
         if(stepperCount > 1) {
-            postParams =  "user_name=\(userName)&user_phone=\(phone)\(email)&numRes=\(stepperCount)"
+            notificationText = "You have reserved \(String(stepperCount)) haircuts, first one is in "
         }
-        getNumberPostRequest().HTTPBody = postParams.dataUsingEncoding(NSUTF8StringEncoding)
+        
+        notificationText += etaHrsMinsText
+        self.sendNotification("Your Appointment", messageText: notificationText)
 
-        let task = getNumberPostSession().dataTaskWithRequest(getNumberPostRequest()){ data,response,error in
-                if error != nil {
-                    self.sendNotification("Fail...", messageText: self.serverErrorGreeting)
-                    return
-                }
-                do {
-                    let responseJSON = try NSJSONSerialization.JSONObjectWithData(data!, options: []) as! [[String: AnyObject]]
-
-                    // First make sure an expected response was received
-                    let id1Num: Int = responseJSON[0]["id1"] as! Int
-                    if(id1Num < 1) { // Error was received...
-                        // TODO: set the wait time or any session parameters here??
-                        let messageReturned: String = responseJSON[0]["message"] as! String
-                        self.sendNotification("Hey!", messageText: messageReturned)
-                        return
-                    }
-                    self.setEtaPostParams(userName as String, phoneParam: phone as String)
-                    var userIdsArray = [Int: Double]()
-                    for i in 1...responseJSON.count {
-                        let curId:String = "id" + String(i)
-                        let startTm:String = "start_time" + String(i)
-                        userIdsArray.updateValue(responseJSON[i-1][startTm] as! Double, forKey: responseJSON[i-1][curId] as! Int)
-                    }
-                    self.userDefaults.addNumber(userIdsArray)
-                    // Long term TODO: this can track all appointments with slight modification. One day...
-                    let firstStartTime : Int = responseJSON[0]["start_time1"] as! Int
-                    var alertText = "Your haircut is in " + String(firstStartTime) + " minutes"
-                    if(stepperCount > 1) {
-                        alertText = "You have scheduled " + String(stepperCount) + " haircuts, first one is at " + String(firstStartTime)
-                        dispatch_async(dispatch_get_main_queue(), { self.greetingLabel.text = "\(userName), \(alertText)" })
-                    }
-                    alertText += " Please check back in the app for updated waiting time."
-                    dispatch_async(dispatch_get_main_queue(), {
-                        self.greetingLabel.text = self.haircut_upcoming_label
-                    })
-                    self.sendNotification("Your Appointment", messageText: alertText)
-
-                    // TODO: does anything else need to be added to defaultstorage?
-                    } catch {
-                        self.sendNotification("FAIL", messageText: self.serverErrorGreeting)
-                }
-            } // end of task
-            task.resume()
         self.hideGetNumber(true)
     } // end of getNumber function
     
     @IBAction func cancelAppointmentWithSender(sender: UIButton) {
-
         // TODO: customer can have multiple reservations!!
         if(userDefaults.idsValidBool) { // Make sure  customer has a number -- shouldn't be visible otherwise though?
             // Prompt customer to confirm they want to delete
@@ -454,7 +400,7 @@ class ViewController: UIViewController {
 
             self.sendNotification("Confirmation", messageText: "Cancel Appointments?", alternateAction: cancelAction)
         }  else { // Customer doesn't have a local ID currently
-            // this error message is no good -- it does mean some clean-up is required
+            // TODO: this error message is no good -- it does mean some clean-up is required
             if(self.errFlag > 1) {
                 dispatch_async(dispatch_get_main_queue(), { self.greetingLabel.text = self.unknownErrorGreeting })
                 self.errFlag = 0
@@ -464,39 +410,34 @@ class ViewController: UIViewController {
             hideGetNumber(false)
         }
     }
-    func cancelAppointmentReally() {
-        if let dName = userDefaults.name {
-            if let dPhone = userDefaults.phone {
-                let postParams =  "deleteName=\(dName)&deletePhone=\(dPhone)"
-                getNumberPostRequest().HTTPBody = postParams.dataUsingEncoding(NSUTF8StringEncoding)
-            }
-        }
-        
-        let task = getNumberPostSession().dataTaskWithRequest(getNumberPostRequest()){ data,response,error in
-            if error != nil{
-                self.sendNotification("FAIL", messageText: self.serverErrorGreeting)
-                return
-            }
-            do {
-                let responseJSON = try NSJSONSerialization.JSONObjectWithData(data!, options: []  ) as! [String: AnyObject]
-                let delResult: Int = responseJSON["delResult"] as! Int
-                if(delResult > 0) { // Delete succeeded
-                    self.setEtaPostParams()
+    func processCancellation() {
+        if let delName = userDefaults.name {
+            if let delPhone = userDefaults.phone {
+                let delResponse = postController.cancelAppointment(delName, delPhone: delPhone)
+                if let delError = delResponse["error"] {
+                    // TODO: handle error
+                    let (eFatalBool, eAction) = CONSTS.GET_ERROR_ACTION(delError as! Int)
+                    if(eFatalBool) {
+                        self.handleError(delError as! Int, errorAction: eAction)
+                        return
+                    } else if(delError as! Int == CONSTS.GET_ERROR_CODE("DEL_NUM_FAIL")) {
+                        self.sendNotification("FAIL", messageText: CONSTS.GET_ERROR_TEXT(delError as! Int))
+                        self.hideGetNumber(true)
+                        return
+                    } else {
+                        self.handleError(delError as! Int, errorAction: eAction)
+                        return
+                    } // treat as fatal
+                } else { // Appointment Success supposedly
+                    userDefaults.removeAllNumbers()
                     self.sendNotification("Appointment Cancelled", messageText: self.forIssuesAlert)
-                } else { // Delete did not succeed
-                    self.sendNotification("Error!", messageText: self.unknownDeleteAlert)
+                    
+                    dispatch_async(dispatch_get_main_queue(), { self.greetingLabel.text = "\(self.generalGreeting), \(delName)?" })
+                    self.hideGetNumber(false)
                 }
-                
-            } catch {
-                self.sendNotification("FAIL", messageText: self.serverErrorGreeting)
             }
         }
-        task.resume()
-        userDefaults.removeAllNumbers()
-        let uName = self.userDefaults.name!
-        dispatch_async(dispatch_get_main_queue(), { self.greetingLabel.text = "\(self.generalGreeting), \(uName)?" })
-        self.hideGetNumber(false)
-    } // end of cancel function
+    }
 
     @IBAction func StepperWithSender(sender: UIStepper) {
         stepperLabel.text = String(Int(Stepper.value))
@@ -510,16 +451,10 @@ class ViewController: UIViewController {
         checkForExistingAppointment(userDefaults.name)
 
         NSTimer.scheduledTimerWithTimeInterval(10, target: self, selector: #selector(ViewController.getWaitTime), userInfo: nil, repeats: true)
-
-        
-        // TODO: Most elements should be hidden while things load. Minimize # of occurrences of this
-        /*
-        self.myNumberLabel.hidden = true
-        self.getNumberButton.hidden = true
-        self.cancelAppointment.hidden = true
-        */
         
         // TODO: Limit this to just 1-2
+        //
+        //
         self.firstNotificationStatus = false
         self.nowNotificationStatus = false
         self.nextNotificationStatus = false
@@ -528,4 +463,4 @@ class ViewController: UIViewController {
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
     }
-};// end of view controller
+}// end of view controller
