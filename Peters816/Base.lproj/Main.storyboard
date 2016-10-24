@@ -50,17 +50,6 @@
                                 <color key="textColor" red="1" green="0.061523099774187906" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Current #" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="CfT-6c-JhG">
-                                <fontDescription key="fontDescription" type="system" pointSize="19"/>
-                                <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                <nil key="highlightedColor"/>
-                            </label>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="..." textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="AUW-2K-c96">
-                                <fontDescription key="fontDescription" type="system" pointSize="34"/>
-                                <color key="textColor" red="0.98431372549019602" green="0.0" blue="0.14117647058823529" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                <nil key="highlightedColor"/>
-                                <size key="shadowOffset" width="0.0" height="0.0"/>
-                            </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="1" textAlignment="natural" lineBreakMode="tailTruncation" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Wzs-3Q-UeD">
                                 <fontDescription key="fontDescription" type="system" pointSize="16"/>
                                 <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
@@ -78,18 +67,11 @@
                             </stepper>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="hID-W2-0to">
                                 <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="15"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <size key="titleShadowOffset" width="1" height="1"/>
                                 <state key="normal" title="Get A Number!"/>
                                 <connections>
                                     <action selector="getNumberWithSender:" destination="BYZ-38-t0r" eventType="touchUpInside" id="KKY-eN-0Fw"/>
-                                </connections>
-                            </button>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="qmj-Ow-oGI">
-                                <fontDescription key="fontDescription" type="system" pointSize="15"/>
-                                <state key="normal" title="Make a Reservation"/>
-                                <connections>
-                                    <segue destination="FUC-De-t0o" kind="show" id="E7v-0h-npg"/>
                                 </connections>
                             </button>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Hey, looking to get a haircut today?" textAlignment="center" lineBreakMode="wordWrap" numberOfLines="2" baselineAdjustment="alignBaselines" minimumFontSize="11" adjustsLetterSpacingToFitWidth="YES" translatesAutoresizingMaskIntoConstraints="NO" id="vJB-xm-H8f" userLabel="greetingLabel">
@@ -104,37 +86,40 @@
                                     <action selector="cancelAppointmentWithSender:" destination="BYZ-38-t0r" eventType="touchUpInside" id="ppl-nM-ERE"/>
                                 </connections>
                             </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="qmj-Ow-oGI">
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <state key="normal" title="Make a Reservation"/>
+                                <connections>
+                                    <segue destination="FUC-De-t0o" kind="show" id="E7v-0h-npg"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
                             <constraint firstItem="rkt-ms-ciA" firstAttribute="top" secondItem="H4S-Xo-SXh" secondAttribute="bottom" id="0y4-lG-SQa"/>
-                            <constraint firstItem="CfT-6c-JhG" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="1Qu-6D-PKU"/>
                             <constraint firstItem="L46-m5-SXV" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="21W-uO-eF9"/>
                             <constraint firstItem="Wzs-3Q-UeD" firstAttribute="top" secondItem="w3o-vL-yv8" secondAttribute="bottom" constant="9.5" id="3a1-mf-vtp"/>
                             <constraint firstItem="w3o-vL-yv8" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="4TK-kB-Drm"/>
-                            <constraint firstAttribute="trailingMargin" secondItem="qmj-Ow-oGI" secondAttribute="trailing" constant="10" id="6Rj-YU-UHG"/>
                             <constraint firstAttribute="trailingMargin" secondItem="vJB-xm-H8f" secondAttribute="trailing" constant="4" id="8vT-hE-0LF"/>
                             <constraint firstItem="vJB-xm-H8f" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="9gO-eN-QHK"/>
-                            <constraint firstItem="hID-W2-0to" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" constant="10" id="GqI-Ty-DDQ"/>
+                            <constraint firstItem="qmj-Ow-oGI" firstAttribute="top" secondItem="hID-W2-0to" secondAttribute="bottom" constant="20" id="A3E-82-u14"/>
                             <constraint firstItem="w3o-vL-yv8" firstAttribute="top" secondItem="qmj-Ow-oGI" secondAttribute="bottom" constant="30" id="JtZ-mi-NOu"/>
-                            <constraint firstItem="qmj-Ow-oGI" firstAttribute="top" secondItem="AUW-2K-c96" secondAttribute="bottom" constant="20" id="LXR-zW-Z9Y"/>
+                            <constraint firstItem="hID-W2-0to" firstAttribute="top" secondItem="rkt-ms-ciA" secondAttribute="bottom" constant="20" id="LzT-qA-N2Q"/>
                             <constraint firstItem="Vws-Nb-FbK" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" constant="-10" id="NR5-BZ-Fsa"/>
                             <constraint firstItem="4My-pv-hlh" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" constant="10" id="OVC-qP-9cx"/>
                             <constraint firstItem="4My-pv-hlh" firstAttribute="top" secondItem="Xvd-Sa-WDf" secondAttribute="bottom" constant="5" id="Ojf-G7-AJq"/>
-                            <constraint firstItem="hID-W2-0to" firstAttribute="top" secondItem="AUW-2K-c96" secondAttribute="bottom" constant="20" id="QkJ-K0-fSK"/>
                             <constraint firstItem="Zmf-1n-51x" firstAttribute="top" secondItem="Xvd-Sa-WDf" secondAttribute="bottom" constant="5" id="Qyq-Fz-xNm"/>
                             <constraint firstItem="Xvd-Sa-WDf" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" constant="10" id="UP4-gi-KpL"/>
                             <constraint firstItem="Vws-Nb-FbK" firstAttribute="trailing" secondItem="Wzs-3Q-UeD" secondAttribute="leading" constant="-15" id="ZSk-7S-hak"/>
                             <constraint firstItem="rkt-ms-ciA" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="a6k-pn-j2f"/>
                             <constraint firstItem="vJB-xm-H8f" firstAttribute="top" secondItem="Zmf-1n-51x" secondAttribute="bottom" constant="20" id="adf-4z-3ef"/>
-                            <constraint firstItem="AUW-2K-c96" firstAttribute="top" secondItem="CfT-6c-JhG" secondAttribute="bottom" id="dTK-Fr-Tiw"/>
+                            <constraint firstItem="qmj-Ow-oGI" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="fBx-Yc-qke"/>
                             <constraint firstItem="H4S-Xo-SXh" firstAttribute="top" secondItem="vJB-xm-H8f" secondAttribute="bottom" constant="20" id="h4u-p5-Gt9"/>
                             <constraint firstItem="H4S-Xo-SXh" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="jjR-o2-xfE"/>
+                            <constraint firstItem="hID-W2-0to" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="lJC-bV-ICJ"/>
                             <constraint firstAttribute="trailingMargin" secondItem="Zmf-1n-51x" secondAttribute="trailing" constant="10" id="nuI-Un-iUi"/>
                             <constraint firstItem="Vws-Nb-FbK" firstAttribute="top" secondItem="w3o-vL-yv8" secondAttribute="bottom" constant="5" id="nz4-hh-aPe"/>
-                            <constraint firstItem="L46-m5-SXV" firstAttribute="top" secondItem="AUW-2K-c96" secondAttribute="bottom" constant="40" id="uLB-vQ-3qL"/>
-                            <constraint firstItem="AUW-2K-c96" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="x31-cW-Cji"/>
-                            <constraint firstItem="CfT-6c-JhG" firstAttribute="top" secondItem="rkt-ms-ciA" secondAttribute="bottom" constant="10" id="x47-gH-igD"/>
+                            <constraint firstItem="L46-m5-SXV" firstAttribute="top" secondItem="hID-W2-0to" secondAttribute="bottom" constant="20" id="ymP-JQ-eD4"/>
                             <constraint firstItem="Xvd-Sa-WDf" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="ypS-wY-cjY"/>
                         </constraints>
                     </view>
@@ -142,10 +127,8 @@
                     <connections>
                         <outlet property="Stepper" destination="Vws-Nb-FbK" id="SW4-Dk-dk7"/>
                         <outlet property="cancelAppointment" destination="L46-m5-SXV" id="QFQ-YG-8lk"/>
-                        <outlet property="currentNumber" destination="AUW-2K-c96" id="SCc-Xv-XmQ"/>
                         <outlet property="getNumberButton" destination="hID-W2-0to" id="9Jf-q7-CyZ"/>
                         <outlet property="greetingLabel" destination="vJB-xm-H8f" id="GZR-F9-amI"/>
-                        <outlet property="myNumberLabel" destination="CfT-6c-JhG" id="Qpz-vZ-R0b"/>
                         <outlet property="numHaircutsStatic" destination="w3o-vL-yv8" id="8IA-GB-Rie"/>
                         <outlet property="reservationButton" destination="qmj-Ow-oGI" id="mT7-WK-vki"/>
                         <outlet property="staticApproxWait" destination="H4S-Xo-SXh" id="FM2-Ge-LJW"/>
@@ -305,7 +288,7 @@
                                 </connections>
                             </button>
                             <navigationBar contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="mbA-Qy-iCU">
-                                <frame key="frameInset" minY="20" height="44" maxX="-1"/>
+                                <frame key="frameInset" minX="-1" minY="20" height="44" maxX="-1"/>
                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
                                 <textAttributes key="titleTextAttributes">
                                     <fontDescription key="fontDescription" type="system" pointSize="17"/>
@@ -516,7 +499,7 @@ Last Edited on 2016-02-27</string>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <prototypes>
                             <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="reservationCell" id="zee-h1-k7e">
-                                <rect key="frame" x="0.0" y="28" width="320" height="44"/>
+                                <rect key="frame" x="0.0" y="92" width="320" height="44"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="zee-h1-k7e" id="1Oq-Qq-Rgp">
                                     <frame key="frameInset" width="320" height="43"/>
@@ -547,7 +530,7 @@ Last Edited on 2016-02-27</string>
         <image name="logo" width="446" height="267"/>
     </resources>
     <inferredMetricsTieBreakers>
+        <segue reference="oeQ-68-ORB"/>
         <segue reference="7fl-rv-o3b"/>
-        <segue reference="V9R-fw-aPR"/>
     </inferredMetricsTieBreakers>
 </document>

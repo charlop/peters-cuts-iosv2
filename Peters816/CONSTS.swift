@@ -34,20 +34,22 @@ class CONSTS {
     class func GET_ERROR_ACTION(errorId : Int) -> (Bool, String) {
         switch errorId {
         case -500: return (true, "UNEXPECTED_VAL") // non-server response code
+        case -38: return (false, "NO_NUMBER")
+        case -37: return (false, "ACTIVE")
         case -36: return (false, "RETURNING")
         case -35: return (false, "DELETED")
         case -34: return (false, "RETURNING")
         
-        case -10: return (false, "FAIL")
+        case -10: return (true, "FAIL")
         case -9:  return (true, "UNEXPECTED_VAL")
         case -8:  return (true, "UNEXPECTED_VAL")
             
         case -7:  return (false, "DUPLICATE")
-        case -5:  return (false, "FAIL")
+        case -5:  return (true, "FAIL")
         case -3:  return (true, "FAIL")
         case -2:  return (true, "CLOSED")
         case -1:  return (true, "CLOSED")
-        default:  return (true, "UNK")          // non-server response code
+        default:  return (false, "UNK")          // non-server response code
         }
     }
     

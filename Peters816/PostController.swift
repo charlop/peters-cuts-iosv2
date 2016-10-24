@@ -13,12 +13,31 @@ class PostController {
     var GET_ETA_SESSION:NSURLSession!
     var GET_NUMBER_POST_REQUEST:NSMutableURLRequest!
     var GET_NUMBER_POST_SESSION:NSURLSession!
-    
-    
     var APP_REQUEST_URL:NSURL = NSURL(string: "http://peterscuts.com/lib/app_request2.php")!
     var GET_ETA_PARAM:String = "get_next_num=1"
     var postHasNumber = false
 
+
+    // Kind of unrelated, do they need their own methods?
+    var GET_OPEN_SPOTS_REQUEST:NSMutableURLRequest!
+    var GET_OPEN_SPOTS_SESSION:NSURLSession!
+    var POST_PARAMS:String = "get_available=1"
+    func getOpeningsPostRequest() -> NSMutableURLRequest {
+        if(GET_OPEN_SPOTS_REQUEST == nil) {
+            GET_OPEN_SPOTS_REQUEST = NSMutableURLRequest(URL: APP_REQUEST_URL)
+            GET_OPEN_SPOTS_REQUEST.HTTPMethod = "POST"
+        }
+        return GET_OPEN_SPOTS_REQUEST
+    }
+    func getOpeningsPostSession() -> NSURLSession {
+        if(GET_OPEN_SPOTS_SESSION == nil) {
+            GET_OPEN_SPOTS_SESSION = NSURLSession.sharedSession()
+        }
+        return GET_OPEN_SPOTS_SESSION
+    }
+    // end reservation methods
+    
+    
     func getEtaPostRequest() -> NSMutableURLRequest {
         if(GET_ETA_REQUEST == nil) {
             GET_ETA_REQUEST = NSMutableURLRequest(URL: APP_REQUEST_URL)
@@ -65,52 +84,74 @@ class PostController {
     
     // Check if user has an existing appointment
     // Possible errors returned:
-    //      get_next_num <-1, -2, -9>
-    //      etaName <34,35,36>
-    var validatingFlag = false
-    func getEta() -> [String: AnyObject] {
+    //      <1,2,9>,<34,35,37,38>
+    func getEta(completionHandler:(etaResponse:[String: AnyObject]) -> Void!) {
         var etaResponse = [String: AnyObject]()
         
         getEtaPostRequest().HTTPBody = self.GET_ETA_PARAM.dataUsingEncoding(NSUTF8StringEncoding)
         let task = getEtaPostSession().dataTaskWithRequest(getEtaPostRequest()){ data,response,error in
             if error != nil {
                 etaResponse.updateValue(-500, forKey: "error")
+                completionHandler(etaResponse: etaResponse)
             } else {
                 do {
-                    let responseJSON = try NSJSONSerialization.JSONObjectWithData(data!, options: []  ) as! [[String: AnyObject]]
-                    
-                    
-                    // User has number indicator -- needs to be returned
-                    let hasNum:Bool = responseJSON[0]["hasNum"] as! Int > 0 ? true : false
-                    
-                    if(hasNum == false && self.postHasNumber == true) {
+                    let responseJSON = try NSJSONSerialization.JSONObjectWithData(data!, options: []) as! [[String: AnyObject]]
+                    var errorHit = false
+                    if let errorVal = responseJSON[0]["error"] {
+                        print(errorVal)
                         self.setEtaPostParam()
-                    }
-                    etaResponse.updateValue(hasNum, forKey: "hasNumBool")
-                    
-                    var etaMinsArray = [Int: Double]()
-                    for i in 1...responseJSON.count {
-                        let etaMinVal = responseJSON[i-1]["etaMins"] as! Double
-                        if(etaMinVal < 0) {
-                            if(self.validatingFlag || self.postHasNumber == false ||
-                                (etaMinVal >= -36 && etaMinVal <= -34)
-                            ) {
-                                etaResponse.updateValue(Int(etaMinVal), forKey: "error")
-                                self.validatingFlag = false
-                                break
-                            } else { // TODO: this is more complex, user does not have a number; calling function again but with postHasNumber = false
-                                self.setEtaPostParam()
-                                self.getEta()
+                        etaResponse.updateValue(errorVal as! Int, forKey: "error")
+                        errorHit = true
+                        
+                        let fatalInd = responseJSON[0]["fatal"] as! Int
+                        if(fatalInd == 1) {
+                            // Fatal error -- 1,2,9 -- these are only returned when user does not have a number (i.e. getNextNum)
+                            // TODO: handle fatal error
+                            completionHandler(etaResponse: etaResponse)
+                        } else {  // Non-fatal error from etaName and etaPhone (user does not have a number)
+                            // User does not have a number, still got a valid eta response
+                            if let getNextNumErrorVal = responseJSON[1]["error"] { // these would only be returned by getNextNum and should always be fatal
+                                etaResponse.updateValue(getNextNumErrorVal, forKey: "error2") // this is ONLY used in the fatalErrorHandler
+                                let getNextNumFatalInd = responseJSON[1]["fatal"] as! Int
+                                if(getNextNumFatalInd == 1) {
+                                    // Fatal error -- 1,2,9
+                                    // TODO: handle FATAL ERROR
+                                } else {
+                                    // Currently cannot reach this spot, as the second-level errors are always fatal. Treat as fatal, may be changed in the future as needed
+                                }
+                                completionHandler(etaResponse: etaResponse)
+                            } else {
+                                // Non-fatal error -- 34,35,37,38; received valid eta response from getNextNum
                             }
-                        } else {
-                            etaMinsArray.updateValue(etaMinVal, forKey: responseJSON[i-1]["id"] as! Int)
                         }
+                        etaResponse.updateValue(0, forKey: "hasNumBool")
+                    } else {
+                        etaResponse.updateValue(self.postHasNumber, forKey: "hasNumBool")
                     }
-                    etaResponse.updateValue(etaMinsArray, forKey: "etaMinsArray")
-                    
-                    // TBD if this should be handled here, probably not
-                    //if(etaMinsResponse > 0) {
-                    
+
+                    // Will be returned whether user has a number or not
+                    //var etaMinsArray = [(Int, Double)]()
+                    if(errorHit == false) { // this means NO error was found
+                        let etaResponseArray = responseJSON[0]["etaArray"] as! [[String: AnyObject]]
+                        for i in 1...etaResponseArray.count {
+                            let etaMinVal = etaResponseArray[i-1]["etaMins"] as! Double
+                            //let etaId = etaResponseArray[i-1]["id"] as! Int
+                            etaResponse.updateValue(etaMinVal, forKey: "etaMinsSingle")
+                        }
+                    } else { // non-fatal error was hit
+                        self.setEtaPostParam()
+                        var responseRecord:[[String: AnyObject]]
+                        if(errorHit) { // e.g. need to go into array index 1
+                            responseRecord = responseJSON[1]["etaArray"] as! [[String: AnyObject]]
+                        } else {
+                            // go into array index 0
+                            responseRecord = responseJSON[0]["etaArray"] as! [[String: AnyObject]]
+                        }
+                        let etaMinVal = responseRecord[0]["etaMins"] as! Double
+                        //let etaId = responseRecord[0]["id"] as! Int
+                        etaResponse.updateValue(etaMinVal, forKey: "etaMinsSingle")
+                    }
+                    completionHandler(etaResponse: etaResponse)
                 } catch {
                     print("Exception in postController -- getEta")
                 }
@@ -118,15 +159,11 @@ class PostController {
         }
 
         task.resume()
-        
-        
-        // FUCK FUCK FUCK -- i guess this is async and it can't be returned...gonna have to rethink this entire fucking thing. Fuck it all to hell
-        return etaResponse
     }
     
     // Get a number
-    // Possible errors returned: <2, 7>
-    func getNumber(inName:String, inPhone:String, numRes:Int, inEmailParm:String) -> [String: AnyObject] {
+    // Possible errors returned: <2,5,7>
+    func getNumber(inName:String, inPhone:String, numRes:Int, inEmailParm:String, completionHandler:(getNumResponse:[String: AnyObject]) -> Void!) {
         let GET_NUM_PARAM = "user_name=\(inName)&user_phone=\(inPhone)&numRes=\(numRes)\(inEmailParm)"
         getNumberPostRequest().HTTPBody = GET_NUM_PARAM.dataUsingEncoding(NSUTF8StringEncoding)
         
@@ -136,48 +173,29 @@ class PostController {
             if error != nil {
                 getNumResponse.updateValue(-500, forKey: "error")
                 self.setEtaPostParam()
+                completionHandler(getNumResponse: getNumResponse)
             } else { // No http error
                 do {
                     let responseJSON = try NSJSONSerialization.JSONObjectWithData(data!, options: []) as! [[String: AnyObject]]
                     
                     // First make sure an expected response was received
-                    let id1Num: Int = responseJSON[0]["id1"] as! Int
-                    var getNumArray = [Int: Double]()
-
-                    var validateError = 0
-                    if(id1Num < 1) { // Error was received
-                        if(id1Num == CONSTS.GET_ERROR_CODE("GET_NUM_FAIL")) {
-                            self.setEtaPostParam(inName, phoneParam: inPhone)
-
-                            self.validatingFlag = true
-                            let validateNumReceived = self.getEta()
-                            if let hasNumUnwrapped = validateNumReceived["hasNumBool"] {
-                                // GetNum actually succeeded
-                                let hasNumBool = hasNumUnwrapped as! Bool
-                                if(hasNumBool) {
-                                    getNumArray = validateNumReceived["etaMinsArray"] as! [Int : Double]
-                                } else if let errorIdUnwrapped = validateNumReceived["error"]{
-                                    validateError = errorIdUnwrapped as! Int
-                                }
-                            }
-                            
-                            if(validateError < 0) {
-                                getNumResponse.updateValue(validateError, forKey: "error")
-                                self.setEtaPostParam()
-                            }
-                        } else {
-                            getNumResponse.updateValue(id1Num, forKey: "error")
+                    if let getNumError = responseJSON[0]["error"] {
+                        let getNumFatal = responseJSON[0]["fatal"] as! Int
+                        getNumResponse.updateValue(getNumError as! Int, forKey: "error")
+                        if(getNumFatal == 1) {
                             self.setEtaPostParam()
+                            completionHandler(getNumResponse: getNumResponse)
                         }
-                    } else {
-                        self.setEtaPostParam(inName, phoneParam: inPhone)
-                        for i in 1...responseJSON.count {
-                            let curId:String = "id" + String(i)
-                            let startTm:String = "start_time" + String(i)
-                            getNumArray.updateValue(responseJSON[i-1][startTm] as! Double, forKey: responseJSON[i-1][curId] as! Int)
-                        }
-                        getNumResponse.updateValue(getNumArray, forKey: "getNumArray")
                     }
+                    
+                    // User does have a number at this point
+                    self.setEtaPostParam(inName, phoneParam: inPhone)
+                    var getNumArray = [Int: Double]()
+                    for i in 1...responseJSON.count {
+                        getNumArray.updateValue(responseJSON[i-1]["etaMins"] as! Double, forKey: responseJSON[i-1]["id"] as! Int)
+                    }
+                    getNumResponse.updateValue(getNumArray, forKey: "getNumArray")
+                    completionHandler(getNumResponse:getNumResponse)
                 } catch {
                     // TODO: Exception
                     print("Exception in PostController -- getNum")
@@ -185,13 +203,12 @@ class PostController {
             }
         }
         task.resume()
-        
-        return getNumResponse
     }
     
     // Cancel Appointment
     // Possible Errors returned: <-10>
-    func cancelAppointment(delName: String, delPhone: String) -> [String: AnyObject] {
+
+    func cancelAppointment(delName: String, delPhone: String, completionHandler:(delResponse:[String:AnyObject]) -> Void!) {
         let DEL_NUM_PARAM = "deleteName=\(delName)&deletePhone=\(delPhone)"
         getNumberPostRequest().HTTPBody = DEL_NUM_PARAM.dataUsingEncoding(NSUTF8StringEncoding)
         
@@ -200,34 +217,14 @@ class PostController {
         let task = getNumberPostSession().dataTaskWithRequest(getNumberPostRequest()){ data,response,error in
             if error != nil{
                 cancelResponse.updateValue(-500, forKey: "error")
+                completionHandler(delResponse: cancelResponse)
             } else {
                 do {
                     let responseJSON = try NSJSONSerialization.JSONObjectWithData(data!, options: []  ) as! [String: AnyObject]
                     let delResult: Int = responseJSON["delResult"] as! Int
-                    if(delResult > 0) { // Delete succeeded
-                        self.setEtaPostParam()
-                    } else { // Delete possibly did not succeed
-                        self.setEtaPostParam(delName, phoneParam: delPhone)
-                        self.validatingFlag = true
-                        let delValidateResponse = self.getEta()
-                        var validateError = 0
-                        if let hasNumUnwrapped = delValidateResponse["hasNumBool"] {
-                            // Delete actually succeeded
-                            let hasNumBool = hasNumUnwrapped as! Bool
-                            if(hasNumBool == false) {
-                                self.setEtaPostParam()
-                            } else if let errorIdUnwrapped = delValidateResponse["error"]{
-                                validateError = errorIdUnwrapped as! Int
-                            }
-                        }
-                        if(validateError < 0) {
-                            cancelResponse.updateValue(validateError, forKey: "error")
-                            self.setEtaPostParam()
-                        } else {
-                            cancelResponse.updateValue(delResult, forKey: "error")
-                            self.setEtaPostParam()
-                        }
-                    }
+                    self.setEtaPostParam()
+                    cancelResponse.updateValue(delResult, forKey: "error")
+                    completionHandler(delResponse:cancelResponse)
                 } catch {
                     // TODO: need to do some cleanup here
                     // cancelResponse.updateValue(-500, forKey: "error")
@@ -236,8 +233,38 @@ class PostController {
             }
         }
         task.resume()
-
-        return cancelResponse
     }
+    
+    // Get available reservations
+    func getOpenings(completionHandler:(openingsArray:[String]) -> Void!)  {
+        getOpeningsPostRequest().HTTPBody = POST_PARAMS.dataUsingEncoding(NSUTF8StringEncoding)
+        let task = getOpeningsPostSession().dataTaskWithRequest(getOpeningsPostRequest()) { data,response, error in
+            if error != nil {
+                // TODO: handle error
+            }
+            do {
+                let responseJSON = try NSJSONSerialization.JSONObjectWithData(data!, options: []) as! [[String: AnyObject]]
+                let initId = responseJSON[0]["id"] as! Int
+                var availableTimesArray = [String]()
+                if(initId < 0) {
+                    // TODO: error of some sort
+                } else if(initId > 0) {
+                    for i in 1...responseJSON.count {
+                        let curStartTime = responseJSON[i-1]["start_time"] as! String
+                        availableTimesArray.append(curStartTime)
+                    }
+                    completionHandler(openingsArray: availableTimesArray)
+                } else {
+                    // TODO: initId invalid -- 0 or not an integer
+                }
+                
+            } catch {
+                // TODO: handle error
+            }
+        }
+        task.resume()
+    
+    }
+    
 
 }

@@ -86,10 +86,10 @@ class userInfoViewController: UIViewController {
         // Dispose of any resources that can be recreated.
     }
     
-    @IBAction func saveButtonAction(sender: AnyObject) {
+    @IBAction func saveButtonActionWithSender(sender: AnyObject) {
         if let name = nameField.text {
             if let phone = phoneField.text {
-                userDefaults.saveUserDetails(name, inPhone: phone, inEmail: emailField.text)
+                userDefaults.saveUserDetails(name, inPhone: phone, inEmail: emailField.text!)
             } else {
                 phoneInvalidLabel.hidden = false
             }

@@ -41,7 +41,7 @@ class User {
         }
     }
     
-    // receive eta in seconds preferably
+    // receive eta in seconds preferably -- just take it in minutes
     func addNumber(newIds :NSDictionary) {
         // Clear out anything stored locally
         userDefaults.removeObjectForKey("cust_id_dict")
@@ -50,10 +50,9 @@ class User {
             //let udNSDict = [String: AnyObject]() as NSDictionary
             for(key,value) in tmpDict {
                 // This is the appointment start time adjusting for hour shift
-                let date = NSDate(timeIntervalSinceNow: value)
+                let date = NSDate(timeIntervalSinceNow: value * 60)
                 cust_ids.updateValue(date, forKey: key)
                 tmpUdNSDict.updateValue(date, forKey: String(key))
-                //udNSDict.setValue(date, forKey: String(key))
             }
             idsValidBool = true
             let date = NSDate()
@@ -66,6 +65,26 @@ class User {
             userDefaults.synchronize()
 
         }
+    }
+    // This is just a stop-gap solution, should be using the addNumber function
+    // 95% identical code to addNumber, but less efficient
+    func addSingleEta(nextEtaMin: Double) {
+        let date = NSDate(timeIntervalSinceNow: nextEtaMin * 60)
+        var tmpUdNSDict : [String: NSDate] = Dictionary()
+        tmpUdNSDict.updateValue(date, forKey: "50") // 50 is an arbitrary number. really being lazy here
+        cust_ids.updateValue(date, forKey: 50) // again, arbitrary id
+        
+        idsValidBool = true
+        let date2 = NSDate()
+        let calendar = NSCalendar.currentCalendar()
+        expireAfter = calendar.components([.Day], fromDate: date2).day
+        userDefaults.setObject(expireAfter, forKey: "expiryDate")
+        
+        let udNSDict = tmpUdNSDict as NSDictionary
+        userDefaults.setObject(udNSDict, forKey: "cust_id_dict")
+        userDefaults.synchronize()
+
+        
     }
     // TODOs
     func removeAllNumbers() {
