@@ -25,8 +25,6 @@ class userInfoViewController: UIViewController {
         let tap: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(userInfoViewController.dismissKeyboard))
         view.addGestureRecognizer(tap)
         
-        userDefaults.getUserDetails()
-        
         let extname: String? = userDefaults.name
         let extphone: String? = userDefaults.phone
         let extemail: String? = userDefaults.email

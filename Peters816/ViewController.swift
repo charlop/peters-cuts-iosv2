@@ -16,6 +16,7 @@ class ViewController: UIViewController {
     @IBOutlet weak var greetingLabel: UILabel!
     
     let postController = PostController()
+    let postErrorHandler = PostErrorHandler()
     var initPerformed = false
 
     let userDefaults = User()
@@ -72,27 +73,7 @@ class ViewController: UIViewController {
         localNotification.alertBody = "Your haircut appointment # \(number) is \(time)!"
         UIApplication.sharedApplication().scheduleLocalNotification(localNotification)
     }
-    
-    // Handle errors here whenever possible
-    func handleError(errorId : Int, errorAction : String) {
-        if(errFlag > 2) {
-            self.sendNotification("Fail", messageText: CONSTS.GET_ERROR_TEXT(errorId))
-            errFlag = 0
-        }
-        errFlag += 1
-        return
-        
-        // THOUGHT STARTERS
-            // THIS NEEDS TO BE AN INTEGER RESPONSE PERHAPS??
-            // TODO: error hadnling
-            //self.sendNotification("Fail...", messageText: getNumResponseError as! Int)
-            // TODO: set the wait time or any session parameters here??
-            //self.sendNotification("Hey!", messageText: "")
-            //userDefaults.removeAllNumbers()
-        //return
-    }
-    
-    
+
     // Returns the wait time
     func getWaitTime() {
         // Check if user has any existing appointments
@@ -100,7 +81,7 @@ class ViewController: UIViewController {
             if let etaResponseError = etaResponse["error"] {
                 let (errorFatalBool, errorAction) = CONSTS.GET_ERROR_ACTION(etaResponseError as! Int)
                 if(errorFatalBool) { // i.e. error codes -1,2,9
-                    self.handleError(etaResponseError as! Int, errorAction: errorAction)
+                    self.postErrorHandler.handleError(etaResponseError as! Int, errorAction: errorAction)
                     return
                 } else {
                     // Non-fatal errors possible: 34,35,37,38
@@ -273,13 +254,13 @@ class ViewController: UIViewController {
         if(Int(stepperLabel.text!) > 0) {
             stepperCount = Int(stepperLabel.text!)!
         }
-        postController.getNumber(userName, inPhone: userPhone, numRes: stepperCount, inEmailParm: email,
+        postController.getNumber(inName: userName, inPhone: userPhone, numRes: stepperCount, inEmailParm: email,
             completionHandler: {(getNumResponse:[String: AnyObject]) -> Void in
                 if let getNumResponseError = getNumResponse["error"] {
                     // Possible values: 2,7,9
                     let (errorFatalBool, errorAction) = CONSTS.GET_ERROR_ACTION(getNumResponseError as! Int)
                     if(errorFatalBool) {
-                        self.handleError(getNumResponseError as! Int, errorAction: errorAction)
+                        self.postErrorHandler.handleError(getNumResponseError as! Int, errorAction: errorAction)
                         return
                     } else { // Only non-fatal possibility is 7; duplicate
                         if(errorAction == "DUPLICATE") {
@@ -374,7 +355,6 @@ class ViewController: UIViewController {
     }
     override func viewWillAppear(animated: Bool) {
         // Load previous info from user defaults
-        userDefaults.getUserDetails()
         checkForExistingAppointment(userDefaults.name)
         
         getEtaTimer = NSTimer.scheduledTimerWithTimeInterval(10, target: self, selector: #selector(ViewController.getWaitTime), userInfo: nil, repeats: true)

@@ -18,7 +18,7 @@ class User {
     
     let userDefaults = NSUserDefaults.standardUserDefaults()
     
-    func getUserDetails() {
+    init() {
             name = userDefaults.stringForKey("name")
             phone = userDefaults.stringForKey("phone")
             email = userDefaults.stringForKey("email")

@@ -27,6 +27,7 @@
 		435308A51DB067FC00C56608 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0681772C1C6C295D00732B29 /* User.swift */; };
 		435D3AC91DBC031C00A38101 /* PostController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 435D3AC81DBC031C00A38101 /* PostController.swift */; };
 		435D3ACB1DBC06AE00A38101 /* CONSTS.swift in Sources */ = {isa = PBXBuildFile; fileRef = 435D3ACA1DBC06AE00A38101 /* CONSTS.swift */; };
+		43C2DE971DC016DA00CE231D /* PostErrorHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43C2DE961DC016DA00CE231D /* PostErrorHandler.swift */; };
 		A6F207451CB83BF8000C1BA5 /* SwiftyJSON.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6F207441CB83BF8000C1BA5 /* SwiftyJSON.swift */; };
 /* End PBXBuildFile section */
 
@@ -74,6 +75,7 @@
 		4312CA111DB6FCCA00972F38 /* ReservationViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReservationViewController.swift; sourceTree = "<group>"; };
 		435D3AC81DBC031C00A38101 /* PostController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostController.swift; sourceTree = "<group>"; };
 		435D3ACA1DBC06AE00A38101 /* CONSTS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CONSTS.swift; sourceTree = "<group>"; };
+		43C2DE961DC016DA00CE231D /* PostErrorHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostErrorHandler.swift; sourceTree = "<group>"; };
 		4AFC8A50D26D5152225E485A /* Pods-Peters816.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Peters816.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Peters816/Pods-Peters816.debug.xcconfig"; sourceTree = "<group>"; };
 		A6F207441CB83BF8000C1BA5 /* SwiftyJSON.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SwiftyJSON.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -131,10 +133,10 @@
 		068176EE1C6B908B00732B29 /* Peters816 */ = {
 			isa = PBXGroup;
 			children = (
+				43270BEA1DC2B61200D1B157 /* DAL */,
 				435D3AC71DBC02E200A38101 /* Post */,
 				068176EF1C6B908B00732B29 /* AppDelegate.swift */,
 				068176F11C6B908B00732B29 /* ViewController.swift */,
-				0681772C1C6C295D00732B29 /* User.swift */,
 				0645282E1C80F2F2008479EA /* termsOfUseViewController.swift */,
 				064528301C80F32F008479EA /* privacyPolicyViewController.swift */,
 				0645282C1C80EF8D008479EA /* aboutViewController.swift */,
@@ -177,11 +179,20 @@
 			name = Pods;
 			sourceTree = "<group>";
 		};
+		43270BEA1DC2B61200D1B157 /* DAL */ = {
+			isa = PBXGroup;
+			children = (
+				0681772C1C6C295D00732B29 /* User.swift */,
+			);
+			name = DAL;
+			sourceTree = "<group>";
+		};
 		435D3AC71DBC02E200A38101 /* Post */ = {
 			isa = PBXGroup;
 			children = (
 				435D3AC81DBC031C00A38101 /* PostController.swift */,
 				435D3ACA1DBC06AE00A38101 /* CONSTS.swift */,
+				43C2DE961DC016DA00CE231D /* PostErrorHandler.swift */,
 			);
 			name = Post;
 			sourceTree = "<group>";
@@ -395,6 +406,7 @@
 				A6F207451CB83BF8000C1BA5 /* SwiftyJSON.swift in Sources */,
 				0681772E1C6C295D00732B29 /* User.swift in Sources */,
 				068176F01C6B908B00732B29 /* AppDelegate.swift in Sources */,
+				43C2DE971DC016DA00CE231D /* PostErrorHandler.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
