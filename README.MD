@@ -9,7 +9,7 @@ This is the iOS component of Peter's 816 Barber Shop App. This app is a fork fro
 
 [PHP Repository](https://github.com/charlop/peters816-php/)
 
-## TODOs:
+## TODOs
 
 * **Notifications** 
   * Currently not working correctly, users receive notifications at random times. Based on a timer event, that sends the notification based on the original ETA received. This code has not been modified from the original, but should be simpler and more reliable since v2 relies on set times, as opposed to an arbitrary reference point (unscheduled).
