@@ -141,7 +141,6 @@ class ViewController: UIViewController {
                         greetingLabelSelected = self.haircut_upcoming_label
                         curNumStaticLabelSelected = self.yourNumText
                         self.userDefaults.addSingleEta(etaResponse["etaMinsSingle"] as! Double)
-                        
                     } else {
                         greetingLabelSelected = self.existingUserGreeting
                         curNumStaticLabelSelected = self.nextNumText
@@ -164,6 +163,20 @@ class ViewController: UIViewController {
                 }
                 if let curCustNum = etaResponse["curCustNum"] as? Int {
                     DispatchQueue.main.async(execute: { self.curCustLabel.text = String(curCustNum) })
+                }
+                if let isReservation = etaResponse["isReservation"] as? Int {
+                    // should hide these for reservation, since it is time-based, not # based (from the customer's perspective)
+                    if(isReservation == 1) { // cust has a reservation
+                        DispatchQueue.main.async(execute: {
+                            self.nextNumLabelStatic.isHidden = true
+                            self.nextNumLabel.isHidden = true
+                        })
+                    } else {
+                        DispatchQueue.main.async(execute: {
+                            self.nextNumLabelStatic.isHidden = false
+                            self.nextNumLabel.isHidden = false
+                        })
+                    }
                 }
                 
                 if(etaHrs == 0) {
@@ -405,6 +418,7 @@ class ViewController: UIViewController {
                                                         if(delError as! Int == 1) {
                                                             // not an error
                                                             self.hideGetNumber(false)
+                                                            self.getWaitTime() // update immediately
                                                             self.userDefaults.removeAllNumbers()
                                                             self.sendNotification("Appointment Cancelled", messageText: self.forIssuesAlert)
                                                             DispatchQueue.main.async(execute: { self.greetingLabel.text = "\(self.generalGreeting), \(delName)?" })

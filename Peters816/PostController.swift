@@ -174,6 +174,13 @@ class PostController {
                         let etaMinVal = etaResponseArray[0]["etaMins"] as! Double
                         let custEtaId = etaResponseArray[0]["id"] as! Int
                         let curId = etaResponseArray[0]["curNum"] as! Int
+                        
+                        // Todo: the next 4 lines should be handled with a try/catch or something?
+                        etaResponse.updateValue(0 as AnyObject, forKey: "isReservation")
+                        if let isReservationUnwrapped = etaResponseArray[0]["reservation"] {
+                            let isReservation = isReservationUnwrapped as! Int
+                            etaResponse.updateValue(isReservation as AnyObject, forKey: "isReservation")
+                        }
                         etaResponse.updateValue(etaMinVal as AnyObject, forKey: "etaMinsSingle")
                         etaResponse.updateValue(custEtaId as AnyObject, forKey: "custEtaSingle")
                         etaResponse.updateValue(curId as AnyObject, forKey: "curCustNum")
@@ -196,7 +203,7 @@ class PostController {
                         etaResponse.updateValue(etaMinVal as AnyObject, forKey: "etaMinsSingle")
                         etaResponse.updateValue(custEtaId as AnyObject, forKey: "custEtaSingle")
                         etaResponse.updateValue(curId as AnyObject, forKey: "curCustNum")
-
+                        etaResponse.updateValue(0 as AnyObject, forKey: "isReservation") // will be accessed in the completionHandler whether customer has num or not.
                     }
                     completionHandler(etaResponse)
                     return
