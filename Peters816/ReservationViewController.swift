@@ -22,33 +22,32 @@ class ReservationViewController: UITableViewController {
     var reservationIdDictionary = [String: Int]()
     let postController = PostController()
     
-    func sendNotification(titleText:String, messageText:String, goBack:Bool) {
-        dispatch_async(
-            dispatch_get_main_queue(), {
-                let alertController = UIAlertController(title: titleText, message: messageText, preferredStyle: .Alert  )
-                let OKAction = UIAlertAction(title: "OK", style: .Default) { (action) in
+    func sendNotification(_ titleText:String, messageText:String, goBack:Bool) {
+        DispatchQueue.main.async(execute: {
+                let alertController = UIAlertController(title: titleText, message: messageText, preferredStyle: .alert  )
+                let OKAction = UIAlertAction(title: "OK", style: .default) { (action) in
                     if(goBack) {
-                        self.navigationController?.popViewControllerAnimated(true)
+                        self.navigationController?.popViewController(animated: true)
                     }
                 }
                 alertController.addAction(OKAction)
-                self.presentViewController(alertController, animated: true, completion: nil)
+                self.present(alertController, animated: true, completion: nil)
         }) // end of dispatch
     }
     
-    override func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+    override func numberOfSections(in tableView: UITableView) -> Int {
         // TODO: this should return something better...
         return 1
     }
-    override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return reservationData.count
     }
-    override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCellWithIdentifier("reservationCell", forIndexPath: indexPath)
+    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "reservationCell", for: indexPath)
         
         let resTime = reservationData[indexPath.row]
         cell.textLabel?.text = resTime
-        cell.textLabel?.backgroundColor = UIColor.clearColor()
+        cell.textLabel?.backgroundColor = UIColor.clear
         
         // new -- take advantage of this in other spots
         cell.tag = reservationIdDictionary[resTime]!
@@ -57,7 +56,7 @@ class ReservationViewController: UITableViewController {
     }
     
     func refreshTable() {
-        dispatch_async(dispatch_get_main_queue(), {
+        DispatchQueue.main.async(execute: {
             self.tableView.reloadData()
         })
     }
@@ -78,21 +77,20 @@ class ReservationViewController: UITableViewController {
         
         // Inform the user that there is an additional fee for reservations
         
-        let alertController = UIAlertController(title: "Important", message: "There is an additional fee for reservations, paid when you receive your haircut. Continue?", preferredStyle: .Alert  )
-        let OKAction = UIAlertAction(title: "OK", style: .Default) { (action) in
+        let alertController = UIAlertController(title: "Important", message: "Please be on time for your appointment or give at least 1 hour notice if you can't make it.", preferredStyle: .alert  )
+        let OKAction = UIAlertAction(title: "OK", style: .default) { (action) in
         }
-        let cancelAction = UIAlertAction(title: "Cancel", style: .Default) { (action) in
+        let cancelAction = UIAlertAction(title: "Cancel", style: .default) { (action) in
             //let vc : AnyObject! = self.storyboard!.instantiateViewControllerWithIdentifier("ViewController")
             //self.showViewController(vc as! UIViewController, sender: vc)
-            self.navigationController?.popToRootViewControllerAnimated(true)
+            self.navigationController?.popToRootViewController(animated: true)
         }
         
         alertController.addAction(OKAction)
         alertController.addAction(cancelAction)
         
-        dispatch_async(dispatch_get_main_queue(),
-                       {
-                        self.presentViewController(alertController, animated: true, completion: nil)
+        DispatchQueue.main.async(execute: {
+                        self.present(alertController, animated: true, completion: nil)
         }) // end of dispatch
         
         self.getOpenSpots()
@@ -102,16 +100,16 @@ class ReservationViewController: UITableViewController {
         super.didReceiveMemoryWarning()
     }
     
-    @IBAction func makeReservationWithSender(sender: UIButton) {
+    @IBAction func makeReservationWithSender(_ sender: UIButton) {
         // Reservations disabled because no user info is available
         if(reservationsDisabled) {
             self.sendNotification("Can't Make Reservations", messageText: "Please go back and enter your name and number before you can make reservations", goBack: false)
         } else {
             // Allow the user to make a reservation
-            let buttonPosition = sender.convertPoint(CGPointZero, toView: self.tableView)
-            if let indexPath = self.tableView.indexPathForRowAtPoint(buttonPosition) {
+            let buttonPosition = sender.convert(CGPoint.zero, to: self.tableView)
+            if let indexPath = self.tableView.indexPathForRow(at: buttonPosition) {
                 // TODO -- this is probably not the safest way to get text:
-                if let start_time = tableView.cellForRowAtIndexPath(indexPath)?.textLabel!.text {
+                if let start_time = tableView.cellForRow(at: indexPath)?.textLabel!.text {
                     
                     postController.getNumber(reservationIdDictionary[start_time]!,
                                              inName: uName, inPhone: uPhone, completionHandler: {(getNumResponse:[String: AnyObject])->Void in

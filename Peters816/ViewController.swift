@@ -2,6 +2,30 @@ import UIKit
 import CoreData
 import Foundation
 import SwiftyJSON
+// FIXME: comparison operators with optionals were removed from the Swift Standard Libary.
+// Consider refactoring the code to use the non-optional operators.
+fileprivate func < <T : Comparable>(lhs: T?, rhs: T?) -> Bool {
+  switch (lhs, rhs) {
+  case let (l?, r?):
+    return l < r
+  case (nil, _?):
+    return true
+  default:
+    return false
+  }
+}
+
+// FIXME: comparison operators with optionals were removed from the Swift Standard Libary.
+// Consider refactoring the code to use the non-optional operators.
+fileprivate func > <T : Comparable>(lhs: T?, rhs: T?) -> Bool {
+  switch (lhs, rhs) {
+  case let (l?, r?):
+    return l > r
+  default:
+    return rhs < lhs
+  }
+}
+
 
 class ViewController: UIViewController {
     // MARK: Properties
@@ -14,6 +38,10 @@ class ViewController: UIViewController {
     @IBOutlet weak var stepperLabel: UILabel!
     @IBOutlet weak var numHaircutsStatic: UILabel!
     @IBOutlet weak var greetingLabel: UILabel!
+    @IBOutlet weak var curCustLabel: UILabel!
+    @IBOutlet weak var nextNumLabelStatic: UILabel!
+    @IBOutlet weak var nextNumLabel: UILabel!
+    @IBOutlet weak var curNumLabelStatic: UILabel!
     
     let postController = PostController()
     let postErrorHandler = PostErrorHandler()
@@ -21,7 +49,7 @@ class ViewController: UIViewController {
     
     var userDefaults = User()
     var errFlag = 0
-    var getEtaTimer: NSTimer?
+    var getEtaTimer = Timer()
     
     let noInfoGreeting:String = "Welcome to Peter's, Please set your information to make reservations."
     let existingUserGreeting:String = "looking to get a haircut?"
@@ -40,12 +68,14 @@ class ViewController: UIViewController {
     let generalGreeting:String = "How's it going"
     let sign_up_label:String = "Enter your information before you can reserve a number"
     let shopClosedGreeting:String = "Peter's is closed, try checking the app after 9AM.\nSee the About page for shop hours."
+    let yourNumText:String = "Your #"
+    let nextNumText:String = "Next #"
     
     // notification statuses
     var firstNotificationStatus:Bool = false
     var nextNotificationStatus:Bool = false
     var nowNotificationStatus:Bool = false
-    func fortyMinutesNotification (input:String) -> Void{
+    func fortyMinutesNotification (_ input:String) -> Void{
         if (input == "setON") {
             self.firstNotificationStatus = true
             // print("\(firstNotificationStatus)")
@@ -53,26 +83,26 @@ class ViewController: UIViewController {
             self.firstNotificationStatus = false
         }
     }
-    func youAreNextNotification (input:String) -> Void{
+    func youAreNextNotification (_ input:String) -> Void{
         if (input == "setON") {
             self.nextNotificationStatus = true
         } else if (input == "setOFF") {
             self.nextNotificationStatus = false
         }
     }
-    func NowNotification (input:String) -> Void{
+    func NowNotification (_ input:String) -> Void{
         if (input == "setON") {
             self.nowNotificationStatus = true
         } else if (input == "setOFF") {
             self.nowNotificationStatus = false
         }
     }
-    func createLocalNotification(number: String, time: String) {
+    func createLocalNotification(_ number: String, time: String) {
         let localNotification = UILocalNotification()
-        localNotification.fireDate = NSDate(timeIntervalSinceNow: 1)
+        localNotification.fireDate = Date(timeIntervalSinceNow: 1)
         localNotification.soundName = UILocalNotificationDefaultSoundName
         localNotification.alertBody = "Your haircut appointment # \(number) is \(time)!"
-        UIApplication.sharedApplication().scheduleLocalNotification(localNotification)
+        UIApplication.shared.scheduleLocalNotification(localNotification)
     }
     
     // Returns the wait time
@@ -92,7 +122,7 @@ class ViewController: UIViewController {
                 return
             } else {
                 // Non-fatal errors possible: 34,35,37,38
-                dispatch_async(dispatch_get_main_queue(), { self.greetingLabel.text = CONSTS.GET_ERROR_TEXT(etaResponseError) })
+                DispatchQueue.main.async(execute: { self.greetingLabel.text = CONSTS.GET_ERROR_TEXT(etaResponseError) })
                 self.hideGetNumber(false)
                 self.initPerformed = false
             }
@@ -106,27 +136,40 @@ class ViewController: UIViewController {
                         hasNumBool = hasNumUnwrapped as! Int == 1 ? true : false
                     }
                     var greetingLabelSelected = ""
-                    
+                    var curNumStaticLabelSelected = ""
                     if(hasNumBool == true) {
                         greetingLabelSelected = self.haircut_upcoming_label
+                        curNumStaticLabelSelected = self.yourNumText
                         self.userDefaults.addSingleEta(etaResponse["etaMinsSingle"] as! Double)
                         
                     } else {
                         greetingLabelSelected = self.existingUserGreeting
+                        curNumStaticLabelSelected = self.nextNumText
                     }
-                    dispatch_async(dispatch_get_main_queue(), { self.greetingLabel.text = "Hey \(unwrappedName), \(greetingLabelSelected)" })
+                    DispatchQueue.main.async(execute: {
+                        self.greetingLabel.text = "Hey \(unwrappedName), \(greetingLabelSelected)"
+                        self.nextNumLabelStatic.text = curNumStaticLabelSelected
+                    })
                     self.hideGetNumber(hasNumBool)
                 } else {
-                    dispatch_async(dispatch_get_main_queue(), { self.greetingLabel.text = "Hey, \(self.sign_up_label)" })
+                    DispatchQueue.main.async(execute: { self.greetingLabel.text = "Hey, \(self.sign_up_label)" })
                 }
             }
             if let etaMinsVal = etaResponse["etaMinsSingle"] as? Double {
                 let etaHrs = Int(etaMinsVal / 60)
-                let etaMins = Int(etaMinsVal % 60)
+                let etaMins = Int(etaMinsVal.truncatingRemainder(dividingBy: 60))
+                
+                if let custEtaSingle = etaResponse["custEtaSingle"] as? Int {
+                    DispatchQueue.main.async(execute: { self.nextNumLabel.text = String(custEtaSingle) })
+                }
+                if let curCustNum = etaResponse["curCustNum"] as? Int {
+                    DispatchQueue.main.async(execute: { self.curCustLabel.text = String(curCustNum) })
+                }
+                
                 if(etaHrs == 0) {
-                    dispatch_async(dispatch_get_main_queue(), { self.waitTime.text = String(etaMins) + " minutes" })
+                    DispatchQueue.main.async(execute: { self.waitTime.text = String(etaMins) + " minutes" })
                 } else {
-                    dispatch_async(dispatch_get_main_queue(), { self.waitTime.text = String (etaHrs) + " hours " + String(etaMins) + " minutes" })
+                    DispatchQueue.main.async(execute: { self.waitTime.text = String (etaHrs) + " hours " + String(etaMins) + " minutes" })
                 }
             }
             
@@ -134,20 +177,20 @@ class ViewController: UIViewController {
     }
     
     // Check if user has an appointment to decide which view to present
-    func checkForExistingAppointment(inName:String?=nil) {
+    func checkForExistingAppointment(_ inName:String?=nil) {
         if let savedName = inName {
-            dispatch_async(dispatch_get_main_queue(), { self.greetingLabel.text = "Hey \(savedName), \(self.existingUserGreeting) \(self.loadingInitGreeting)" })
+            DispatchQueue.main.async(execute: { self.greetingLabel.text = "Hey \(savedName), \(self.existingUserGreeting) \(self.loadingInitGreeting)" })
             
             if let savedPhone = userDefaults.phone {
                 postController.setEtaPostParam(savedName, phoneParam: savedPhone)
             } else {
                 postController.setEtaPostParam()
             }
+            self.getWaitTime() // make POST request here, so latest info can be loaded sooner
             if(userDefaults.idsValidBool) { // User has at least 1 appointment
                 let etaLocal :(Int, Int) = userDefaults.getEta()
                 
-                dispatch_async(dispatch_get_main_queue(),
-                               {
+                DispatchQueue.main.async(execute: {
                                 if (etaLocal.0 == 0) {
                                     self.waitTime.text="\(etaLocal.1) minutes"
                                 } else if(etaLocal.0 > 0){ // valid eta
@@ -156,6 +199,7 @@ class ViewController: UIViewController {
                                     self.waitTime.text = "..."
                                 }
                                 self.greetingLabel.text = "Hey \(savedName), \(self.hasLocalNumberGreeting)"
+                                self.nextNumLabelStatic.text = self.yourNumText
                 })
             }
             // pass in the name and phone to see if appointments exist
@@ -163,24 +207,26 @@ class ViewController: UIViewController {
             sendNotification("Hey!", messageText: self.signUpText)
             postController.setEtaPostParam()
         }
-        
-        self.getWaitTime()
     }
     
-    func handleErrorInternal(errorId: Int, errorAction: String) {
+    func handleErrorInternal(_ errorId: Int, errorAction: String) {
         if(errorAction == "UNEXPECTED_VAL") {
             //titleText:String, messageText:String, alternateAction:String?=nil
             sendNotification("No Internet", messageText: " Cannot connect to the internet or update schedules!")
         } else if(errorAction == "CLOSED") {
             self.hideGetNumber(true)
-            dispatch_async(dispatch_get_main_queue(), { self.greetingLabel.text = "Hey \(self.shopClosedGreeting)"
-                self.getNumberButton.enabled = false
-                self.reservationButton.enabled = false
-                self.Stepper.enabled = false
-                self.waitTime.hidden = true
-                self.staticApproxWait.hidden = true
-                self.cancelAppointment.hidden = true
-                self.staticApproxWait.text = self.defaultWaitTime
+            DispatchQueue.main.async(execute: { self.greetingLabel.text = "Hey \(self.shopClosedGreeting)"
+                self.getNumberButton.isEnabled = false
+                self.reservationButton.isEnabled = false
+                self.Stepper.isEnabled = false
+                self.waitTime.isHidden = true
+                self.staticApproxWait.isHidden = true
+                self.cancelAppointment.isHidden = true
+                
+                self.nextNumLabel.isHidden = true
+                self.nextNumLabelStatic.isHidden = true
+                self.curCustLabel.isHidden = true
+                self.curNumLabelStatic.isHidden = true
             })
         } else if(errorAction == "FAIL") {
             if(errorId == -10) {
@@ -192,56 +238,56 @@ class ViewController: UIViewController {
                 self.hideGetNumber(false)
             }
             
-            dispatch_async(dispatch_get_main_queue(), { self.greetingLabel.text = "Hey \(CONSTS.GET_ERROR_TEXT(errorId))"
+            DispatchQueue.main.async(execute: { self.greetingLabel.text = "Hey \(CONSTS.GET_ERROR_TEXT(errorId))"
             })
         } else if(errorAction == "DUPLICATE" || errorAction == "ACTIVE") {
             self.hideGetNumber(true)
-            dispatch_async(dispatch_get_main_queue(), { self.greetingLabel.text = "Hey \(CONSTS.GET_ERROR_TEXT(errorId))"
+            DispatchQueue.main.async(execute: { self.greetingLabel.text = "Hey \(CONSTS.GET_ERROR_TEXT(errorId))"
             })
         } else if(errorAction == "RETURNING" || errorAction == "NO_NUMBER") {
             self.hideGetNumber(false)
-            dispatch_async(dispatch_get_main_queue(), { self.greetingLabel.text = "Hey \(CONSTS.GET_ERROR_TEXT(errorId))"
+            DispatchQueue.main.async(execute: { self.greetingLabel.text = "Hey \(CONSTS.GET_ERROR_TEXT(errorId))"
             })
         } else if(errorAction == "EXCEPTION") {
-            dispatch_async(dispatch_get_main_queue(), { self.greetingLabel.text = "Hey \(CONSTS.GET_ERROR_TEXT(errorId))"
+            DispatchQueue.main.async(execute: { self.greetingLabel.text = "Hey \(CONSTS.GET_ERROR_TEXT(errorId))"
             })
         } else {
             // handle "UNK" and anything else
-            dispatch_async(dispatch_get_main_queue(), { self.greetingLabel.text = "Hey something went wrong. Restart the app and try again. If you still have the problem, call Peter and let him know so we can get it fixed."
+            DispatchQueue.main.async(execute: { self.greetingLabel.text = "Hey something went wrong. Restart the app and try again. If you still have the problem, call Peter and let him know so we can get it fixed."
             })
         }
     }
     
-    func hideGetNumber(hideGetNum: Bool) {
-        dispatch_async(dispatch_get_main_queue(),
-                       {
+    func hideGetNumber(_ hideGetNum: Bool) {
+        DispatchQueue.main.async(execute: {
                         if(hideGetNum) { // Toggle controls
-                            self.getNumberButton.hidden = true
-                            self.reservationButton.hidden = true
-                            self.cancelAppointment.hidden = false
-                            self.Stepper.hidden = true
-                            self.stepperLabel.hidden = true
+                            self.getNumberButton.isHidden = true
+                            self.reservationButton.isHidden = true
+                            self.cancelAppointment.isHidden = false
+                            self.Stepper.isHidden = true
+                            self.stepperLabel.isHidden = true
                             self.staticApproxWait.text = self.yourEtaLabel
-                            self.numHaircutsStatic.hidden = true
+                            self.nextNumLabelStatic.text = self.yourNumText
+                            self.numHaircutsStatic.isHidden = true
                         } else {
-                            self.cancelAppointment.hidden = true
-                            self.getNumberButton.hidden = false
-                            self.reservationButton.hidden = false
-                            self.Stepper.hidden = false
-                            self.stepperLabel.hidden = false
-                            self.numHaircutsStatic.hidden = false
+                            self.cancelAppointment.isHidden = true
+                            self.getNumberButton.isHidden = false
+                            self.reservationButton.isHidden = false
+                            self.Stepper.isHidden = false
+                            self.stepperLabel.isHidden = false
+                            self.numHaircutsStatic.isHidden = false
                             self.staticApproxWait.text = self.defaultWaitTime
+                            self.nextNumLabelStatic.text = self.nextNumText
                             
                         }
         })
     }
     
-    func sendNotification(titleText:String, messageText:String, alternateAction:String?=nil) {
-        dispatch_async(dispatch_get_main_queue(),
-                       {
+    func sendNotification(_ titleText:String, messageText:String, alternateAction:String?=nil) {
+        DispatchQueue.main.async(execute: {
                         
-                        let alertController = UIAlertController(title: titleText, message: messageText, preferredStyle: .Alert  )
-                        let OKAction = UIAlertAction(title: "OK", style: .Default) { (action) in
+                        let alertController = UIAlertController(title: titleText, message: messageText, preferredStyle: .alert  )
+                        let OKAction = UIAlertAction(title: "OK", style: .default) { (action) in
                             if let unrwappedAltAction = alternateAction {
                                 if(unrwappedAltAction == "Cancel") {
                                     self.processCancellation()
@@ -250,16 +296,16 @@ class ViewController: UIViewController {
                         }
                         alertController.addAction(OKAction)
                         if let unwrappedAlternateAction = alternateAction {
-                            let alternateAlertAction = UIAlertAction(title: unwrappedAlternateAction, style: .Cancel) { (action) in
+                            let alternateAlertAction = UIAlertAction(title: unwrappedAlternateAction, style: .cancel) { (action) in
                                 return // is this enough to cancel?? pass from other function?
                             }
                             alertController.addAction(alternateAlertAction)
                         }
-                        self.presentViewController(alertController, animated: true, completion: nil)
+                        self.present(alertController, animated: true, completion: nil)
         }) // end of dispatch
     }
     
-    @IBAction func getNumberWithSender(sender: UIButton) {
+    @IBAction func getNumberWithSender(_ sender: UIButton) {
         // User info does not exist
         var userName = ""
         var userPhone = ""
@@ -306,7 +352,7 @@ class ViewController: UIViewController {
                                     }
                                     // Successfully acquired numbers
                                     let getNumResponseArray = getNumResponse["getNumArray"] as! [Int: Double]
-                                    self.userDefaults.addNumber(getNumResponseArray)
+                                    self.userDefaults.addNumber(getNumResponseArray as NSDictionary)
                                     
                                     var etaHrsMinsText = ""
                                     if let firstEtaObj = getNumResponseArray.first {
@@ -314,11 +360,11 @@ class ViewController: UIViewController {
                                         if(firstEtaMins >= 60) {
                                             etaHrsMinsText = String(Int(firstEtaMins / 60)) + " hours "
                                         }
-                                        etaHrsMinsText += String(Int(firstEtaMins % 60)) + " minutes"
+                                        etaHrsMinsText += String(Int(firstEtaMins.truncatingRemainder(dividingBy: 60))) + " minutes"
                                     }
                                     
                                     let alertText = "Your next haircut is in \(etaHrsMinsText)"
-                                    dispatch_async(dispatch_get_main_queue(), { self.greetingLabel.text = "\(userName), \(alertText)" })
+                                    DispatchQueue.main.async(execute: { self.greetingLabel.text = "\(userName), \(alertText)" })
                                     
                                     var notificationText = "Nice! Your haircut is in "
                                     if(stepperCount > 1) {
@@ -331,7 +377,7 @@ class ViewController: UIViewController {
         })
     }
     
-    @IBAction func cancelAppointmentWithSender(sender: UIButton) {
+    @IBAction func cancelAppointmentWithSender(_ sender: UIButton) {
         // TODO: customer can have multiple reservations!!
         if(userDefaults.idsValidBool) { // Make sure  customer has a number -- shouldn't be visible otherwise though?
             // Prompt customer to confirm they want to delete
@@ -340,7 +386,7 @@ class ViewController: UIViewController {
             self.sendNotification("Confirmation", messageText: "Cancel Appointments?", alternateAction: cancelAction)
         }  else { // Customer doesn't have a local ID currently
             if(self.errFlag > 1) {
-                dispatch_async(dispatch_get_main_queue(), { self.greetingLabel.text = self.unknownErrorGreeting })
+                DispatchQueue.main.async(execute: { self.greetingLabel.text = self.unknownErrorGreeting })
                 self.errFlag = 0
             } else {
                 self.errFlag += 1
@@ -361,7 +407,7 @@ class ViewController: UIViewController {
                                                             self.hideGetNumber(false)
                                                             self.userDefaults.removeAllNumbers()
                                                             self.sendNotification("Appointment Cancelled", messageText: self.forIssuesAlert)
-                                                            dispatch_async(dispatch_get_main_queue(), { self.greetingLabel.text = "\(self.generalGreeting), \(delName)?" })
+                                                            DispatchQueue.main.async(execute: { self.greetingLabel.text = "\(self.generalGreeting), \(delName)?" })
                                                         } else {
                                                             self.hideGetNumber(true)
                                                             let (_, eAction) = CONSTS.GET_ERROR_ACTION(delError as! Int)
@@ -374,7 +420,7 @@ class ViewController: UIViewController {
         }
     }
     
-    @IBAction func StepperWithSender(sender: UIStepper) {
+    @IBAction func StepperWithSender(_ sender: UIStepper) {
         stepperLabel.text = String(Int(Stepper.value))
     }
     
@@ -386,46 +432,50 @@ class ViewController: UIViewController {
                     // Server error received. Return false and do nothing for now
                     self.performInit()
                 } else {
-                    dispatch_async(dispatch_get_main_queue(), {
+                    DispatchQueue.main.async(execute: {
                         if(msgLength > 25) {
                             self.greetingLabel.numberOfLines = msgLength / 25
                         }
                         self.greetingLabel.text = closedMessage
-                        self.getNumberButton.enabled = false
-                        self.reservationButton.enabled = false
-                        self.Stepper.enabled = false
-                        self.waitTime.hidden = true
-                        self.staticApproxWait.hidden = true
+                        self.getNumberButton.isEnabled = false
+                        self.reservationButton.isEnabled = false
+                        self.Stepper.isEnabled = false
+                        self.waitTime.isHidden = true
+                        self.staticApproxWait.isHidden = true
+                        
+                        self.nextNumLabel.isHidden = true
+                        self.curCustLabel.isHidden = true
+                        self.nextNumLabelStatic.isHidden = true
+                        self.curNumLabelStatic.isHidden = true
                     })
-                    return
                 }
+            } else {
+                self.performInit()
             }
-            
-            self.performInit()
             return
         })
     }
     func performInit() {
         userDefaults = User()
         checkForExistingAppointment(userDefaults.name)
-        getEtaTimer = NSTimer.scheduledTimerWithTimeInterval(10, target: self, selector: #selector(ViewController.getWaitTime), userInfo: nil, repeats: true)
+        DispatchQueue.main.async {
+            self.getEtaTimer = Timer.scheduledTimer(timeInterval: 10.0, target: self, selector: #selector(self.getWaitTime), userInfo: nil, repeats: true)
+        }
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
     }
-    override func viewWillAppear(animated: Bool) {
+    override func viewWillAppear(_ animated: Bool) {
         // First check for closed message
         // This calls performInit if there is no message
         getClosedMessage()
     }
     
-    override func viewWillDisappear(animated: Bool) {
+    override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        if let getEtaTimerUnwrapped = getEtaTimer {
-            getEtaTimerUnwrapped.invalidate()
-        }
-        getEtaTimer = nil
+        
+        getEtaTimer.invalidate()
         initPerformed = false
     }
     

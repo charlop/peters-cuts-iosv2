@@ -1,6 +1,30 @@
 import UIKit
 import CoreData
 import Foundation
+// FIXME: comparison operators with optionals were removed from the Swift Standard Libary.
+// Consider refactoring the code to use the non-optional operators.
+fileprivate func < <T : Comparable>(lhs: T?, rhs: T?) -> Bool {
+  switch (lhs, rhs) {
+  case let (l?, r?):
+    return l < r
+  case (nil, _?):
+    return true
+  default:
+    return false
+  }
+}
+
+// FIXME: comparison operators with optionals were removed from the Swift Standard Libary.
+// Consider refactoring the code to use the non-optional operators.
+fileprivate func > <T : Comparable>(lhs: T?, rhs: T?) -> Bool {
+  switch (lhs, rhs) {
+  case let (l?, r?):
+    return l > r
+  default:
+    return rhs < lhs
+  }
+}
+
 
 class userInfoViewController: UIViewController {
     @IBOutlet weak var nameField: UITextField!
@@ -40,51 +64,51 @@ class userInfoViewController: UIViewController {
             emailField.text = extemail
         }
         if(phoneValid && nameValid) {
-            saveButton.enabled=true
+            saveButton.isEnabled=true
         }
     }
     
     // On namefield change
-    @IBAction func validateNameWithSenderWithSender(sender: AnyObject) {
+    @IBAction func validateNameWithSenderWithSender(_ sender: AnyObject) {
         if(nameField.text == nil || nameField.text == "" || nameField.text?.characters.count < 3) {
-            nameInvalidLabel.hidden = false
-            saveButton.enabled=false
+            nameInvalidLabel.isHidden = false
+            saveButton.isEnabled=false
             nameValid = false
         } else {
             nameValid = true
             if(nameValid && phoneValid) {
-                saveButton.enabled=true
+                saveButton.isEnabled=true
             }
-            nameInvalidLabel.hidden = true
+            nameInvalidLabel.isHidden = true
         }
     }
     
-    @IBAction func validatePhoneWithSenderWithSender(sender: AnyObject) {
+    @IBAction func validatePhoneWithSenderWithSender(_ sender: AnyObject) {
         if(phoneField.text == nil || phoneField.text == "" || phoneField.text?.characters.count < 10 || phoneField.text?.characters.count > 20) {
-            phoneInvalidLabel.hidden = false
-            saveButton.enabled=false
+            phoneInvalidLabel.isHidden = false
+            saveButton.isEnabled=false
             phoneValid = false
         } else {
             do {
                 let regexStr = "^(?:(?:\\+?1\\s*(?:[.-]\\s*)?)?(?:\\(\\s*([2-9]1[02-9]|[2-9][02-8]1|[2-9][02-8][02-9])\\s*\\)|([2-9]1[02-9]|[2-9][02-8]1|[2-9][02-8][02-9]))\\s*(?:[.-]\\s*)?)?([2-9]1[02-9]|[2-9][02-9]1|[2-9][02-9]{2})\\s*(?:[.-]\\s*)?([0-9]{4})(?:\\s*(?:#|x\\.?|ext\\.?|extension)\\s*(\\d+))?$"
                 let validatePhoneRegex = try NSRegularExpression(pattern: regexStr, options: [])
-                if validatePhoneRegex.firstMatchInString(phoneField.text!, options: [], range: NSMakeRange(0, phoneField.text!.characters.count)) != nil {
+                if validatePhoneRegex.firstMatch(in: phoneField.text!, options: [], range: NSMakeRange(0, phoneField.text!.characters.count)) != nil {
                     // valid phone number
                     phoneValid = true
                     if(nameValid && phoneValid) {
-                        saveButton.enabled=true
+                        saveButton.isEnabled=true
                     }
-                    phoneInvalidLabel.hidden = true
+                    phoneInvalidLabel.isHidden = true
                 } else {
                     // invalid phone number
-                    phoneInvalidLabel.hidden = false
-                    saveButton.enabled=false
+                    phoneInvalidLabel.isHidden = false
+                    saveButton.isEnabled=false
                     phoneValid = false
                 }
             } catch _ as NSError {
                 // treat as invalid?
-                phoneInvalidLabel.hidden = false
-                saveButton.enabled=false
+                phoneInvalidLabel.isHidden = false
+                saveButton.isEnabled=false
                 phoneValid = false
             }
         }
@@ -99,15 +123,15 @@ class userInfoViewController: UIViewController {
         // Dispose of any resources that can be recreated.
     }
     
-    @IBAction func saveButtonActionWithSender(sender: AnyObject) {
+    @IBAction func saveButtonActionWithSender(_ sender: AnyObject) {
         if let name = nameField.text {
             if let phone = phoneField.text {
                 userDefaults.saveUserDetails(name, inPhone: phone, inEmail: emailField.text!)
             } else {
-                phoneInvalidLabel.hidden = false
+                phoneInvalidLabel.isHidden = false
             }
         } else {
-            nameInvalidLabel.hidden = false
+            nameInvalidLabel.isHidden = false
         }
     }
 }

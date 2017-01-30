@@ -3,19 +3,19 @@ import CoreData
 import Foundation
 
 class aboutViewController: UIViewController {
-    @IBAction func call(sender: UIButton) {
+    @IBAction func call(_ sender: UIButton) {
         
         // Launch dialer
-        let url:NSURL = NSURL(string: "tel://5198162887")!
+        let url:URL = URL(string: "tel://5198162887")!
         
-        if (UIApplication.sharedApplication().canOpenURL(url))
+        if (UIApplication.shared.canOpenURL(url))
         {
-            UIApplication.sharedApplication().openURL(url)
+            UIApplication.shared.openURL(url)
         }
     }
     
-    @IBAction func directions(sender: UIButton) {
-        if let url = NSURL(string: "http://maps.apple.com/?daddr=939+Wyandotte+St+E+Windsor+ON") { UIApplication.sharedApplication().openURL(url)
+    @IBAction func directions(_ sender: UIButton) {
+        if let url = URL(string: "http://maps.apple.com/?daddr=939+Wyandotte+St+E+Windsor+ON") { UIApplication.shared.openURL(url)
         }
     }
     

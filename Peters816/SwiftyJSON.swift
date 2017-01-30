@@ -189,7 +189,7 @@ public struct JSON {
     public var error: NSError? { get { return self._error } }
     
     /// The static null json
-    @available(*, unavailable, renamed="null")
+    @available(*, unavailable, renamed: "null")
     public static var nullJSON: JSON { get { return null } }
     public static var null: JSON { get { return JSON(NSNull()) } }
 }
@@ -602,7 +602,7 @@ extension JSON: Swift.DictionaryLiteralConvertible {
             var d = dictionary
             d[element.0] = element.1
             return d
-            })
+        })
     }
 }
 
@@ -907,7 +907,7 @@ extension JSON {
         }
     }
     public func exists() -> Bool{
-        if let errorValue = error where errorValue.code == ErrorNotExist{
+        if let errorValue = error, errorValue.code == ErrorNotExist{
             return false
         }
         return true

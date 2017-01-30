@@ -10,7 +10,7 @@ import Foundation
 
 
 class CONSTS {
-    class func GET_ERROR_TEXT(errorId : Int) -> String {
+    class func GET_ERROR_TEXT(_ errorId : Int) -> String {
         switch errorId {
         case -888: return "Exception hit. We'd really appreciate if you call Peter and tell him how it happened."
         case -500: return "Can't get any information. Call Peter to see what's up."
@@ -34,7 +34,7 @@ class CONSTS {
     
     // TBD: this needs to do something (isFatal, Action)
     // NON-SERVER RESPONSE CODES MUST BE FATAL
-    class func GET_ERROR_ACTION(errorId : Int) -> (Bool, String) {
+    class func GET_ERROR_ACTION(_ errorId : Int) -> (Bool, String) {
         switch errorId {
         case -888: return (true, "EXCEPTION")       // non-server response
         case -500: return (true, "UNEXPECTED_VAL") // non-server response code
@@ -58,7 +58,7 @@ class CONSTS {
     }
     
     // Only for the ones that need this!
-    class func GET_ERROR_CODE(errorAction : String) -> Int {
+    class func GET_ERROR_CODE(_ errorAction : String) -> Int {
         switch errorAction {
         case "GET_NUM_FAIL": return -5
         case "DEL_NUM_FAIL": return -10

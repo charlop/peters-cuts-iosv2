@@ -9,123 +9,125 @@
 import Foundation
 
 class PostController {
-    var GET_ETA_REQUEST:NSMutableURLRequest!
-    var GET_ETA_SESSION:NSURLSession!
-    var GET_NUMBER_POST_REQUEST:NSMutableURLRequest!
-    var GET_NUMBER_POST_SESSION:NSURLSession!
+    var GET_ETA_REQUEST:URLRequest!
+    var GET_ETA_SESSION:URLSession!
+    var GET_NUMBER_POST_REQUEST:URLRequest!
+    var GET_NUMBER_POST_SESSION:URLSession!
     
-    var GET_CLOSED_MESSAGE_POST_REQUEST:NSMutableURLRequest!
-    var GET_CLOSED_MESSAGE_POST_SESSION:NSURLSession!
+    var GET_CLOSED_MESSAGE_POST_REQUEST:URLRequest!
+    var GET_CLOSED_MESSAGE_POST_SESSION:URLSession!
     
-    var APP_REQUEST_URL:NSURL = NSURL(string: "http://peterscuts.com/lib/app_request2.php")!
+    var APP_REQUEST_URL:URL = URL(string: "http://peterscuts.com/lib/app_request2.php")!
     var GET_ETA_PARAM:String = "get_next_num=1"
     var GET_MESSAGE_PARM:String = "getClosedMessage=1"
-    var postHasNumber = false
+    var postHasNumber = 0
     
     
     // Kind of unrelated, do they need their own methods?
-    var GET_OPEN_SPOTS_REQUEST:NSMutableURLRequest!
-    var GET_OPEN_SPOTS_SESSION:NSURLSession!
+    var GET_OPEN_SPOTS_REQUEST:URLRequest!
+    var GET_OPEN_SPOTS_SESSION:URLSession!
     var GET_QUEUE_PARAMS:String = "get_available=1" // returns open spots with id and start_time
     
-    func getOpeningsPostRequest() -> NSMutableURLRequest {
+    func getOpeningsPostRequest() -> URLRequest {
         if(GET_OPEN_SPOTS_REQUEST == nil) {
-            GET_OPEN_SPOTS_REQUEST = NSMutableURLRequest(URL: APP_REQUEST_URL)
-            GET_OPEN_SPOTS_REQUEST.HTTPMethod = "POST"
+            GET_OPEN_SPOTS_REQUEST = URLRequest(url: APP_REQUEST_URL)
+            GET_OPEN_SPOTS_REQUEST.httpMethod = "POST"
         }
         return GET_OPEN_SPOTS_REQUEST
     }
-    func getOpeningsPostSession() -> NSURLSession {
+    func getOpeningsPostSession() -> URLSession {
         if(GET_OPEN_SPOTS_SESSION == nil) {
-            GET_OPEN_SPOTS_SESSION = NSURLSession.sharedSession()
+            GET_OPEN_SPOTS_SESSION = URLSession.shared
         }
         return GET_OPEN_SPOTS_SESSION
     }
     // end reservation methods
     
     
-    func getEtaPostRequest() -> NSMutableURLRequest {
+    func getEtaPostRequest() -> URLRequest {
         if(GET_ETA_REQUEST == nil) {
-            GET_ETA_REQUEST = NSMutableURLRequest(URL: APP_REQUEST_URL)
-            GET_ETA_REQUEST.HTTPMethod = "POST"
+            GET_ETA_REQUEST = URLRequest(url: APP_REQUEST_URL)
+            GET_ETA_REQUEST.httpMethod = "POST"
         }
         return GET_ETA_REQUEST
     }
-    func getEtaPostSession() -> NSURLSession {
+    func getEtaPostSession() -> URLSession {
         if(GET_ETA_SESSION == nil) {
-            GET_ETA_SESSION = NSURLSession.sharedSession()
+            GET_ETA_SESSION = URLSession.shared
         }
         return GET_ETA_SESSION
     }
-    func getNumberPostRequest() -> NSMutableURLRequest {
+    func getNumberPostRequest() -> URLRequest {
         if(GET_NUMBER_POST_REQUEST == nil) {
-            GET_NUMBER_POST_REQUEST = NSMutableURLRequest(URL: APP_REQUEST_URL)
-            GET_NUMBER_POST_REQUEST.HTTPMethod = "POST"
+            GET_NUMBER_POST_REQUEST = URLRequest(url: APP_REQUEST_URL)
+            GET_NUMBER_POST_REQUEST.httpMethod = "POST"
         }
         return GET_NUMBER_POST_REQUEST
     }
-    func getNumberPostSession() -> NSURLSession {
+    func getNumberPostSession() -> URLSession {
         if(GET_NUMBER_POST_SESSION == nil) {
-            GET_NUMBER_POST_SESSION = NSURLSession.sharedSession()
+            GET_NUMBER_POST_SESSION = URLSession.shared
         }
         return GET_NUMBER_POST_SESSION
     }
-    func getClosedMessagePostRequest() -> NSMutableURLRequest {
+    func getClosedMessagePostRequest() -> URLRequest {
         if(GET_CLOSED_MESSAGE_POST_REQUEST == nil) {
-            GET_CLOSED_MESSAGE_POST_REQUEST = NSMutableURLRequest(URL: APP_REQUEST_URL)
-            GET_CLOSED_MESSAGE_POST_REQUEST.HTTPMethod = "POST"
+            GET_CLOSED_MESSAGE_POST_REQUEST = URLRequest(url: APP_REQUEST_URL)
+            GET_CLOSED_MESSAGE_POST_REQUEST.httpMethod = "POST"
             
         }
         return GET_CLOSED_MESSAGE_POST_REQUEST
     }
-    func getClosedMessagePostSession() -> NSURLSession {
+    func getClosedMessagePostSession() -> URLSession {
         if(GET_CLOSED_MESSAGE_POST_SESSION == nil) {
-            GET_CLOSED_MESSAGE_POST_SESSION = NSURLSession.sharedSession()
+            GET_CLOSED_MESSAGE_POST_SESSION = URLSession.shared
         }
         return GET_CLOSED_MESSAGE_POST_SESSION
     }
     
     // Set the request parms
-    func setEtaPostParam(nameParam:String?=nil, phoneParam:String?=nil) {
+    func setEtaPostParam(_ nameParam:String?=nil, phoneParam:String?=nil) {
         if let nameUnwrapped = nameParam {
             if let phoneUnwrapped = phoneParam {
                 GET_ETA_PARAM = "etaName=\(nameUnwrapped)&etaPhone=\(phoneUnwrapped)"
-                postHasNumber = true
+                postHasNumber = 1
                 return
             }
         }
         
         // Fall through -- name or phone input was nil
         GET_ETA_PARAM = "get_next_num=1"
-        postHasNumber = false
+        postHasNumber = 0
     }
     
     // Check if user has an existing appointment
     // Possible errors returned:
     //      <1,2,9>,<34,35,37,38>
-    func getEta(completionHandler:(etaResponse:[String: AnyObject]) -> Void!) {
+    func getEta(_ completionHandler:@escaping (_ etaResponse:[String: AnyObject]) -> Void!) {
         var etaResponse = [String: AnyObject]()
         
-        getEtaPostRequest().HTTPBody = self.GET_ETA_PARAM.dataUsingEncoding(NSUTF8StringEncoding)
-        let task = getEtaPostSession().dataTaskWithRequest(getEtaPostRequest()){ data,response,error in
+        var getEtaPost = getEtaPostRequest()
+        getEtaPost.httpBody = self.GET_ETA_PARAM.data(using: String.Encoding.utf8)
+        
+        let task = getEtaPostSession().dataTask(with: getEtaPost, completionHandler: { data,response,error in
             if error != nil {
-                etaResponse.updateValue(-500, forKey: "error")
-                completionHandler(etaResponse: etaResponse)
+                etaResponse.updateValue(-500 as AnyObject, forKey: "error")
+                completionHandler(etaResponse)
                 return
             } else {
                 do {
                     
                     var responseJSON:[Dictionary<String,AnyObject>] = [[:],[:]]
                     if let dataUnwrapped = data {
-                        let responseJSONWrapped = try NSJSONSerialization.JSONObjectWithData(dataUnwrapped, options: []) as? [[String:AnyObject]]
+                        let responseJSONWrapped = try JSONSerialization.jsonObject(with: dataUnwrapped, options: []) as? [[String:AnyObject]]
                         
                         if(responseJSONWrapped == nil) {
                             // fatal error was hit...
                             
-                            responseJSON[0]["error"] = -38
-                            responseJSON[0]["fatal"] = 0
-                            responseJSON[1]["error"] = -2
-                            responseJSON[1]["fatal"] = 1
+                            responseJSON[0]["error"] = -38 as AnyObject
+                            responseJSON[0]["fatal"] = 0 as AnyObject
+                            responseJSON[1]["error"] = -2 as AnyObject
+                            responseJSON[1]["fatal"] = 1 as AnyObject
                         } else {
                             responseJSON = responseJSONWrapped!
                         }
@@ -134,13 +136,13 @@ class PostController {
                     var errorHit = false
                     if let errorVal = responseJSON[0]["error"] {
                         self.setEtaPostParam()
-                        etaResponse.updateValue(errorVal as! Int, forKey: "error")
+                        etaResponse.updateValue(errorVal as AnyObject, forKey: "error")
                         errorHit = true
                         
                         let fatalInd = responseJSON[0]["fatal"] as! Int
                         if(fatalInd == 1) {
                             // Fatal error -- 1,2,9 -- these are only returned when user does not have a number (i.e. getNextNum)
-                            completionHandler(etaResponse: etaResponse)
+                            completionHandler(etaResponse)
                             return
                         } else {  // Non-fatal error from etaName and etaPhone (user does not have a number)
                             // User does not have a number, still got a valid eta response
@@ -149,58 +151,67 @@ class PostController {
                                 let getNextNumFatalInd = responseJSON[1]["fatal"] as! Int
                                 if(getNextNumFatalInd == 1) {
                                     // Fatal error -- 1,2,9
-                                    completionHandler(etaResponse: etaResponse)
+                                    completionHandler(etaResponse)
                                     return
                                 } else {
                                     // Currently cannot reach this spot, as the second-level errors are always fatal. Treat as fatal, may be changed in the future as needed
                                 }
-                                completionHandler(etaResponse: etaResponse)
+                                completionHandler(etaResponse)
                                 return
                             } else {
                                 // Non-fatal error -- 34,35,37,38; received valid eta response from getNextNum
                             }
                         }
-                        etaResponse.updateValue(0, forKey: "hasNumBool")
+                        etaResponse.updateValue(0 as AnyObject, forKey: "hasNumBool")
                     } else {
-                        etaResponse.updateValue(self.postHasNumber, forKey: "hasNumBool")
+                        etaResponse.updateValue(self.postHasNumber as AnyObject, forKey: "hasNumBool")
                     }
                     
-                    // Will be returned whether user has a number or not
-                    //var etaMinsArray = [(Int, Double)]()
                     if(errorHit == false) { // this means NO error was found
                         let etaResponseArray = responseJSON[0]["etaArray"] as! [[String: AnyObject]]
+                        
+                        // TODO: replace this with the commented code below, currently only using the first number even if customer has multiple appointments
+                        let etaMinVal = etaResponseArray[0]["etaMins"] as! Double
+                        let custEtaId = etaResponseArray[0]["id"] as! Int
+                        let curId = etaResponseArray[0]["curNum"] as! Int
+                        etaResponse.updateValue(etaMinVal as AnyObject, forKey: "etaMinsSingle")
+                        etaResponse.updateValue(custEtaId as AnyObject, forKey: "custEtaSingle")
+                        etaResponse.updateValue(curId as AnyObject, forKey: "curCustNum")
+                        
+                    // TODO: previous code (commented below) stores only the LAST appointment; would not give accurate ETA
+                    /*
                         for i in 1...etaResponseArray.count {
                             let etaMinVal = etaResponseArray[i-1]["etaMins"] as! Double
                             //let etaId = etaResponseArray[i-1]["id"] as! Int
-                            etaResponse.updateValue(etaMinVal, forKey: "etaMinsSingle")
+                            etaResponse.updateValue(etaMinVal as AnyObject, forKey: "etaMinsSingle")
                         }
-                    } else { // non-fatal error was hit
+                    */
+                    } else { // non-fatal error was hit (customer does not have a number)
                         self.setEtaPostParam()
                         var responseRecord:[[String: AnyObject]]
-                        if(errorHit) { // e.g. need to go into array index 1
-                            responseRecord = responseJSON[1]["etaArray"] as! [[String: AnyObject]]
-                        } else {
-                            // go into array index 0
-                            responseRecord = responseJSON[0]["etaArray"] as! [[String: AnyObject]]
-                        }
+                        responseRecord = responseJSON[1]["etaArray"] as! [[String: AnyObject]]
                         let etaMinVal = responseRecord[0]["etaMins"] as! Double
-                        //let etaId = responseRecord[0]["id"] as! Int
-                        etaResponse.updateValue(etaMinVal, forKey: "etaMinsSingle")
+                        let custEtaId = responseRecord[0]["id"] as! Int // this is the next available #
+                        let curId = responseRecord[0]["curNum"] as! Int
+                        etaResponse.updateValue(etaMinVal as AnyObject, forKey: "etaMinsSingle")
+                        etaResponse.updateValue(custEtaId as AnyObject, forKey: "custEtaSingle")
+                        etaResponse.updateValue(curId as AnyObject, forKey: "curCustNum")
+
                     }
-                    completionHandler(etaResponse: etaResponse)
+                    completionHandler(etaResponse)
                     return
-                } catch _ {
-                    print("error hit..")
+                } catch {
+                    print("error hit in PostController.getEta()")
                 }
                 
             }
-        }
+        })
         task.resume()
     }
     
     // Get a number
     // Possible errors returned: <2,5,7>
-    func getNumber(inId:Int?=nil, inName:String, inPhone:String, numRes:Int?=1, inEmailParm:String?=nil, completionHandler:(getNumResponse:[String: AnyObject]) -> Void!) {
+    func getNumber(_ inId:Int?=nil, inName:String, inPhone:String, numRes:Int?=1, inEmailParm:String?=nil, completionHandler:@escaping (_ getNumResponse:[String: AnyObject]) -> Void!) {
         var reservationInd = false
         var GET_NUM_PARAM = "user_name=\(inName)&user_phone=\(inPhone)&numRes=\(numRes!)"
         
@@ -209,27 +220,28 @@ class PostController {
             GET_NUM_PARAM += "&get_res=\(String(inIdUnwrapped))"
             reservationInd = true
         }
-        getNumberPostRequest().HTTPBody = GET_NUM_PARAM.dataUsingEncoding(NSUTF8StringEncoding)
+        var getNumPostReq = getNumberPostRequest()
+        getNumPostReq.httpBody = GET_NUM_PARAM.data(using: String.Encoding.utf8)
         
         var getNumResponse = [String: AnyObject]()
         
-        let task = getNumberPostSession().dataTaskWithRequest(getNumberPostRequest()) { data,response,error in
+        let task = getNumberPostSession().dataTask(with: getNumPostReq, completionHandler: { data,response,error in
             if error != nil {
-                getNumResponse.updateValue(-500, forKey: "error")
+                getNumResponse.updateValue(-500 as AnyObject, forKey: "error")
                 self.setEtaPostParam()
-                completionHandler(getNumResponse: getNumResponse)
+                completionHandler(getNumResponse)
                 return
             } else { // No http error
                 do {
-                    let responseJSON = try NSJSONSerialization.JSONObjectWithData(data!, options: []) as! [[String: AnyObject]]
+                    let responseJSON = try JSONSerialization.jsonObject(with: data!, options: []) as! [[String: AnyObject]]
                     
                     // First make sure an expected response was received
                     if let getNumError = responseJSON[0]["error"] {
                         let getNumFatal = responseJSON[0]["fatal"] as! Int
-                        getNumResponse.updateValue(getNumError as! Int, forKey: "error")
+                        getNumResponse.updateValue(getNumError as AnyObject, forKey: "error")
                         if(getNumFatal == 1) {
                             self.setEtaPostParam()
-                            completionHandler(getNumResponse: getNumResponse)
+                            completionHandler(getNumResponse)
                             return
                         }
                     }
@@ -238,45 +250,46 @@ class PostController {
                     self.setEtaPostParam(inName, phoneParam: inPhone)
                     
                     if(reservationInd) {
-                        getNumResponse.updateValue(responseJSON[0]["id"] as! Int, forKey: "id")
+                        getNumResponse.updateValue(responseJSON[0]["id"] as AnyObject, forKey: "id")
                         // TODO: add etaMins here?
-                        completionHandler(getNumResponse: getNumResponse)
+                        completionHandler(getNumResponse)
                     } else {
                         var getNumArray = [Int: Double]()
                         for i in 1...responseJSON.count {
                             getNumArray.updateValue(responseJSON[i-1]["etaMins"] as! Double, forKey: responseJSON[i-1]["id"] as! Int)
                         }
-                        getNumResponse.updateValue(getNumArray, forKey: "getNumArray")
-                        completionHandler(getNumResponse:getNumResponse)
+                        getNumResponse.updateValue(getNumArray as AnyObject, forKey: "getNumArray")
+                        completionHandler(getNumResponse)
                     }
                     return
                 } catch {
-                    getNumResponse.updateValue(-888, forKey: "error")
-                    completionHandler(getNumResponse: getNumResponse)
+                    getNumResponse.updateValue(-888 as AnyObject, forKey: "error")
+                    completionHandler(getNumResponse)
                     return
                 }
             }
-        }
+        }) 
         task.resume()
     }
     
     // Cancel Appointment
     // Possible Errors returned: <-10>
     
-    func cancelAppointment(delName: String, delPhone: String, completionHandler:(delResponse:[String:AnyObject]) -> Void!) {
+    func cancelAppointment(_ delName: String, delPhone: String, completionHandler:@escaping (_ delResponse:[String:AnyObject]) -> Void!) {
         let DEL_NUM_PARAM = "deleteName=\(delName)&deletePhone=\(delPhone)"
-        getNumberPostRequest().HTTPBody = DEL_NUM_PARAM.dataUsingEncoding(NSUTF8StringEncoding)
+        var getNumPostReq = getNumberPostRequest()
+        getNumPostReq.httpBody = DEL_NUM_PARAM.data(using: String.Encoding.utf8)
         
         var cancelResponse = [String: AnyObject]()
         
-        let task = getNumberPostSession().dataTaskWithRequest(getNumberPostRequest()){ data,response,error in
+        let task = getNumberPostSession().dataTask(with: getNumPostReq, completionHandler: { data,response,error in
             if error != nil{
-                cancelResponse.updateValue(-500, forKey: "error")
-                completionHandler(delResponse: cancelResponse)
+                cancelResponse.updateValue(-500 as AnyObject, forKey: "error")
+                completionHandler(cancelResponse)
                 return
             } else {
                 do {
-                    let responseJSON = try NSJSONSerialization.JSONObjectWithData(data!, options: []  ) as! [[String: AnyObject]]
+                    let responseJSON = try JSONSerialization.jsonObject(with: data!, options: []  ) as! [[String: AnyObject]]
                     
                     var delResult:Int = 0
                     
@@ -287,37 +300,38 @@ class PostController {
                     }
                     
                     self.setEtaPostParam()
-                    cancelResponse.updateValue(delResult, forKey: "error")
-                    completionHandler(delResponse:cancelResponse)
+                    cancelResponse.updateValue(delResult as AnyObject, forKey: "error")
+                    completionHandler(cancelResponse)
                     return
                 } catch {
-                    cancelResponse.updateValue(-500, forKey: "error")
-                    completionHandler(delResponse:cancelResponse)
+                    cancelResponse.updateValue(-500 as AnyObject, forKey: "error")
+                    completionHandler(cancelResponse)
                     return
                 }
             }
-        }
+        })
         task.resume()
     }
     
     // Get available reservations
-    func getOpenings(completionHandler:(openingsArray:[String: AnyObject]) -> Void!)  {
-        getOpeningsPostRequest().HTTPBody = GET_QUEUE_PARAMS.dataUsingEncoding(NSUTF8StringEncoding)
+    func getOpenings(_ completionHandler:@escaping (_ openingsArray:[String: AnyObject]) -> Void!)  {
+        var getOpeningsPostReq = getOpeningsPostRequest()
+        getOpeningsPostReq.httpBody = GET_QUEUE_PARAMS.data(using: String.Encoding.utf8)
         
         var openingsArray = [String: AnyObject]()
-        let task = getOpeningsPostSession().dataTaskWithRequest(getOpeningsPostRequest()) { data,response, error in
+        let task = getOpeningsPostSession().dataTask(with: getOpeningsPostReq, completionHandler: { data,response, error in
             if error != nil {
-                openingsArray.updateValue(-500, forKey: "error")
-                completionHandler(openingsArray: openingsArray)
+                openingsArray.updateValue(-500 as AnyObject, forKey: "error")
+                completionHandler(openingsArray)
                 return
             }
             do {
-                let responseJSON = try NSJSONSerialization.JSONObjectWithData(data!, options: []) as! [[String: AnyObject]]
+                let responseJSON = try JSONSerialization.jsonObject(with: data!, options: []) as! [[String: AnyObject]]
                 if let errorId = responseJSON[0]["error"] {
                     let errorFatalInd = responseJSON[0]["fatal"] as! Int
                     if(errorFatalInd == 1) { // presently only fatal errors are being thrown
-                        openingsArray.updateValue(errorId as! Int, forKey: "error")
-                        completionHandler(openingsArray: openingsArray)
+                        openingsArray.updateValue(errorId as AnyObject, forKey: "error")
+                        completionHandler(openingsArray)
                         return
                     }
                 }
@@ -330,31 +344,32 @@ class PostController {
                     availableSpots.updateValue(curId, forKey: curStartTime)
                     availableSpotsArray.append(curStartTime)
                 }
-                openingsArray.updateValue(availableSpotsArray, forKey: "availableSpotsArray")
-                openingsArray.updateValue(availableSpots, forKey: "availableSpots")
-                completionHandler(openingsArray: openingsArray)
+                openingsArray.updateValue(availableSpotsArray as AnyObject, forKey: "availableSpotsArray")
+                openingsArray.updateValue(availableSpots as AnyObject, forKey: "availableSpots")
+                completionHandler(openingsArray)
                 return
             } catch {
-                openingsArray.updateValue(-500, forKey: "error")
-                completionHandler(openingsArray: openingsArray)
+                openingsArray.updateValue(-500 as AnyObject, forKey: "error")
+                completionHandler(openingsArray)
             }
-        }
+        }) 
         task.resume()
     }
     
-    func getClosedMessage(completionHandler:(closedMessage:String) -> Void!) {
-        getClosedMessagePostRequest().HTTPBody = GET_MESSAGE_PARM.dataUsingEncoding(NSUTF8StringEncoding)
+    func getClosedMessage(_ completionHandler:@escaping (_ closedMessage:String) -> Void!) {
+        var getClosedMessagePostReq = getClosedMessagePostRequest()
+        getClosedMessagePostReq.httpBody = GET_MESSAGE_PARM.data(using: String.Encoding.utf8)
         
-        let task = getClosedMessagePostSession().dataTaskWithRequest(getClosedMessagePostRequest()) { data,response, error in
+        let task = getClosedMessagePostSession().dataTask(with: getClosedMessagePostRequest(), completionHandler: { data,response, error in
             if error != nil {
-                completionHandler(closedMessage: "-500")
+                completionHandler("-500")
                 return
             }
-            if let retString = String(data: data!, encoding: NSUTF8StringEncoding) {
-                completionHandler(closedMessage: retString)
+            if let retString = String(data: data!, encoding: String.Encoding.utf8) {
+                completionHandler(retString)
             }
             return
-        }
+        }) 
         task.resume()
     }
     // Make a reservation
