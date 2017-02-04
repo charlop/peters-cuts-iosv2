@@ -49,11 +49,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func applicationWillTerminate(_ application: UIApplication) {
         // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
         // Saves changes in the application's managed object context before the application terminates.
-        self.saveContext()
+        
+        // Below line removed, assuming it's not needed since CoreData is not being used.
+        // Delete prior to release if no issues found (removed 2017-02-04)
+        //self.saveContext()
     }
     
     // MARK: - Core Data stack
-    
+    /* REMOVING CORE DATA STACK, THIS ISN'T EVEN USED IS IT???
     lazy var applicationDocumentsDirectory: URL = {
         // The directory the application uses to store the Core Data store file. This code uses a directory named "com.Peters816" in the application's documents Application Support directory.
         let urls = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
@@ -115,6 +118,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             }
         }
     }
-    
+     END CORE DATA CODE
+    */
 }
 

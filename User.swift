@@ -48,7 +48,7 @@ class User {
         // Clear out anything stored locally
         userDefaults.removeObject(forKey: "cust_id_dict")
         self.cancelLocalNotification() // cancel notification
-        if let tmpDict :[Int: Double] = (newIds as! [Int : Double]) {
+        if let tmpDict = (newIds as? [Int : Double]) {
             var tmpUdNSDict : [String: Date] = Dictionary()
             
             var firstNumberFlag = true

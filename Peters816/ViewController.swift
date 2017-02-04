@@ -43,6 +43,9 @@ class ViewController: UIViewController {
     @IBOutlet weak var nextNumLabel: UILabel!
     @IBOutlet weak var curNumLabelStatic: UILabel!
     
+    
+    
+    
     let postController = PostController()
     let postErrorHandler = PostErrorHandler()
     var initPerformed = false
@@ -498,3 +501,35 @@ class ViewController: UIViewController {
     }
     
 }// end of view controller
+
+
+extension UIView {
+    
+    @IBInspectable var cornerRadius: CGFloat {
+        get {
+            return layer.cornerRadius
+        }
+        set {
+            layer.cornerRadius = newValue
+            layer.masksToBounds = newValue > 0
+        }
+    }
+    
+    @IBInspectable var borderWidth: CGFloat {
+        get {
+            return layer.borderWidth
+        }
+        set {
+            layer.borderWidth = newValue
+        }
+    }
+    
+    @IBInspectable var borderColor: UIColor? {
+        get {
+            return UIColor(cgColor: layer.borderColor!)
+        }
+        set {
+            layer.borderColor = newValue?.cgColor
+        }
+    }
+}
