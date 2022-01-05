@@ -10,183 +10,244 @@ import Foundation
 import UIKit
 
 class User {
-    var name :String?
-    var phone :String?
-    var email :String?
-    var cust_ids = [Int: Date]()
-    var expireAfter :Int? // only storing day of the month
-    var idsValidBool:Bool = false
+    private var name :String
+    private var phone :String
+    private var email :String
+    //private var expireAfter :Int // only storing day of the month
+    //private var hasAppointment:Bool
+    
+    private var appointmentArray = [Appointment()]
     
     var userDefaults = UserDefaults.standard
     
     init() {
-        userDefaults = UserDefaults.standard
-        name = userDefaults.string(forKey: "name")
-        phone = userDefaults.string(forKey: "phone")
-        email = userDefaults.string(forKey: "email")
-        expireAfter = userDefaults.integer(forKey: "expiryDate")
+        name = ""
+        phone = ""
+        email = ""
         
-        if(idsValid()) {
-            // Retrieve the Id, start_hr, start_min
-            if let localIds = userDefaults.dictionary(forKey: "cust_id_dict") {
-                cust_ids.removeAll()
-                for (key,value) in localIds {
-                    // Loading the customer IDs and app_start_time -- needs to be in UTC
-                    cust_ids.updateValue(value as! Date, forKey: Int(key)!)
-                }
+        if(userDefaults.string(forKey: "name") != nil) {
+            name = userDefaults.string(forKey: "name")!
+        }
+        if(userDefaults.string(forKey: "phone") != nil) {
+            phone = userDefaults.string(forKey: "phone")!
+        }
+        if(userDefaults.string(forKey: "email") != nil) {
+            email = userDefaults.string(forKey: "email")!
+        }
+
+        if let restoredAppointmentArray = userDefaults.object(forKey: "appointment") as? NSData {
+            if let unwrappedAppointmentArray = NSKeyedUnarchiver.unarchiveObject(with: restoredAppointmentArray as Data) as? [Appointment] {
+                appointmentArray = unwrappedAppointmentArray
             }
-            idsValidBool = true
+        }
+
+        self.validateIds()
+    }
+    // if appointmentStatus and nextId are the same, appointment has not been changed
+    // constantly varying: lastErrorReceived, currentId
+    // constant regardless: startTimeUTCSeconds -- will change if user does not have appointment
+    
+    func addOrUpdateAppointment(newAppointment:Appointment) {
+        if(newAppointment.getAppointmentStatus() == CONSTS.AppointmentStatus.NO_APPOINTMENT) {
+            if(appointmentArray[0].getAppointmentStatus() != CONSTS.AppointmentStatus.NO_APPOINTMENT) {
+                self.removeAppointmentAtIndex(aptIndex: -1)
+            }
+            appointmentArray = [newAppointment]
+        } else { // newAppointment has number
+            if(appointmentArray.count > 1) {
+                self.validateIds()
+            }
+            if(!newAppointment.appointmentUnchanged(newAppointment: appointmentArray[0])) { // appointments are different
+                self.removeAppointmentAtIndex(aptIndex: -1)
+                self.addAppointment(newAppointment: newAppointment)
+            } else {
+                // these updates only happen if the user has a number, and local info matches server response
+                appointmentArray[0].setCurrentId(currentId: newAppointment.getCurrentId())
+                appointmentArray[0].updateError(newError: newAppointment.getError())
+                appointmentArray[0].setAppointmentStartTime(etaMinVal: newAppointment.getEtaMins())
+            }
+        }
+    }
+ 
+    func addAppointment(newAppointment:Appointment) {
+        // check if user has existing appointments
+        if(self.userHasAppointment()) {
+            if(appointmentArray[0].getEtaMins() > newAppointment.getEtaMins()) {
+                appointmentArray = [newAppointment] + appointmentArray
+                self.createLocalNotification(newAppointment.getEtaMins())
+            } else {
+                appointmentArray.append(newAppointment)
+            }
+            /*
+            var newArray:[Appointment] = []
+            let originalFirstAppointment = appointmentArray[0]
+            while(!appointmentArray.isEmpty) {
+                if(appointmentArray[0].getEtaMins() <= 0) {
+                    removeFirstAppointment()
+                    continue
+                } else if(appointmentArray[0].getEtaMins() > newAppointment.getEtaMins()) {
+                    newArray.append(newAppointment)
+                }
+                newArray.append(appointmentArray.removeFirst())
+            }
+            appointmentArray = newArray
+            // Earlier start time was entered...update notification time
+            if(appointmentArray[0].getEtaMins() != originalFirstAppointment.getEtaMins()) {
+                self.createLocalNotification(appointmentArray[0].getEtaMins())
+            }
+ */
         } else {
-            // No recent appointments, clear out the local data
-            userDefaults.removeObject(forKey: "expiryDate")
-            userDefaults.synchronize()
+            appointmentArray = [newAppointment]
+            self.createLocalNotification(newAppointment.getEtaMins())
         }
-    }
-    
-    // receive eta in seconds preferably -- just take it in minutes
-    func addNumber(_ newIds :NSDictionary) {
-        // Clear out anything stored locally
-        userDefaults.removeObject(forKey: "cust_id_dict")
-        self.cancelLocalNotification() // cancel notification
-        if let tmpDict = (newIds as? [Int : Double]) {
-            var tmpUdNSDict : [String: Date] = Dictionary()
-            
-            var firstNumberFlag = true
-            for(key,value) in tmpDict {
-                // This is the appointment start time adjusting for hour shift
-                let date = Date(timeIntervalSinceNow: value * 60)
-                cust_ids.updateValue(date, forKey: key)
-                tmpUdNSDict.updateValue(date, forKey: String(key))
-                
-                // Create a single notification for the first haircut
-                if(firstNumberFlag) {
-                    // Just pass in the eta in minutes...logic is handled there
-                    self.createLocalNotification(value)
-                    firstNumberFlag = false
-                }
-            }
-            idsValidBool = true
-            let date = Date()
-            let calendar = Calendar.current
-            expireAfter = (calendar as NSCalendar).components([.day], from: date).day
-            userDefaults.set(expireAfter, forKey: "expiryDate")
-            
-            let udNSDict = tmpUdNSDict as NSDictionary
-            userDefaults.set(udNSDict, forKey: "cust_id_dict")
-            userDefaults.synchronize()
-        }
-    }
-    // This is just a stop-gap solution, should be using the addNumber function
-    // 95% identical code to addNumber, but less efficient
-    // TODO: this is full-on retardnation
-    func addSingleEta(_ nextEtaMin: Double) {
-        // Clear out anything stored locally
-        userDefaults.removeObject(forKey: "cust_id_dict")
-        self.cancelLocalNotification() // cancel notification
-        
-        let date = Date(timeIntervalSinceNow: nextEtaMin * 60)
-        var tmpUdNSDict : [String: Date] = Dictionary()
-        tmpUdNSDict.updateValue(date, forKey: "50") // 50 is an arbitrary number. really being lazy here
-        cust_ids.updateValue(date, forKey: 50) // again, arbitrary id
-        
-        idsValidBool = true
-        let date2 = Date()
+/*
+        let date = Date()
         let calendar = Calendar.current
-        expireAfter = (calendar as NSCalendar).components([.day], from: date2).day
+        expireAfter = (calendar as NSCalendar).components([.day], from: date).day!
         userDefaults.set(expireAfter, forKey: "expiryDate")
+ */
         
-        let udNSDict = tmpUdNSDict as NSDictionary
-        userDefaults.set(udNSDict, forKey: "cust_id_dict")
+        let appointmentArrayAsNSData = arrayToNSData(arrayIn: appointmentArray)
+        userDefaults.set(appointmentArrayAsNSData, forKey:"appointment")
         userDefaults.synchronize()
-        
-        self.createLocalNotification(nextEtaMin)
     }
-    // TODOs after haircut finishes (could have more numbers)
-    func removeAllNumbers() {
-        self.cust_ids.removeAll()
-        self.expireAfter = 0
-        userDefaults.set(nil, forKey: "cust_id_dict")
-        userDefaults.set(0, forKey: "expiryDate")
-        userDefaults.synchronize()
-        
-        self.cancelLocalNotification()
-        
-        idsValidBool = false
-    }
-    func getEta() -> (Int, Int) {
-        // need to get first valid value
-        if let firstApt = cust_ids.first {
-            let curDate = firstApt.1
-            let etaSec = curDate.timeIntervalSinceNow
-            if(etaSec <= 0) {
-                // TODO:: SOME ERROR --- see how it's done in viewcontroller
-            } else { // actual eta returned
-                let hrs = Int(floor(etaSec / 60))
-                let mins = Int(etaSec) % 60
-                return (hrs,mins)
-            }
-        }
-        // No number received
-        return (0,0)
+    func arrayToNSData(arrayIn:[Appointment]) -> NSData {
+        return NSKeyedArchiver.archivedData(withRootObject: arrayIn as NSArray) as NSData
     }
     
-    func idsValid()->Bool {
-        if(self.idsValidBool == false) {
-            let date = Date()
-            let calendar = Calendar.current
-            let curDate = (calendar as NSCalendar).components([.day], from: date).day
-            if let unwrappedExpireAfter = expireAfter {
-                if(unwrappedExpireAfter == curDate && cust_ids.count > 0) {
-                    // Customer has gotten a number recently
-                    self.idsValidBool = true
-                    return self.idsValidBool
-                }
-            }
-            expireAfter = nil
-            self.idsValidBool = false
-            self.cust_ids = [Int: Date]()
+    // -1 indicates remove all
+    func removeAppointmentAtIndex(aptIndex:Int) {
+        if(aptIndex == -1) {
+            self.appointmentArray = [Appointment()]
+        } else if(aptIndex >= self.appointmentArray.count) {
+            self.appointmentArray.remove(at: aptIndex)
         }
-        return self.idsValidBool
+        
+        /*
+         self.hasAppointment = false
+         self.expireAfter = 0
+         userDefaults.removeObject(forKey: "expiryDate")
+         */
+        userDefaults.removeObject(forKey: "appointment")
+        userDefaults.synchronize()
+    }
+    func getFirstUpcomingEta() -> (CONSTS.ErrorNum.RawValue, String) {
+        var retStr = ""
+        var errorNum = CONSTS.ErrorNum.NO_NUMBER.rawValue
+        
+        let etaMins = appointmentArray[0].getEtaMins()
+
+        if(self.userHasAppointment()) {
+            errorNum = CONSTS.ErrorNum.NO_ERROR.rawValue
+        }
+        
+        if(etaMins < 0) {
+            errorNum = appointmentArray[0].getError()
+        } else {
+            if(etaMins > 60) {
+                retStr += String(Int(floor(Double(etaMins / 60)))) + " hours "
+            }
+            retStr += String(Int(etaMins) % 60) + " minutes"
+        }
+        return (errorNum,retStr)
     }
     
-    func saveUserDetails(_ inName: String, inPhone: String, inEmail: String?=nil) {
-        removeAllNumbers()
+    // Checks if appointments in array are valid and remove any invalid ones
+    func validateIds() {
+        for var i in 0..<self.appointmentArray.count {
+            if(!appointmentArray[0].isValid()) {
+                self.removeAppointmentAtIndex(aptIndex: i)
+            }
+        }
+    }
+    
+    func saveUserDetails(_ inName: String, inPhone: String, inEmail: String?="") {
+        removeAppointmentAtIndex(aptIndex: -1) // called because userInfo was changed, cannot track appointment status
         self.name = inName
         self.phone = inPhone
-        self.email = inEmail
+        self.email = inEmail!
         self.userDefaults.set(inName, forKey: "name")
         self.userDefaults.set(inPhone, forKey: "phone")
         self.userDefaults.set(inEmail, forKey: "email")
         self.userDefaults.synchronize()
     }
-    
-    // NOTIFICATIONS
-    
-    // Input is a date for 40 minutes prior to appointment
-    func createLocalNotification(_ etaMin : Double) {
-        
-        if(etaMin <= 20) {
-            return
-        } else {
-            let localNotification = UILocalNotification()
-            
-            if(etaMin > 40) {
-                localNotification.fireDate = Date(timeIntervalSinceNow: (etaMin - 40) * 60)
-                localNotification.alertBody = "Your haircut is in 40 minutes!"
-                
-            }else {
-                // > 20 mins
-                localNotification.fireDate = Date(timeIntervalSinceNow: (etaMin - 20) * 60)
-                localNotification.alertBody = "Your haircut is in 20 minutes!"
-                
+    func saveHoursText(hoursText: String) {
+        self.userDefaults.set(hoursText, forKey: "hoursText")
+        self.userDefaults.synchronize()
+    }
+    func getHoursText() -> String {
+        if let hoursText = userDefaults.string(forKey: "hoursText") {
+            if hoursText.isEmpty {
+                self.saveHoursText(hoursText: "Please call/text Peter for current shop hours.")
             }
-            localNotification.soundName = UILocalNotificationDefaultSoundName
-            localNotification.alertTitle = "Message From Peter"
-            UIApplication.shared.scheduleLocalNotification(localNotification)
+        } else {
+            self.saveHoursText(hoursText: "Please call/text Peter for current shop hours.")
         }
         
+        return userDefaults.string(forKey: "hoursText")!
     }
-    func cancelLocalNotification() {
-        UIApplication.shared.cancelAllLocalNotifications()
+    func saveAddrUrl(addrUrl: String) {
+        self.userDefaults.set(addrUrl, forKey: "addrUrl")
+        self.userDefaults.synchronize()
+    }
+    func getAddrUrl() -> String {
+        if let shopAddr = userDefaults.string(forKey: "addrUrl") {
+            if shopAddr.isEmpty {
+                self.saveAddrUrl(addrUrl: "")
+            }
+        } else {
+            self.saveAddrUrl(addrUrl: "")
+        }
+        return userDefaults.string(forKey: "addrUrl")!
+    }
+    
+    // NOTIFICATIONS
+    // Input is a date for 40 minutes prior to appointment
+    func createLocalNotification(_ etaMin : Double) {
+        if(UIApplication.shared.scheduledLocalNotifications != nil) {
+            // notifications are already scheduled
+            removeAppointmentAtIndex(aptIndex: -1)
+        }
+        
+        if(etaMin > 20) {
+            let localNotificationShort = UILocalNotification()
+            localNotificationShort.fireDate = Date(timeIntervalSinceNow: (etaMin - 20) * 60)
+            localNotificationShort.alertBody = "Your haircut is in 20 minutes!"
+            
+            localNotificationShort.soundName = UILocalNotificationDefaultSoundName
+            localNotificationShort.alertTitle = "Message From Peter"
+            UIApplication.shared.scheduleLocalNotification(localNotificationShort)
+        }
+        
+        if(etaMin > 40) {
+            let localNotificationLong = UILocalNotification()
+            localNotificationLong.fireDate = Date(timeIntervalSinceNow: (etaMin - 40) * 60)
+            localNotificationLong.alertBody = "Your haircut is in 40 minutes!"
+            
+            localNotificationLong.soundName = UILocalNotificationDefaultSoundName
+            localNotificationLong.alertTitle = "Message From Peter"
+            UIApplication.shared.scheduleLocalNotification(localNotificationLong)
+        }
+    }
+
+    func userInfoExists() -> Bool {
+        return name != "" && phone != ""
+    }
+    func getUserName() -> String {
+        return name
+    }
+    func getUserPhone() -> String {
+        return phone
+    }
+    func getUserEmail() -> String {
+        return email
+    }
+    func getFirstAppointment() -> Appointment {
+        self.validateIds()
+        return appointmentArray[0]
+    }
+    func userHasAppointment() -> Bool {
+        self.validateIds()
+        return !(appointmentArray[0].getAppointmentStatus() == CONSTS.AppointmentStatus.NO_APPOINTMENT)
     }
 }

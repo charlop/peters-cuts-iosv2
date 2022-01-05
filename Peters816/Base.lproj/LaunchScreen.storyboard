@@ -35,7 +35,6 @@
                                 </variation>
                             </imageView>
                         </subviews>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                         <constraints>
                             <constraint firstItem="goF-iz-dls" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="LqV-eg-SDL"/>
                             <constraint firstItem="goF-iz-dls" firstAttribute="top" secondItem="Llm-lL-Icb" secondAttribute="bottom" constant="10" id="uLG-61-NDG"/>

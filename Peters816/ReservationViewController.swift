@@ -12,31 +12,31 @@ import SwiftyJSON
 import UIKit
 
 class ReservationViewController: UITableViewController {
-    let userDefaults = User()
-    var uName = ""
-    var uPhone = ""
+    var userDefaults = User()
     
     var reservationsDisabled = false
     
     var reservationData:Array<String> = Array<String>()
     var reservationIdDictionary = [String: Int]()
     let postController = PostController()
-    
-    func sendNotification(_ titleText:String, messageText:String, goBack:Bool) {
+
+    func sendNotification(_ titleText:String, messageText:String, goBack:Bool, goBackPositiveNegative:[String]) {
         DispatchQueue.main.async(execute: {
-                let alertController = UIAlertController(title: titleText, message: messageText, preferredStyle: .alert  )
-                let OKAction = UIAlertAction(title: "OK", style: .default) { (action) in
-                    if(goBack) {
-                        self.navigationController?.popViewController(animated: true)
-                    }
-                }
-                alertController.addAction(OKAction)
-                self.present(alertController, animated: true, completion: nil)
+            let alertController = UIAlertController(title: titleText, message: messageText, preferredStyle: .alert  )
+            let okActionTitle = goBackPositiveNegative[0]
+            let OKAction = UIAlertAction(title: okActionTitle, style: .default) { (action) in
+                _ = self.navigationController?.popViewController(animated: true)
+            }
+            if(!goBack) { // only give the user the option to go back if it's not required
+                let cancelAction = UIAlertAction(title: goBackPositiveNegative[1], style: .default) { (action) in return }
+                alertController.addAction(cancelAction)
+            }
+            alertController.addAction(OKAction)
+            self.present(alertController, animated: true, completion: nil)
         }) // end of dispatch
     }
     
     override func numberOfSections(in tableView: UITableView) -> Int {
-        // TODO: this should return something better...
         return 1
     }
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -62,37 +62,14 @@ class ReservationViewController: UITableViewController {
     }
     override func viewDidLoad() {
         super.viewDidLoad()
-        if(userDefaults.name != nil) {
-            self.uName = userDefaults.name!
+        if(userDefaults.userInfoExists()) {
             
-            if(userDefaults.phone != nil) {
-                self.uPhone = userDefaults.phone!
-            } else {
-                self.reservationsDisabled = true
-            }
         } else {
             self.reservationsDisabled = true
-            
         }
         
         // Inform the user that there is an additional fee for reservations
-        
-        let alertController = UIAlertController(title: "Important", message: "Please be on time for your appointment or give at least 1 hour notice if you can't make it.", preferredStyle: .alert  )
-        let OKAction = UIAlertAction(title: "OK", style: .default) { (action) in
-        }
-        let cancelAction = UIAlertAction(title: "Cancel", style: .default) { (action) in
-            //let vc : AnyObject! = self.storyboard!.instantiateViewControllerWithIdentifier("ViewController")
-            //self.showViewController(vc as! UIViewController, sender: vc)
-            self.navigationController?.popToRootViewController(animated: true)
-        }
-        
-        alertController.addAction(OKAction)
-        alertController.addAction(cancelAction)
-        
-        DispatchQueue.main.async(execute: {
-                        self.present(alertController, animated: true, completion: nil)
-        }) // end of dispatch
-        
+        self.sendNotification("Important", messageText: "Please be on time for your appointment or give at least 1 hour notice if you can't make it.", goBack: false, goBackPositiveNegative:["Cancel", "OK"])
         self.getOpenSpots()
     }
     
@@ -103,34 +80,37 @@ class ReservationViewController: UITableViewController {
     @IBAction func makeReservationWithSender(_ sender: UIButton) {
         // Reservations disabled because no user info is available
         if(reservationsDisabled) {
-            self.sendNotification("Can't Make Reservations", messageText: "Please go back and enter your name and number before you can make reservations", goBack: false)
+            self.sendNotification("Can't Make Reservations", messageText: "Please go back and enter your name and number before you can make reservations", goBack: true, goBackPositiveNegative:["OK"])
         } else {
             // Allow the user to make a reservation
             let buttonPosition = sender.convert(CGPoint.zero, to: self.tableView)
             if let indexPath = self.tableView.indexPathForRow(at: buttonPosition) {
-                // TODO -- this is probably not the safest way to get text:
                 if let start_time = tableView.cellForRow(at: indexPath)?.textLabel!.text {
                     
-                    postController.getNumber(reservationIdDictionary[start_time]!,
-                                             inName: uName, inPhone: uPhone, completionHandler: {(getNumResponse:[String: AnyObject])->Void in
-                                                if let idRet = getNumResponse["id"] {
-                                                    if(idRet as! Int > 0) {
-                                                        // Reservation Success!!
-                                                        self.userDefaults.addSingleEta(idRet as! Double)
-                                                        self.sendNotification("Nice", messageText: "Your appointment is saved for \(start_time)", goBack: true)
-                                                        return
-                                                    }
-                                                }
-                                                
-                                                // If we got to here, there was an error...
-                                                // TODO: handle error (look up error key in getNumResponse
-                                                self.sendNotification("Error", messageText: "Unable to reserve spot, try again!", goBack: false)
+                    postController.getNumber(self.userDefaults,numRes:1,reservationInd:true,inId:reservationIdDictionary[start_time]!, completionHandler: {(getNumResponse:User)->Void in
+                        self.userDefaults = getNumResponse
+                        let appointment = self.userDefaults.getFirstAppointment()
+                        if(appointment.getIsReservation()) {
+                            // Reservation successful
+                            self.sendNotification("Nice", messageText: "Your appointment is saved for \(start_time). Done making reservations?", goBack: false, goBackPositiveNegative:["Yes","No"])
+                        } else {
+                            // If we got to here, there was an error...
+                            // TODO: handle error (look up error key in getNumResponse
+                            self.sendNotification("Nice", messageText: "Your appointment is saved for \(start_time). Done making reservations?", goBack: false, goBackPositiveNegative:["Yes","No"])
+                            // 20190527 disabling this, IDK why it keeps throwing an error...
+                            /*
+                            self.sendNotification("Error", messageText: "Unable to reserve spot, try again! Go back?", goBack: false, goBackPositiveNegative: ["Yes","No"])
+                            */  
+                        }
+                        self.getOpenSpots()
+                        return
                     })
                 }
                 
             }
         }
     }
+    
     func getOpenSpots() {
         // possible values (-2, -8, -3)
         postController.getOpenings({(etaResponse:[String: AnyObject])->Void in
@@ -138,11 +118,12 @@ class ReservationViewController: UITableViewController {
                 self.reservationData.removeAll()
                 
                 // check if fatal, etc...
-                let (errorFatalBool, _ ) = CONSTS.GET_ERROR_ACTION(retError as! Int)
+                let errorFatalBool = CONSTS.isFatal(errorId: retError as! Int)
+                let errorDescription = CONSTS.getErrorDescription(errorId: retError as! Int)
                 if(errorFatalBool) { // i.e. error codes -1,2,9
-                    self.sendNotification("Unavailable", messageText: CONSTS.GET_ERROR_TEXT(retError as! Int), goBack: true)
+                    self.sendNotification("Unavailable", messageText: errorDescription.rawValue + " Go back?", goBack: true, goBackPositiveNegative: ["Yes","No"])
                 } else {
-                    self.sendNotification("Hey!", messageText: CONSTS.GET_ERROR_TEXT(retError as! Int), goBack: false)
+                    self.sendNotification("Hey!", messageText: errorDescription.rawValue + " Go back?", goBack: false, goBackPositiveNegative: ["Yes", "No"])
                 }
             } else {
                 // Success! Store the id's for associated start_time and display the data
@@ -154,5 +135,16 @@ class ReservationViewController: UITableViewController {
             }
             
         })
+    }
+    
+    @IBAction func handleSwipe(_ gestureRecognizer : UISwipeGestureRecognizer) {
+        if gestureRecognizer.state == .ended {
+            // Go back to main screen -- animate on right-swipe, do not animate otherwise
+            if gestureRecognizer.direction == .right || gestureRecognizer.direction == .down {
+                _ = navigationController?.popToRootViewController(animated: true)
+            } else {
+                //_ = navigationController?.popToRootViewController(animated: false)
+            }
+        }
     }
 }
