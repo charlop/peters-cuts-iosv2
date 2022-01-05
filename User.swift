@@ -8,6 +8,7 @@
 
 import Foundation
 import UIKit
+import UserNotifications
 
 class User {
     private var name :String
@@ -36,9 +37,12 @@ class User {
         }
 
         if let restoredAppointmentArray = userDefaults.object(forKey: "appointment") as? NSData {
-            if let unwrappedAppointmentArray = NSKeyedUnarchiver.unarchiveObject(with: restoredAppointmentArray as Data) as? [Appointment] {
+            //return try NSKeyedUnarchiver.unarchivedObject(ofClasses: [NSDictionary.self, CKServerChangeToken.self], from: tokenData) as? [String : CKServerChangeToken]
+            do {
+            if let unwrappedAppointmentArray = try NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(restoredAppointmentArray as Data) as? [Appointment] {
                 appointmentArray = unwrappedAppointmentArray
             }
+            } catch {}
         }
 
         self.validateIds()
@@ -111,8 +115,11 @@ class User {
         userDefaults.set(appointmentArrayAsNSData, forKey:"appointment")
         userDefaults.synchronize()
     }
-    func arrayToNSData(arrayIn:[Appointment]) -> NSData {
-        return NSKeyedArchiver.archivedData(withRootObject: arrayIn as NSArray) as NSData
+    func arrayToNSData(arrayIn:[Appointment]) -> NSData? {
+        do {
+        return try NSKeyedArchiver.archivedData(withRootObject: arrayIn as NSArray, requiringSecureCoding: false) as NSData
+        } catch {}
+        return nil
     }
     
     // -1 indicates remove all
@@ -204,29 +211,40 @@ class User {
     // NOTIFICATIONS
     // Input is a date for 40 minutes prior to appointment
     func createLocalNotification(_ etaMin : Double) {
-        if(UIApplication.shared.scheduledLocalNotifications != nil) {
-            // notifications are already scheduled
-            removeAppointmentAtIndex(aptIndex: -1)
+        let center = UNUserNotificationCenter.current()
+        center.getPendingNotificationRequests { (notifications) in
+            if notifications.count > 0 {
+                self.removeAppointmentAtIndex(aptIndex: -1)
+                
+            }
+
         }
+
         
         if(etaMin > 20) {
-            let localNotificationShort = UILocalNotification()
-            localNotificationShort.fireDate = Date(timeIntervalSinceNow: (etaMin - 20) * 60)
-            localNotificationShort.alertBody = "Your haircut is in 20 minutes!"
-            
-            localNotificationShort.soundName = UILocalNotificationDefaultSoundName
-            localNotificationShort.alertTitle = "Message From Peter"
-            UIApplication.shared.scheduleLocalNotification(localNotificationShort)
+            let content = UNMutableNotificationContent()
+            content.title = NSString.localizedUserNotificationString(forKey: "Message from Peter", arguments: nil)
+            content.body = NSString.localizedUserNotificationString(forKey: "Your haircut is in 20 minutes!", arguments: nil)
+            // Deliver the notification in 60 seconds.
+            let trigger = UNTimeIntervalNotificationTrigger.init(timeInterval: (etaMin - 20) * 60, repeats: false)
+            let request = UNNotificationRequest.init(identifier: "FiveSecond", content: content, trigger: trigger)
+
+            // Schedule the notification.
+            let center = UNUserNotificationCenter.current()
+            center.add(request)
         }
         
         if(etaMin > 40) {
-            let localNotificationLong = UILocalNotification()
-            localNotificationLong.fireDate = Date(timeIntervalSinceNow: (etaMin - 40) * 60)
-            localNotificationLong.alertBody = "Your haircut is in 40 minutes!"
-            
-            localNotificationLong.soundName = UILocalNotificationDefaultSoundName
-            localNotificationLong.alertTitle = "Message From Peter"
-            UIApplication.shared.scheduleLocalNotification(localNotificationLong)
+            let content = UNMutableNotificationContent()
+            content.title = NSString.localizedUserNotificationString(forKey: "Message from Peter", arguments: nil)
+            content.body = NSString.localizedUserNotificationString(forKey: "Your haircut is in 40 minutes!", arguments: nil)
+            // Deliver the notification in 60 seconds.
+            let trigger = UNTimeIntervalNotificationTrigger.init(timeInterval: (etaMin - 40) * 60, repeats: false)
+            let request = UNNotificationRequest.init(identifier: "FiveSecond", content: content, trigger: trigger)
+
+            // Schedule the notification.
+            let center = UNUserNotificationCenter.current()
+            center.add(request)
         }
     }
 

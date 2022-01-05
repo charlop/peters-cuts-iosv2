@@ -2,6 +2,7 @@ import UIKit
 import CoreData
 import Foundation
 import SwiftyJSON
+import UserNotifications
 
 class ViewController: UIViewController {
     // MARK: Properties
@@ -176,7 +177,10 @@ class ViewController: UIViewController {
             return
         } else if((currentState == .HAS_NUMBER || currentState == .HAS_RESERVATION) && updateState != currentState) {
             // previous view had number, new view does not have number
-            UIApplication.shared.cancelAllLocalNotifications()
+            let center = UNUserNotificationCenter.current()
+            center.removeAllDeliveredNotifications() // To remove all delivered notifications
+            center.removeAllPendingNotificationRequests() // To remove all pending notifications which are not delivered yet but scheduled.
+            //UIApplication.shared.cancelAllLocalNotifications()
         }
         
         currentState = updateState

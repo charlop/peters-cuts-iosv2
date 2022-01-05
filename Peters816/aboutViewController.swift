@@ -15,12 +15,15 @@ class aboutViewController: UIViewController {
         
         if (UIApplication.shared.canOpenURL(url))
         {
-            UIApplication.shared.openURL(url)
+            //UIApplication.shared.openURL(url)
+            UIApplication.shared.open(url, options: [:], completionHandler: nil)
         }
     }
     
     @IBAction func directions(_ sender: UIButton) {
-        if let url = URL(string: "http://maps.apple.com/?daddr=" + ADDRESS_URL) { UIApplication.shared.openURL(url)
+        if let url = URL(string: "http://maps.apple.com/?daddr=" + ADDRESS_URL) {
+            //UIApplication.shared.openURL(url)
+            UIApplication.shared.open(url, options: [:], completionHandler: nil)
         }
     }
     

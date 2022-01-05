@@ -1,6 +1,7 @@
 import UIKit
 import CoreData
 import Foundation
+import UserNotifications
 
 class userInfoViewController: UIViewController {
     @IBOutlet weak var nameField: UITextField!
@@ -117,8 +118,14 @@ class userInfoViewController: UIViewController {
             if let phone = phoneField.text {
                 userDefaults.saveUserDetails(name, inPhone: phone, inEmail: emailField.text!)
                 
-                let notificationSettings = UIUserNotificationSettings(types: [.badge, .alert, .sound ], categories: nil)
-                UIApplication.shared.registerUserNotificationSettings(notificationSettings)
+                UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) {
+                    (granted, error) in
+                    //Parse errors and track state
+                   }
+                //UNNotificationSettings(types: [.badge, .alert, .sound], categories: nil)
+                //UIUserNotificationSettings(types: [.badge, .alert, .sound ], categories: nil)
+                //UIApplication.shared.registerUserNotificationSettings(notificationSettings)
+                //UNUserNotificationCenter.requestAuthorization(notificationSettings)
                 
                 // UIApplication.sharedApplication.registerUserNotificationSettings(UIUserNotificationSettings(forTypes: .Alert | .Badge | .Sound, categories: nil))
                 _ = navigationController?.popToRootViewController(animated: true)

@@ -375,16 +375,16 @@
                             <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="logo1" translatesAutoresizingMaskIntoConstraints="NO" id="Ha2-kx-XbH">
                                 <rect key="frame" x="8" y="-10" width="398" height="238"/>
                             </imageView>
-                            <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="y5Y-dx-d6Y">
-                                <rect key="frame" x="65" y="247" width="55" height="34"/>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="y5Y-dx-d6Y">
+                                <rect key="frame" x="63.5" y="258" width="33" height="36"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="20"/>
                                 <state key="normal" title="Call"/>
                                 <connections>
                                     <action selector="call:" destination="GeS-za-A05" eventType="touchUpInside" id="9bf-3W-drC"/>
                                 </connections>
                             </button>
-                            <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="E5x-cy-lNF">
-                                <rect key="frame" x="280" y="247" width="99" height="36"/>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="E5x-cy-lNF">
+                                <rect key="frame" x="289.5" y="258" width="89" height="36"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="20"/>
                                 <state key="normal" title="Directions"/>
                                 <connections>
@@ -392,7 +392,7 @@
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="bNv-Km-a1v">
-                                <rect key="frame" x="161.5" y="400" width="91" height="30"/>
+                                <rect key="frame" x="161.5" y="440" width="91" height="30"/>
                                 <state key="normal" title="Terms of Use"/>
                                 <connections>
                                     <segue destination="QvK-q7-gpk" kind="show" identifier="showTermsSegue" id="AXF-UB-gMq"/>
@@ -416,20 +416,20 @@
                                 </items>
                             </navigationBar>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Barber Shop Hours" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="puq-OV-E7I">
-                                <rect key="frame" x="20" y="279" width="374" height="21"/>
+                                <rect key="frame" x="20" y="319" width="374" height="21"/>
                                 <fontDescription key="fontDescription" type="boldSystem" pointSize="17"/>
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="8QZ-fG-JRT">
-                                <rect key="frame" x="159.5" y="440" width="95" height="30"/>
+                                <rect key="frame" x="159.5" y="480" width="95" height="30"/>
                                 <state key="normal" title="Privacy Policy"/>
                                 <connections>
                                     <segue destination="cWO-jX-EN7" kind="show" identifier="showPrivPolSegue" id="euY-D4-ujM"/>
                                 </connections>
                             </button>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="4" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="QzZ-jY-JVK">
-                                <rect key="frame" x="20" y="308" width="374" height="72"/>
+                                <rect key="frame" x="20" y="348" width="374" height="72"/>
                                 <string key="text">The app will open at 9AM Tuesday - Saturday. The shop is open from 10AM to 7PM Tuesday to Thursday and 10AM to 9PM Friday and Saturday. Call/text for additional times.</string>
                                 <fontDescription key="fontDescription" type="system" pointSize="15"/>
                                 <nil key="textColor"/>
@@ -446,8 +446,8 @@
                             <constraint firstItem="Ha2-kx-XbH" firstAttribute="top" secondItem="Qb6-fN-5Xn" secondAttribute="bottom" constant="-10" id="7Jl-Rm-WvR"/>
                             <constraint firstItem="8QZ-fG-JRT" firstAttribute="top" secondItem="bNv-Km-a1v" secondAttribute="bottom" constant="10" id="8p8-7o-ZOK"/>
                             <constraint firstItem="puq-OV-E7I" firstAttribute="top" secondItem="E5x-cy-lNF" secondAttribute="bottom" constant="25" id="GEP-9o-1DX"/>
-                            <constraint firstItem="y5Y-dx-d6Y" firstAttribute="top" secondItem="Ha2-kx-XbH" secondAttribute="bottom" constant="-10" id="H08-46-cC4"/>
-                            <constraint firstItem="E5x-cy-lNF" firstAttribute="top" secondItem="Ha2-kx-XbH" secondAttribute="bottom" constant="-10" id="LTc-1D-vCy"/>
+                            <constraint firstItem="y5Y-dx-d6Y" firstAttribute="top" secondItem="Ha2-kx-XbH" secondAttribute="bottom" constant="30" id="H08-46-cC4"/>
+                            <constraint firstItem="E5x-cy-lNF" firstAttribute="top" secondItem="Ha2-kx-XbH" secondAttribute="bottom" constant="30" id="LTc-1D-vCy"/>
                             <constraint firstItem="8QZ-fG-JRT" firstAttribute="centerX" secondItem="t8q-ei-Iy5" secondAttribute="centerX" id="N2q-cq-sPp"/>
                             <constraint firstItem="QzZ-jY-JVK" firstAttribute="trailing" secondItem="t8q-ei-Iy5" secondAttribute="trailing" constant="-20" id="RqT-3u-ScF"/>
                             <constraint firstItem="puq-OV-E7I" firstAttribute="leading" secondItem="t8q-ei-Iy5" secondAttribute="leading" constant="20" id="ZP6-ll-6nH"/>
@@ -701,7 +701,7 @@ Last Edited on 2016-02-27</string>
         </scene>
     </scenes>
     <inferredMetricsTieBreakers>
-        <segue reference="g7O-I6-b3b"/>
+        <segue reference="V9R-fw-aPR"/>
     </inferredMetricsTieBreakers>
     <resources>
         <image name="appBanner" width="348.5" height="72"/>
