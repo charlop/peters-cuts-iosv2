@@ -1,0 +1,6 @@
+.DS_STORE
+xcshareddata/**
+xcuserdata/**
+**.h
+**.pbxproj
+x_*/

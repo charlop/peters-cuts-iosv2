@@ -1,0 +1,19 @@
+{
+	"name": "xcode build server",
+	"version": "0.2",
+	"bspVersion": "2.0",
+	"languages": [
+		"c",
+		"cpp",
+		"objective-c",
+		"objective-cpp",
+		"swift"
+	],
+	"argv": [
+		"/opt/homebrew/bin/xcode-build-server"
+	],
+	"workspace": "/Users/chris/dev/peters-cuts/petersios/Peters816.xcodeproj/project.xcworkspace",
+	"build_root": "/Users/chris/Library/Developer/Xcode/DerivedData/Peters816-cxwfivbcpojgefcyrbhhrsbxvzrb",
+	"scheme": "Peters816",
+	"kind": "xcode"
+}
