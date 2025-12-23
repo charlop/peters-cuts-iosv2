@@ -17,15 +17,13 @@ class ViewController: UIViewController {
     @IBOutlet weak var nextNumLabelStatic: UILabel!
     @IBOutlet weak var nextNumLabel: UILabel!
     @IBOutlet weak var curNumLabelStatic: UILabel!
-    
-    let postController = PostController2()
     @IBOutlet weak var activitySpinner: UIActivityIndicatorView!
-    
+
     var userDefaults = User()
     var getEtaTimer = Timer()
 
     
-    var currentState = CONSTS.AppointmentStatus.NO_APPOINTMENT // Default setting
+    var currentState = AppointmentStatus.noAppointment // Default setting
     
     // no user info messages
     let signUpText:String = "Tap on User Info before you can book a haircut"
@@ -56,50 +54,50 @@ class ViewController: UIViewController {
     @IBOutlet weak var curNumUIStack: UIStackView!
     // Returns the wait time
     @objc func getWaitTime() {
-        postController.getEta(userDefaults: userDefaults, completion: {(etaResponse:Appointment)->Void in
+        Task {
+            let etaResponse = try await APIService.shared.getEta(for: userDefaults)
             self.userDefaults = User()
-            
+
             let errorFatalBool = CONSTS.isFatal(errorId: etaResponse.getError())
 
-            if(etaResponse.getError() != CONSTS.ErrorNum.NO_ERROR.rawValue) {
-                self.handleErrorInternal(errorNum: etaResponse.getError())
-                
-                if(errorFatalBool) {
+            if etaResponse.getError() != CONSTS.ErrorNum.NO_ERROR.rawValue {
+                await handleErrorInternal(errorNum: etaResponse.getError())
+
+                if errorFatalBool {
                     // no point in getting the ETA for fatal errors
                     return
                 }
             }
-            
-            DispatchQueue.main.async(execute: {
-            if(etaResponse.getEtaMins() > 0.0) {
-                self.setUIState(newState: etaResponse.getAppointmentStatus())
-                var waitTimeString = ""
 
-                let etaHrs = Int(etaResponse.getEtaMins() / 60)
-                let etaMins = Int(etaResponse.getEtaMins().truncatingRemainder(dividingBy: 60))
-                if(etaHrs > 0) {
-                    waitTimeString += String (etaHrs) + " hours "
+            await MainActor.run {
+                if etaResponse.getEtaMins() > 0.0 {
+                    self.setUIState(newState: etaResponse.getAppointmentStatus())
+                    var waitTimeString = ""
+
+                    let etaHrs = Int(etaResponse.getEtaMins() / 60)
+                    let etaMins = Int(etaResponse.getEtaMins().truncatingRemainder(dividingBy: 60))
+                    if etaHrs > 0 {
+                        waitTimeString += String(etaHrs) + " hours "
+                    }
+                    waitTimeString += String(etaMins) + " minutes"
+
+                    self.waitTime.text = waitTimeString
                 }
-                waitTimeString += String(etaMins) + " minutes"
-                
-                self.waitTime.text = waitTimeString
+                if etaResponse.getCurrentId() > 0 {
+                    self.curCustLabel.text = String(etaResponse.getCurrentId())
+                }
+                if etaResponse.getUpcomingId() > 0 {
+                    self.nextNumLabel.text = String(etaResponse.getUpcomingId())
+                }
             }
-            if(etaResponse.getCurrentId() > 0) {
-                self.curCustLabel.text = String(etaResponse.getCurrentId())
-            }
-            if(etaResponse.getUpcomingId() > 0) {
-                self.nextNumLabel.text = String(etaResponse.getUpcomingId())
-            }
-            
-            })
-        })
+        }
     }
     
     // Check if user has an appointment to decide which view to present
     // Function should only be called once, when the view initially loads
     func checkForExistingAppointment() {
         if(!userDefaults.userInfoExists) {
-            self.setUIState(newState: .NO_USER_INFO)
+            self.setUIState(newState: .noUserInfo)
         } else if(self.userDefaults.hasAppointment) {
             let etaLocal :(errorNum:CONSTS.ErrorNum.RawValue, etaString:String) = self.userDefaults.getFirstUpcomingEta()
             if(etaLocal.errorNum == CONSTS.ErrorNum.NO_ERROR.rawValue) {
@@ -144,7 +142,7 @@ class ViewController: UIViewController {
                 }
                 return
             case CONSTS.ErrorNum.SHOP_CLOSED.rawValue:
-                self.setUIState(newState: .SHOP_CLOSED)
+                self.setUIState(newState: .shopClosed)
 
                     if currentText != self.shopClosedGreeting {
                         self.greetingLabel.numberOfLines = (24 + self.shopClosedGreeting.count) / 25
@@ -161,7 +159,7 @@ class ViewController: UIViewController {
                 DispatchQueue.main.async( execute: {self.greetingLabel.text = CONSTS.getErrorDescription(errorId: errorNum).rawValue + self.customGreetingMessage})
             case CONSTS.ErrorNum.NO_SPOTS_AVAILABLE.rawValue:
                 // no more available spots
-                self.setUIState(newState: .SHOP_CLOSED)
+                self.setUIState(newState: .shopClosed)
                 DispatchQueue.main.async( execute: {self.greetingLabel.text = CONSTS.getErrorDescription(errorId: errorNum).rawValue + self.customGreetingMessage})
             default:
                 break
@@ -172,14 +170,14 @@ class ViewController: UIViewController {
     func setUIState(newState:CONSTS.AppointmentStatus) {
         var updateState = newState
         
-        if(!userDefaults.userInfoExists && updateState != CONSTS.AppointmentStatus.LOADING_VIEW && updateState != CONSTS.AppointmentStatus.SHOP_CLOSED) {
+        if(!userDefaults.userInfoExists && updateState != CONSTS.AppointmentStatus.loadingView && updateState != CONSTS.AppointmentStatus.shopClosed) {
             // 1. if user info does not exist, that should be the new state
-            updateState = .NO_USER_INFO
+            updateState = .noUserInfo
         }
         
         if(updateState == currentState) { // Already displaying this view
             return
-        } else if((currentState == .HAS_NUMBER || currentState == .HAS_RESERVATION) && updateState != currentState) {
+        } else if((currentState == .hasNumber || currentState == .hasReservation) && updateState != currentState) {
             // previous view had number, new view does not have number
             let center = UNUserNotificationCenter.current()
             center.removeAllDeliveredNotifications() // To remove all delivered notifications
@@ -189,11 +187,11 @@ class ViewController: UIViewController {
         
         currentState = updateState
         
-        let hideGetNumControls = (updateState == .HAS_NUMBER || updateState == .HAS_RESERVATION || updateState == .LOADING_VIEW)
-        let hideNextNumCurNumLabels = updateState == .SHOP_CLOSED
-        let reservationSpecific = updateState == .HAS_RESERVATION
-        let enableControls = !(updateState == .SHOP_CLOSED || updateState == .NO_USER_INFO)
-        let hasNumberEtaLabelText = (updateState == .HAS_NUMBER || updateState == .HAS_RESERVATION)
+        let hideGetNumControls = (updateState == .hasNumber || updateState == .hasReservation || updateState == .loadingView)
+        let hideNextNumCurNumLabels = updateState == .shopClosed
+        let reservationSpecific = updateState == .hasReservation
+        let enableControls = !(updateState == .shopClosed || updateState == .noUserInfo)
+        let hasNumberEtaLabelText = (updateState == .hasNumber || updateState == .hasReservation)
         let labelColor: UIColor = UIColor.label
 
         let etaLabelStr = hasNumberEtaLabelText ? self.yourEtaLabel : self.defaultWaitTime
@@ -202,24 +200,24 @@ class ViewController: UIViewController {
             self.staticApproxWait.text = etaLabelStr
             
             switch(updateState) {
-            case .NO_APPOINTMENT:
+            case .noAppointment:
                 self.nextNumLabelStatic.text = self.nextNumText
                 
                 self.greetingLabel.text = "Hey " + self.userDefaults.userName + ", \(self.existingUserGreeting) \(self.customGreetingMessage)"
                 break
-            case .HAS_NUMBER:
+            case .hasNumber:
                 self.nextNumLabelStatic.text = self.yourNumText
                 self.greetingLabel.text = "Hey " + self.userDefaults.userName + ", \(self.haircut_upcoming_label)"
                 break
-            case .HAS_RESERVATION:
+            case .hasReservation:
                 self.greetingLabel.text = "Hey " + self.userDefaults.userName + ", \(self.haircut_upcoming_label)"
                 break
-            case .SHOP_CLOSED:
+            case .shopClosed:
                 break
-            case .NO_USER_INFO:
+            case .noUserInfo:
                 self.greetingLabel.text = "Hey, \(self.signUpText) \(self.customGreetingMessage)"
                 break
-            case .LOADING_VIEW:
+            case .loadingView:
                 self.greetingLabel.text = self.loadingInitGreeting + self.customGreetingMessage
                 self.nextNumLabel.text = "--"
                 self.curCustLabel.text = "--"
@@ -233,7 +231,7 @@ class ViewController: UIViewController {
             self.nextNumLabel.textColor = labelColor
             self.getNumberButton.isHidden = hideGetNumControls
             self.reservationButton.isHidden = hideGetNumControls
-            self.cancelAppointment.isHidden = (!hideGetNumControls || updateState == .LOADING_VIEW) // not set in shop_closed
+            self.cancelAppointment.isHidden = (!hideGetNumControls || updateState == .loadingView) // not set in shop_closed
             self.numHaircutsStatic.isHidden = hideGetNumControls // not set in shop_closed
             self.stepper.isHidden = hideGetNumControls
             self.stepperLabel.isHidden = hideGetNumControls
@@ -276,39 +274,47 @@ class ViewController: UIViewController {
     }
     
     @IBAction func getNumberWithSender(_ sender: UIButton) {
-        if(userDefaults.userInfoExists) {
-            // Get the stepper value from label, default 1
-            var stepperCount: Int = 1
-            if let stepperText = stepperLabel.text,
-               let count = Int(stepperText),
-               count > 0 {
-                stepperCount = count
-            }
-            
-            postController.getNumber(
-                userDefaults, numRes: stepperCount, reservationInd: false, completion: {(newUserDefaults:User) -> Void in
-                    self.userDefaults = newUserDefaults
-                    let firstAppointment = self.userDefaults.getFirstAppointment()
-                    
-                    if(self.userDefaults.hasAppointment) {
-                        // Call succeeded
-                        var notificationText = "Nice! Your haircut is in "
-                        if(stepperCount > 1) {
-                            notificationText = "You have reserved \(String(stepperCount)) haircuts, first one is in "
-                        }
-                        notificationText += self.userDefaults.getFirstUpcomingEta().1
-                        self.sendNotification("Your Appointment", messageText: notificationText)
-                        
-                        self.setUIState(newState: firstAppointment.getAppointmentStatus())
-                    } else {
-                        // Error was hit
-                        self.handleErrorInternal(errorNum: firstAppointment.getError())
+        guard userDefaults.userInfoExists else {
+            setUIState(newState: .noUserInfo)
+            return
+        }
+
+        // Get the stepper value from label, default 1
+        var stepperCount: Int = 1
+        if let stepperText = stepperLabel.text,
+           let count = Int(stepperText),
+           count > 0 {
+            stepperCount = count
+        }
+
+        Task {
+            let newUserDefaults = try await APIService.shared.getNumber(
+                for: userDefaults,
+                count: stepperCount,
+                isReservation: false
+            )
+            self.userDefaults = newUserDefaults
+            let firstAppointment = self.userDefaults.getFirstAppointment()
+
+            await MainActor.run {
+                if self.userDefaults.hasAppointment {
+                    // Call succeeded
+                    var notificationText = "Nice! Your haircut is in "
+                    if stepperCount > 1 {
+                        notificationText = "You have reserved \(String(stepperCount)) haircuts, first one is in "
                     }
-                    self.getWaitTime()
-            })
-        } else {
-            // Technically this should not be possible
-            self.setUIState(newState: .NO_USER_INFO)
+                    notificationText += self.userDefaults.getFirstUpcomingEta().1
+                    self.sendNotification("Your Appointment", messageText: notificationText)
+
+                    self.setUIState(newState: firstAppointment.getAppointmentStatus())
+                } else {
+                    // Error was hit
+                    Task {
+                        await self.handleErrorInternal(errorNum: firstAppointment.getError())
+                    }
+                }
+                self.getWaitTime()
+            }
         }
     }
     
@@ -320,27 +326,34 @@ class ViewController: UIViewController {
             self.sendNotification("Confirmation", messageText: "Cancel Appointments?", alternateAction: "Cancel")
             // If user confirms, func processCancellation() is called
         } else { // UserInfo does not exist -- should not be reachable
-            setUIState(newState: .NO_USER_INFO)
+            setUIState(newState: .noUserInfo)
         }
     }
     func processCancellation() {
-        if(userDefaults.userInfoExists) {
-            postController.cancelAppointment(userDefaults, completion: {(delResponse:CONSTS.ErrorNum.RawValue) -> Void in
-
-                if(delResponse == CONSTS.ErrorNum.NO_ERROR.rawValue) {
-                    // delete succeeded
-                    self.setUIState(newState: .NO_APPOINTMENT)
-                    self.sendNotification("Appointment Cancelled", messageText: self.forIssuesAlert)
-                    
-                    DispatchQueue.main.async(execute: { self.greetingLabel.text = "\(self.generalGreeting), \(self.userDefaults.userName)? \(self.customGreetingMessage)" })
-                } else {
-                    self.handleErrorInternal(errorNum: delResponse)
-                }
-            })
-        } else {
-            self.setUIState(newState: .NO_USER_INFO)
+        guard userDefaults.userInfoExists else {
+            setUIState(newState: .noUserInfo)
+            getWaitTime()
+            return
         }
-        self.getWaitTime() // update immediately
+
+        Task {
+            let delResponse = try await APIService.shared.cancelAppointment(for: userDefaults)
+
+            await MainActor.run {
+                if delResponse == CONSTS.ErrorNum.NO_ERROR.rawValue {
+                    // delete succeeded
+                    self.setUIState(newState: .noAppointment)
+                    self.sendNotification("Appointment Cancelled", messageText: self.forIssuesAlert)
+
+                    self.greetingLabel.text = "\(self.generalGreeting), \(self.userDefaults.userName)? \(self.customGreetingMessage)"
+                } else {
+                    Task {
+                        await self.handleErrorInternal(errorNum: delResponse)
+                    }
+                }
+                self.getWaitTime() // update immediately
+            }
+        }
     }
     
     @IBAction func StepperWithSender(_ sender: UIStepper) {
@@ -350,34 +363,36 @@ class ViewController: UIViewController {
     }
     
     func getClosedMessage() {
-        postController.getClosedMessage(completion: { (closedMessage:(errorNum: CONSTS.ErrorNum, messageText: String)) -> Void in
+        Task {
+            let closedMessage = try await APIService.shared.getClosedMessage()
             let msgLength = closedMessage.messageText.count
-            
-            if(closedMessage.errorNum == CONSTS.ErrorNum.NO_ERROR && msgLength >= 3) {
-                // No server error received and message text is at least 3 characters. Assume shop is closed
-                self.shopClosedGreeting = closedMessage.messageText
-                self.setUIState(newState: .SHOP_CLOSED)
-            }
-        })
-    }
-    func getGreetingMessage() {
-        postController.getGreetingMessage(completion: { (greetingMessage:(errorNum: CONSTS.ErrorNum, messageText: String)) -> Void in
-            let msgLength = greetingMessage.messageText.count
-            
-            if(greetingMessage.errorNum == CONSTS.ErrorNum.NO_ERROR && msgLength >= 3) {
-                // No server error received and message text is at least 3 characters. Assume shop is closed
-                //self.shopClosedGreeting = greetingMessage.messageText
-                //self.setUIState(newState: .SHOP_CLOSED)
-                self.customGreetingMessage = greetingMessage.messageText
 
-                DispatchQueue.main.async(execute: {
+            await MainActor.run {
+                if closedMessage.errorNum == CONSTS.ErrorNum.NO_ERROR && msgLength >= 3 {
+                    // No server error received and message text is at least 3 characters. Assume shop is closed
+                    self.shopClosedGreeting = closedMessage.messageText
+                    self.setUIState(newState: .shopClosed)
+                }
+            }
+        }
+    }
+
+    func getGreetingMessage() {
+        Task {
+            let greetingMessage = try await APIService.shared.getGreetingMessage()
+            let msgLength = greetingMessage.messageText.count
+
+            await MainActor.run {
+                if greetingMessage.errorNum == CONSTS.ErrorNum.NO_ERROR && msgLength >= 3 {
+                    self.customGreetingMessage = greetingMessage.messageText
+
                     guard let currentText = self.greetingLabel.text else { return }
                     if currentText.suffix(self.customGreetingMessage.count) != self.customGreetingMessage {
                         self.greetingLabel.text = currentText + self.customGreetingMessage
                     }
-                })
+                }
             }
-        })
+        }
     }
     
     override func viewDidLoad() {
@@ -387,16 +402,24 @@ class ViewController: UIViewController {
     // Start here:
     override func viewWillAppear(_ animated: Bool) {
         userDefaults = User()
-        
-        self.setUIState(newState: .LOADING_VIEW)
+
+        self.setUIState(newState: .loadingView)
         // First check for closed message and any customizations to greeting
         getClosedMessage()
         getGreetingMessage()
         getWaitTime()
         checkForExistingAppointment()
-        
+
+        // Auto-refresh: Poll every 10 seconds for real-time updates
+        // Note: This provides live queue status without requiring user action
         DispatchQueue.main.async {
-            self.getEtaTimer = Timer.scheduledTimer(timeInterval: 10.0, target: self, selector: #selector(self.getWaitTime), userInfo: nil, repeats: true)
+            self.getEtaTimer = Timer.scheduledTimer(
+                timeInterval: 10.0,
+                target: self,
+                selector: #selector(self.getWaitTime),
+                userInfo: nil,
+                repeats: true
+            )
         }
     }
     override func viewWillDisappear(_ animated: Bool) {

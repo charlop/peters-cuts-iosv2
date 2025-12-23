@@ -102,7 +102,7 @@ class Appointment: NSObject, NSSecureCoding {
         let etaMinsRet = floor(self.startTimeUTCSeconds.timeIntervalSinceNow / 60) + 1
         if(etaMinsRet < 0) {
             // right?
-            if(self.getAppointmentStatus() != .NO_APPOINTMENT) {
+            if(self.getAppointmentStatus() != .noAppointment) {
                 self.lastErrorReceived = CONSTS.ErrorNum.RETURNING_MISSED.rawValue
             } else {
                 self.lastErrorReceived = CONSTS.ErrorNum.NO_SPOTS_AVAILABLE.rawValue
@@ -131,11 +131,11 @@ class Appointment: NSObject, NSSecureCoding {
     
     func getAppointmentStatus() -> CONSTS.AppointmentStatus {
         if(hasReservation) {
-            return .HAS_RESERVATION
+            return .hasReservation
         } else if(hasNumber) {
-            return .HAS_NUMBER
+            return .hasNumber
         } else {
-            return .NO_APPOINTMENT
+            return .noAppointment
         }
     }
     

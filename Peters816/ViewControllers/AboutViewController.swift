@@ -1,10 +1,8 @@
 import UIKit
-import CoreData
 import Foundation
 
 class aboutViewController: UIViewController {
-    let postController = PostController2()
-    var ADDRESS_URL:String = "939+Wyandotte+St+E+Windsor+ON"
+    var ADDRESS_URL: String = "939+Wyandotte+St+E+Windsor+ON"
     var OPEN_HOURS:String = ""
     var userDefaults = User()
     @IBOutlet weak var shopHoursLabel: UILabel!
@@ -49,33 +47,35 @@ class aboutViewController: UIViewController {
     }
     
     func getNewHours() {
-        postController.getNewHours(completion: { (newHours:(errorNum: CONSTS.ErrorNum, messageText: String)) -> Void in
-            let msgLength = newHours.messageText.count
-            
-            if(newHours.errorNum == CONSTS.ErrorNum.NO_ERROR && msgLength >= 3) {
-                self.userDefaults.saveHoursText(newHours.messageText)
-                DispatchQueue.main.async(execute: {
-                    self.shopHoursLabel.text = self.userDefaults.getHoursText()
-                })
-            }
-        })
         self.shopHoursLabel.text = self.userDefaults.getHoursText()
-    }
-    func getNewAddr() {
-        postController.getNewAddr(completion: { (newAddr:(errorNum: CONSTS.ErrorNum, messageText: String)) -> Void in
-            let msgLength = newAddr.messageText.count
-            
-            if(newAddr.errorNum == CONSTS.ErrorNum.NO_ERROR && msgLength >= 3) {
-                self.userDefaults.saveAddrUrl(newAddr.messageText)
-                self.ADDRESS_URL = self.userDefaults.getAddrUrl()
+
+        Task {
+            let newHours = try await APIService.shared.getHours()
+            let msgLength = newHours.messageText.count
+
+            await MainActor.run {
+                if newHours.errorNum == CONSTS.ErrorNum.NO_ERROR && msgLength >= 3 {
+                    self.userDefaults.saveHoursText(newHours.messageText)
+                    self.shopHoursLabel.text = self.userDefaults.getHoursText()
+                }
             }
-        })
-        self.ADDRESS_URL = self.userDefaults.getAddrUrl()
+        }
     }
-    
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
+
+    func getNewAddr() {
+        self.ADDRESS_URL = self.userDefaults.getAddrUrl()
+
+        Task {
+            let newAddr = try await APIService.shared.getAddress()
+            let msgLength = newAddr.messageText.count
+
+            await MainActor.run {
+                if newAddr.errorNum == CONSTS.ErrorNum.NO_ERROR && msgLength >= 3 {
+                    self.userDefaults.saveAddrUrl(newAddr.messageText)
+                    self.ADDRESS_URL = self.userDefaults.getAddrUrl()
+                }
+            }
+        }
     }
     @IBAction func handleSwipe(_ gestureRecognizer : UISwipeGestureRecognizer) {
         // Animate only if swiping in correct direction

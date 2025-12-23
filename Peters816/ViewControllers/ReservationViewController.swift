@@ -7,17 +7,15 @@
 //
 
 import Foundation
-import CoreData
 import UIKit
 
 class ReservationViewController: UITableViewController {
     var userDefaults = User()
-    
+
     var reservationsDisabled = false
-    
-    var reservationData:Array<String> = Array<String>()
+
+    var reservationData: Array<String> = Array<String>()
     var reservationIdDictionary = [String: Int]()
-    let postController = PostController2()
 
     func sendNotification(_ titleText:String, messageText:String, goBack:Bool, goBackPositiveNegative:[String]) {
         DispatchQueue.main.async(execute: {
@@ -78,62 +76,65 @@ class ReservationViewController: UITableViewController {
     
     @IBAction func makeReservationWithSender(_ sender: UIButton) {
         // Reservations disabled because no user info is available
-        if(reservationsDisabled) {
+        if reservationsDisabled {
             self.sendNotification("Can't Make Reservations", messageText: "Please go back and enter your name and number before you can make reservations", goBack: true, goBackPositiveNegative:["OK"])
         } else {
             // Allow the user to make a reservation
             let buttonPosition = sender.convert(CGPoint.zero, to: self.tableView)
-            if let indexPath = self.tableView.indexPathForRow(at: buttonPosition) {
-                if let start_time = tableView.cellForRow(at: indexPath)?.textLabel!.text {
-                    
-                    postController.getNumber(self.userDefaults,numRes:1,reservationInd:true,inId:reservationIdDictionary[start_time]!, completion: {(getNumResponse:User)->Void in
-                        self.userDefaults = getNumResponse
-                        let appointment = self.userDefaults.getFirstAppointment()
-                        if(appointment.getIsReservation()) {
+            if let indexPath = self.tableView.indexPathForRow(at: buttonPosition),
+               let start_time = tableView.cellForRow(at: indexPath)?.textLabel?.text,
+               let reservationId = reservationIdDictionary[start_time] {
+
+                Task {
+                    let getNumResponse = try await APIService.shared.getNumber(
+                        for: self.userDefaults,
+                        count: 1,
+                        isReservation: true,
+                        reservationId: reservationId
+                    )
+                    self.userDefaults = getNumResponse
+                    let appointment = self.userDefaults.getFirstAppointment()
+
+                    await MainActor.run {
+                        if appointment.getIsReservation() {
                             // Reservation successful
                             self.sendNotification("Nice", messageText: "Your appointment is saved for \(start_time). Done making reservations?", goBack: false, goBackPositiveNegative:["Yes","No"])
                         } else {
                             // If we got to here, there was an error...
                             // TODO: handle error (look up error key in getNumResponse
                             self.sendNotification("Nice", messageText: "Your appointment is saved for \(start_time). Done making reservations?", goBack: false, goBackPositiveNegative:["Yes","No"])
-                            // 20190527 disabling this, IDK why it keeps throwing an error...
-                            /*
-                            self.sendNotification("Error", messageText: "Unable to reserve spot, try again! Go back?", goBack: false, goBackPositiveNegative: ["Yes","No"])
-                            */  
                         }
                         self.getOpenSpots()
-                        return
-                    })
+                    }
                 }
-                
             }
         }
     }
     
     func getOpenSpots() {
-        // possible values (-2, -8, -3)
-        postController.getOpenings(completion: {(etaResponse:[String: AnyObject])->Void in
-            if let retError = etaResponse["error"] {
-                self.reservationData.removeAll()
-                
-                // check if fatal, etc...
-                let errorFatalBool = CONSTS.isFatal(errorId: retError as! Int)
-                let errorDescription = CONSTS.getErrorDescription(errorId: retError as! Int)
-                if(errorFatalBool) { // i.e. error codes -1,2,9
-                    self.sendNotification("Unavailable", messageText: errorDescription.rawValue + " Go back?", goBack: true, goBackPositiveNegative: ["Yes","No"])
+        Task {
+            let result = try await APIService.shared.getOpenings()
+
+            await MainActor.run {
+                if let retError = result.error {
+                    self.reservationData.removeAll()
+
+                    // check if fatal, etc...
+                    let errorFatalBool = CONSTS.isFatal(errorId: retError)
+                    let errorDescription = CONSTS.getErrorDescription(errorId: retError)
+                    if errorFatalBool { // i.e. error codes -1,2,9
+                        self.sendNotification("Unavailable", messageText: errorDescription.rawValue + " Go back?", goBack: true, goBackPositiveNegative: ["Yes","No"])
+                    } else {
+                        self.sendNotification("Hey!", messageText: errorDescription.rawValue + " Go back?", goBack: false, goBackPositiveNegative: ["Yes", "No"])
+                    }
                 } else {
-                    self.sendNotification("Hey!", messageText: errorDescription.rawValue + " Go back?", goBack: false, goBackPositiveNegative: ["Yes", "No"])
-                }
-            } else {
-                // Success! Store the id's for associated start_time and display the data
-                if let tmpReservationDictionary = etaResponse["availableSpots"] {
-                    self.reservationIdDictionary = tmpReservationDictionary as! [String : Int]
-                    self.reservationData = etaResponse["availableSpotsArray"] as! [String]
+                    // Success! Store the id's for associated start_time and display the data
+                    self.reservationIdDictionary = result.availableSpots
+                    self.reservationData = result.availableSpotsArray
                     self.refreshTable()
                 }
             }
-            
-        })
+        }
     }
     
     @IBAction func handleSwipe(_ gestureRecognizer : UISwipeGestureRecognizer) {

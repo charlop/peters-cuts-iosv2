@@ -4,6 +4,7 @@
 //
 //  Created by Chris on 2016-10-12.
 //  Copyright © 2016 Chris Charlopov. All rights reserved.
+//  Refactored 2025-12-22 to use services
 //
 
 import Foundation
@@ -13,47 +14,28 @@ import UserNotifications
 // MARK: - User
 final class User {
     // MARK: - Properties
-    private struct Constants {
-        static let defaultHoursText = "Please call/text Peter for current shop hours."
-        static let notificationTitles = [
-            20: "Your haircut is in 20 minutes!",
-            40: "Your haircut is in 40 minutes!"
-        ]
-    }
-    
-    private struct UserKeys {
-        static let name = "name"
-        static let phone = "phone"
-        static let email = "email"
-        static let appointment = "appointment"
-        static let hoursText = "hoursText"
-        static let addrUrl = "addrUrl"
-    }
-    
     private var name: String
     private var phone: String
     private var email: String
     private var appointmentArray: [Appointment]
-    
-    private let userDefaults: UserDefaults
-    
+
+    private let storage = UserDefaultsService.shared
+    private let notifications = NotificationService.shared
+
     // MARK: - Initialization
-    init(userDefaults: UserDefaults = .standard) {
-        self.userDefaults = userDefaults
-        
-        // Initialize with stored values or defaults
-        self.name = userDefaults.string(forKey: UserKeys.name) ?? ""
-        self.phone = userDefaults.string(forKey: UserKeys.phone) ?? ""
-        self.email = userDefaults.string(forKey: UserKeys.email) ?? ""
-        self.appointmentArray = [Appointment()]
-        
-        loadAppointments()
+    init() {
+        // Load from UserDefaultsService
+        self.name = storage.getUserName() ?? ""
+        self.phone = storage.getUserPhone() ?? ""
+        self.email = storage.getUserEmail() ?? ""
+        self.appointmentArray = storage.loadAppointments()
+
         validateIds()
     }
     
     // MARK: - Public Methods
     func addOrUpdateAppointment(newAppointment: Appointment) {
-        if newAppointment.getAppointmentStatus() == CONSTS.AppointmentStatus.NO_APPOINTMENT {
+        if newAppointment.getAppointmentStatus() == CONSTS.AppointmentStatus.noAppointment {
             handleNoAppointment(newAppointment)
         } else {
             handleExistingAppointment(newAppointment)
@@ -63,14 +45,12 @@ final class User {
     
     func saveUserDetails(name: String, phone: String, email: String = "") {
         removeAllAppointments() // Reset appointments when user info changes
-        
+
         self.name = name
         self.phone = phone
         self.email = email
-        
-        userDefaults.set(name, forKey: UserKeys.name)
-        userDefaults.set(phone, forKey: UserKeys.phone)
-        userDefaults.set(email, forKey: UserKeys.email)
+
+        storage.saveUserInfo(name: name, phone: phone, email: email)
     }
     
     func getFirstUpcomingEta() -> (CONSTS.ErrorNum.RawValue, String) {
@@ -89,27 +69,26 @@ final class User {
     
     func removeAllAppointments() {
         appointmentArray = [Appointment()]
-        userDefaults.removeObject(forKey: UserKeys.appointment)
+        storage.removeAllAppointments()
     }
     
     // MARK: - Hours and Address Management
     @discardableResult
     func saveHoursText(_ hoursText: String) -> String {
-        let text = hoursText.isEmpty ? Constants.defaultHoursText : hoursText
-        userDefaults.set(text, forKey: UserKeys.hoursText)
-        return text
+        storage.saveHoursText(hoursText)
+        return storage.getHoursText()
     }
-    
+
     func getHoursText() -> String {
-        return userDefaults.string(forKey: UserKeys.hoursText) ?? saveHoursText("")
+        return storage.getHoursText()
     }
-    
+
     func saveAddrUrl(_ addrUrl: String) {
-        userDefaults.set(addrUrl, forKey: UserKeys.addrUrl)
+        storage.saveAddressURL(addrUrl)
     }
-    
+
     func getAddrUrl() -> String {
-        return userDefaults.string(forKey: UserKeys.addrUrl) ?? ""
+        return storage.getAddressURL()
     }
     
     // MARK: - User Info Access
@@ -129,26 +108,12 @@ final class User {
     var hasAppointment: Bool {
         validateIds()
         if appointmentArray.count == 0 { return false }
-        return appointmentArray[0].getAppointmentStatus() != .NO_APPOINTMENT
+        return appointmentArray[0].getAppointmentStatus() != .noAppointment
     }
     
     // MARK: - Private Methods
-    private func loadAppointments() {
-        guard let data = userDefaults.object(forKey: UserKeys.appointment) as? Data else { return }
-        
-        do {
-            if let appointments = try NSKeyedUnarchiver.unarchivedArrayOfObjects(ofClass: Appointment.self, from: data) {
-                appointmentArray = appointments
-            }
-        } catch {
-            print("Failed to unarchive appointment array: \(error)")
-        }
-    }
-    
     private func saveAppointments() {
-        if let data = try? NSKeyedArchiver.archivedData(withRootObject: appointmentArray as NSArray, requiringSecureCoding: false) {
-            userDefaults.set(data, forKey: UserKeys.appointment)
-        }
+        storage.saveAppointments(appointmentArray)
     }
     
     private func handleNoAppointment(_ newAppointment: Appointment) {
@@ -208,35 +173,6 @@ final class User {
     
     // MARK: - Notifications
     private func createNotifications(for etaMin: Double) {
-        let center = UNUserNotificationCenter.current()
-        
-        // Remove existing notifications if any
-        center.getPendingNotificationRequests { [weak self] notifications in
-            if !notifications.isEmpty {
-                self?.removeAllAppointments()
-            }
-        }
-        
-        // Create new notifications for different time intervals
-        Constants.notificationTitles.forEach { minutes, message in
-            guard etaMin > Double(minutes) else { return }
-            
-            scheduleNotification(
-                title: "Message from Peter",
-                body: message,
-                timeInterval: (etaMin - Double(minutes)) * 60
-            )
-        }
-    }
-    
-    private func scheduleNotification(title: String, body: String, timeInterval: TimeInterval) {
-        let content = UNMutableNotificationContent()
-        content.title = NSString.localizedUserNotificationString(forKey: title, arguments: nil)
-        content.body = NSString.localizedUserNotificationString(forKey: body, arguments: nil)
-        
-        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: timeInterval, repeats: false)
-        let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
-        
-        UNUserNotificationCenter.current().add(request)
+        notifications.scheduleAppointmentNotifications(etaMinutes: etaMin)
     }
 }
