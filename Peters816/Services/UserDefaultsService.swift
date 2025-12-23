@@ -9,7 +9,7 @@
 import Foundation
 
 // MARK: - UserDefaultsService
-final class UserDefaultsService {
+final class UserDefaultsService: @unchecked Sendable {
     static let shared = UserDefaultsService()
 
     private let userDefaults: UserDefaults

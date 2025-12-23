@@ -31,7 +31,7 @@ actor APIService {
     }
 
     private func performRequest(_ request: URLRequest) async throws -> Data {
-        guard Reachability.isConnectedToNetwork() else {
+        guard await Reachability.isConnectedToNetwork() else {
             throw APIError.noInternet
         }
 

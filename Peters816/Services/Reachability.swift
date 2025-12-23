@@ -3,7 +3,7 @@
 //  Peters816
 //
 //  Created by Chris Charlopov on 7/30/17.
-//  Updated by Claude on 2025-12-22 to use modern Network framework
+//  Updated by Claude on 2025-12-23 to use async/await
 //  Copyright © 2017 spandan. All rights reserved.
 //
 
@@ -11,66 +11,66 @@ import Foundation
 import Network
 
 /// Modern network reachability checker using Network framework
-public class Reachability {
+public actor Reachability {
+
     /// Check if device is connected to the network
-    /// Uses the modern NWPathMonitor API (iOS 12+) instead of deprecated SCNetworkReachability
-    class func isConnectedToNetwork() -> Bool {
-        let monitor = NWPathMonitor()
-        let semaphore = DispatchSemaphore(value: 0)
-        var isConnected = false
+    public static func isConnectedToNetwork() async -> Bool {
+        await withCheckedContinuation { continuation in
+            let monitor = NWPathMonitor()
+            let queue = DispatchQueue(label: "com.peters816.reachability")
 
-        monitor.pathUpdateHandler = { path in
-            isConnected = path.status == .satisfied
-            semaphore.signal()
+            monitor.pathUpdateHandler = { path in
+                continuation.resume(returning: path.status == .satisfied)
+                monitor.cancel()
+            }
+
+            monitor.start(queue: queue)
+
+            // Timeout after 1 second
+            DispatchQueue.global().asyncAfter(deadline: .now() + 1.0) {
+                continuation.resume(returning: false)
+                monitor.cancel()
+            }
         }
-
-        let queue = DispatchQueue(label: "com.peters816.reachability")
-        monitor.start(queue: queue)
-
-        // Wait for initial path update (with timeout)
-        _ = semaphore.wait(timeout: .now() + 1.0)
-        monitor.cancel()
-
-        return isConnected
     }
 
     /// Check if connected via WiFi
-    class func isConnectedViaWiFi() -> Bool {
-        let monitor = NWPathMonitor(requiredInterfaceType: .wifi)
-        let semaphore = DispatchSemaphore(value: 0)
-        var isConnected = false
+    public static func isConnectedViaWiFi() async -> Bool {
+        await withCheckedContinuation { continuation in
+            let monitor = NWPathMonitor(requiredInterfaceType: .wifi)
+            let queue = DispatchQueue(label: "com.peters816.reachability.wifi")
 
-        monitor.pathUpdateHandler = { path in
-            isConnected = path.status == .satisfied
-            semaphore.signal()
+            monitor.pathUpdateHandler = { path in
+                continuation.resume(returning: path.status == .satisfied)
+                monitor.cancel()
+            }
+
+            monitor.start(queue: queue)
+
+            DispatchQueue.global().asyncAfter(deadline: .now() + 1.0) {
+                continuation.resume(returning: false)
+                monitor.cancel()
+            }
         }
-
-        let queue = DispatchQueue(label: "com.peters816.reachability.wifi")
-        monitor.start(queue: queue)
-
-        _ = semaphore.wait(timeout: .now() + 1.0)
-        monitor.cancel()
-
-        return isConnected
     }
 
     /// Check if connected via Cellular
-    class func isConnectedViaCellular() -> Bool {
-        let monitor = NWPathMonitor(requiredInterfaceType: .cellular)
-        let semaphore = DispatchSemaphore(value: 0)
-        var isConnected = false
+    public static func isConnectedViaCellular() async -> Bool {
+        await withCheckedContinuation { continuation in
+            let monitor = NWPathMonitor(requiredInterfaceType: .cellular)
+            let queue = DispatchQueue(label: "com.peters816.reachability.cellular")
 
-        monitor.pathUpdateHandler = { path in
-            isConnected = path.status == .satisfied
-            semaphore.signal()
+            monitor.pathUpdateHandler = { path in
+                continuation.resume(returning: path.status == .satisfied)
+                monitor.cancel()
+            }
+
+            monitor.start(queue: queue)
+
+            DispatchQueue.global().asyncAfter(deadline: .now() + 1.0) {
+                continuation.resume(returning: false)
+                monitor.cancel()
+            }
         }
-
-        let queue = DispatchQueue(label: "com.peters816.reachability.cellular")
-        monitor.start(queue: queue)
-
-        _ = semaphore.wait(timeout: .now() + 1.0)
-        monitor.cancel()
-
-        return isConnected
     }
 }

@@ -12,7 +12,7 @@ import UIKit
 import UserNotifications
 
 // MARK: - User
-final class User {
+final class User: @unchecked Sendable {
     // MARK: - Properties
     private var name: String
     private var phone: String

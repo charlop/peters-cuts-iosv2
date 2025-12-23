@@ -8,14 +8,6 @@
 
 import SwiftUI
 
-enum NavigationDestination: Hashable {
-    case about
-    case userInfo
-    case reservation
-    case termsOfUse
-    case privacyPolicy
-}
-
 struct ContentView: View {
     @State private var navigationPath = NavigationPath()
 

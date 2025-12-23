@@ -8,7 +8,7 @@
 
 import Foundation
 
-class Appointment: NSObject, NSSecureCoding {
+class Appointment: NSObject, NSSecureCoding, @unchecked Sendable {
     private var lastErrorReceived: Int
     private var hasNumber: Bool
     private var hasReservation: Bool
