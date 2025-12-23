@@ -9,32 +9,27 @@
 import SwiftUI
 
 /// Extension to apply glass effects with backward compatibility
-/// NOTE: Liquid Glass APIs (.glassEffect, .buttonStyle(.glass), GlassEffectContainer)
-/// are documented but not yet available in the public Xcode SDK.
-/// When Apple releases the updated SDK, uncomment the iOS 26+ branches below.
 extension View {
     /// Apply Liquid Glass effect on iOS 26+, fallback to ultraThinMaterial on iOS 18-25
     @ViewBuilder
     func glassBackground() -> some View {
-        // When Liquid Glass SDK is available, uncomment:
-        // if #available(iOS 26, *) {
-        //     self.glassEffect(.regular)
-        // } else {
+        if #available(iOS 26, *) {
+            self.glassEffect(.regular)
+        } else {
             self
                 .background(.ultraThinMaterial)
                 .clipShape(RoundedRectangle(cornerRadius: 16))
-        // }
+        }
     }
 
     /// Apply glass button style on iOS 26+, fallback to bordered prominent on iOS 18-25
     @ViewBuilder
     func glassButtonStyle() -> some View {
-        // When Liquid Glass SDK is available, uncomment:
-        // if #available(iOS 26, *) {
-        //     self.buttonStyle(.glass)
-        // } else {
+        if #available(iOS 26, *) {
+            self.buttonStyle(.glass)
+        } else {
             self.buttonStyle(.borderedProminent)
-        // }
+        }
     }
 }
 

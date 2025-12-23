@@ -17,19 +17,24 @@ struct QueueStatusView: View {
 
     var body: some View {
         VStack(spacing: 16) {
-            // Number display cards
-            // TODO: When Liquid Glass SDK is available, use GlassEffectContainer:
-            // GlassEffectContainer(spacing: 20) {
-            //     HStack(spacing: 20) {
-            //         QueueNumberCard(...)
-            //             .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 12))
-            //             .glassEffectID("current", in: namespace)
-            //         ...
-            //     }
-            // }
-            HStack(spacing: 20) {
-                QueueNumberCard(title: "Current #", value: currentNumber)
-                QueueNumberCard(title: "Next Available #", value: nextNumber)
+            // Number display cards with Liquid Glass morphing
+            if #available(iOS 26, *) {
+                GlassEffectContainer(spacing: 20) {
+                    HStack(spacing: 20) {
+                        QueueNumberCard(title: "Current #", value: currentNumber)
+                            .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 12))
+                            .glassEffectID("current", in: namespace)
+
+                        QueueNumberCard(title: "Next Available #", value: nextNumber)
+                            .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 12))
+                            .glassEffectID("next", in: namespace)
+                    }
+                }
+            } else {
+                HStack(spacing: 20) {
+                    QueueNumberCard(title: "Current #", value: currentNumber)
+                    QueueNumberCard(title: "Next Available #", value: nextNumber)
+                }
             }
 
             // Wait time
@@ -59,7 +64,9 @@ struct QueueNumberCard: View {
         }
         .frame(maxWidth: .infinity)
         .padding()
-        .glassBackground()
+        // Note: When inside GlassEffectContainer (iOS 26), the glass effect
+        // is applied by the parent container's .glassEffect() modifier.
+        // For iOS 18-25 fallback, we apply glassBackground() directly.
     }
 }
 

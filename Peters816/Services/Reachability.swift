@@ -3,35 +3,74 @@
 //  Peters816
 //
 //  Created by Chris Charlopov on 7/30/17.
+//  Updated by Claude on 2025-12-22 to use modern Network framework
 //  Copyright © 2017 spandan. All rights reserved.
 //
 
 import Foundation
-import SystemConfiguration
+import Network
 
+/// Modern network reachability checker using Network framework
 public class Reachability {
+    /// Check if device is connected to the network
+    /// Uses the modern NWPathMonitor API (iOS 12+) instead of deprecated SCNetworkReachability
     class func isConnectedToNetwork() -> Bool {
-        
-        var zeroAddress = sockaddr_in(sin_len: 0, sin_family: 0, sin_port: 0, sin_addr: in_addr(s_addr: 0), sin_zero: (0, 0, 0, 0, 0, 0, 0, 0))
-        zeroAddress.sin_len = UInt8(MemoryLayout.size(ofValue: zeroAddress))
-        zeroAddress.sin_family = sa_family_t(AF_INET)
-        
-        let defaultRouteReachability = withUnsafePointer(to: &zeroAddress) {
-            $0.withMemoryRebound(to: sockaddr.self, capacity: 1) {zeroSockAddress in
-                SCNetworkReachabilityCreateWithAddress(nil, zeroSockAddress)
-            }
+        let monitor = NWPathMonitor()
+        let semaphore = DispatchSemaphore(value: 0)
+        var isConnected = false
+
+        monitor.pathUpdateHandler = { path in
+            isConnected = path.status == .satisfied
+            semaphore.signal()
         }
-        
-        var flags: SCNetworkReachabilityFlags = SCNetworkReachabilityFlags(rawValue: 0)
-        if SCNetworkReachabilityGetFlags(defaultRouteReachability!, &flags) == false {
-            return false
+
+        let queue = DispatchQueue(label: "com.peters816.reachability")
+        monitor.start(queue: queue)
+
+        // Wait for initial path update (with timeout)
+        _ = semaphore.wait(timeout: .now() + 1.0)
+        monitor.cancel()
+
+        return isConnected
+    }
+
+    /// Check if connected via WiFi
+    class func isConnectedViaWiFi() -> Bool {
+        let monitor = NWPathMonitor(requiredInterfaceType: .wifi)
+        let semaphore = DispatchSemaphore(value: 0)
+        var isConnected = false
+
+        monitor.pathUpdateHandler = { path in
+            isConnected = path.status == .satisfied
+            semaphore.signal()
         }
-        
-        // Working for Cellular and WIFI
-        let isReachable = (flags.rawValue & UInt32(kSCNetworkFlagsReachable)) != 0
-        let needsConnection = (flags.rawValue & UInt32(kSCNetworkFlagsConnectionRequired)) != 0
-        let ret = (isReachable && !needsConnection)
-        
-        return ret
+
+        let queue = DispatchQueue(label: "com.peters816.reachability.wifi")
+        monitor.start(queue: queue)
+
+        _ = semaphore.wait(timeout: .now() + 1.0)
+        monitor.cancel()
+
+        return isConnected
+    }
+
+    /// Check if connected via Cellular
+    class func isConnectedViaCellular() -> Bool {
+        let monitor = NWPathMonitor(requiredInterfaceType: .cellular)
+        let semaphore = DispatchSemaphore(value: 0)
+        var isConnected = false
+
+        monitor.pathUpdateHandler = { path in
+            isConnected = path.status == .satisfied
+            semaphore.signal()
+        }
+
+        let queue = DispatchQueue(label: "com.peters816.reachability.cellular")
+        monitor.start(queue: queue)
+
+        _ = semaphore.wait(timeout: .now() + 1.0)
+        monitor.cancel()
+
+        return isConnected
     }
 }

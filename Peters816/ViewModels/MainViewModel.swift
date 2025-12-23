@@ -39,8 +39,8 @@ class MainViewModel: ObservableObject {
         greetingText = "Loading the latest schedule..."
 
         // Load closed message and greeting in parallel
-        async let closedMessage = fetchClosedMessage()
-        async let greetingMessage = fetchGreetingMessage()
+        async let closedMessage: () = fetchClosedMessage()
+        async let greetingMessage: () = fetchGreetingMessage()
 
         await closedMessage
         await greetingMessage

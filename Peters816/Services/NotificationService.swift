@@ -34,8 +34,6 @@ final class NotificationService {
     /// Schedule notifications for an appointment
     /// - Parameter etaMinutes: Estimated time in minutes until appointment
     func scheduleAppointmentNotifications(etaMinutes: Double) {
-        let center = UNUserNotificationCenter.current()
-
         // Remove any existing notifications first
         removeAllNotifications()
 
