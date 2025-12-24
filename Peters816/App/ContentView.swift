@@ -9,25 +9,9 @@
 import SwiftUI
 
 struct ContentView: View {
-    @State private var navigationPath = NavigationPath()
-
     var body: some View {
-        NavigationStack(path: $navigationPath) {
+        NavigationStack {
             HomeView()
-                .navigationDestination(for: NavigationDestination.self) { destination in
-                    switch destination {
-                    case .about:
-                        AboutView()
-                    case .userInfo:
-                        UserInfoView()
-                    case .reservation:
-                        ReservationView()
-                    case .termsOfUse:
-                        TermsOfUseView()
-                    case .privacyPolicy:
-                        PrivacyPolicyView()
-                    }
-                }
         }
     }
 }

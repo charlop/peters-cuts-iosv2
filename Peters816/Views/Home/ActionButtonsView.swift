@@ -12,7 +12,6 @@ struct ActionButtonsView: View {
     let currentState: AppointmentStatus
     @Binding var haircutCount: Int
     let onGetNumber: () -> Void
-    let onReservation: () -> Void
     let onCancel: () -> Void
 
     var body: some View {
@@ -47,7 +46,7 @@ struct ActionButtonsView: View {
                 .glassButtonStyle()
                 .padding(.horizontal)
 
-                Button(action: onReservation) {
+                NavigationLink(value: NavigationDestination.reservation) {
                     Text("Make a Reservation")
                         .font(.system(size: 17))
                         .frame(maxWidth: .infinity)
@@ -76,22 +75,22 @@ struct ActionButtonsView: View {
 }
 
 #Preview {
-    VStack(spacing: 40) {
-        ActionButtonsView(
-            currentState: .noAppointment,
-            haircutCount: .constant(1),
-            onGetNumber: {},
-            onReservation: {},
-            onCancel: {}
-        )
+    NavigationStack {
+        VStack(spacing: 40) {
+            ActionButtonsView(
+                currentState: .noAppointment,
+                haircutCount: .constant(1),
+                onGetNumber: {},
+                onCancel: {}
+            )
 
-        ActionButtonsView(
-            currentState: .hasNumber,
-            haircutCount: .constant(1),
-            onGetNumber: {},
-            onReservation: {},
-            onCancel: {}
-        )
+            ActionButtonsView(
+                currentState: .hasNumber,
+                haircutCount: .constant(1),
+                onGetNumber: {},
+                onCancel: {}
+            )
+        }
+        .padding()
     }
-    .padding()
 }

@@ -14,40 +14,25 @@ struct HomeView: View {
     @State private var alertTitle = ""
     @State private var alertMessage = ""
     @State private var haircutCount = 1
-    @State private var navigateToReservation = false
 
     var body: some View {
         ZStack {
             Color(UIColor.systemBackground)
                 .ignoresSafeArea()
 
-            VStack(spacing: 20) {
-                // Header with About and User Info buttons
-                HStack {
-                    NavigationLink(value: NavigationDestination.about) {
-                        Text("About")
-                            .font(.system(size: 17))
-                    }
+            ScrollView {
+                VStack(spacing: 24) {
+                    // Logo
+                    Image("logo1")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(maxWidth: 320)
+                        .padding(.top, 8)
 
-                    Spacer()
-
-                    NavigationLink(value: NavigationDestination.userInfo) {
-                        Text("User Info")
-                            .font(.system(size: 17))
-                    }
-                }
-                .padding(.horizontal)
-                .padding(.top)
-
-                Spacer()
-
-                // Main content based on state
-                VStack(spacing: 30) {
                     // Greeting text
                     Text(viewModel.greetingText)
                         .font(.title3)
                         .multilineTextAlignment(.center)
-                        .padding(.horizontal)
 
                     // Queue status (when not loading or closed)
                     if viewModel.currentState != .loadingView && viewModel.currentState != .shopClosed {
@@ -72,9 +57,6 @@ struct HomeView: View {
                                 }
                             }
                         },
-                        onReservation: {
-                            navigateToReservation = true
-                        },
                         onCancel: {
                             Task {
                                 let result = await viewModel.cancelAppointment()
@@ -83,8 +65,7 @@ struct HomeView: View {
                         }
                     )
                 }
-
-                Spacer()
+                .padding(.horizontal)
             }
             .opacity(viewModel.isLoading ? 0.5 : 1.0)
 
@@ -96,8 +77,31 @@ struct HomeView: View {
         }
         .navigationTitle("Peter's Haircuts")
         .navigationBarTitleDisplayMode(.large)
-        .navigationDestination(isPresented: $navigateToReservation) {
-            ReservationView()
+        .toolbar {
+            ToolbarItem(placement: .navigationBarLeading) {
+                NavigationLink(value: NavigationDestination.about) {
+                    Text("About")
+                }
+            }
+            ToolbarItem(placement: .navigationBarTrailing) {
+                NavigationLink(value: NavigationDestination.userInfo) {
+                    Text("User Info")
+                }
+            }
+        }
+        .navigationDestination(for: NavigationDestination.self) { destination in
+            switch destination {
+            case .about:
+                AboutView()
+            case .userInfo:
+                UserInfoView()
+            case .reservation:
+                ReservationView()
+            case .termsOfUse:
+                TermsOfUseView()
+            case .privacyPolicy:
+                PrivacyPolicyView()
+            }
         }
         .task {
             await viewModel.loadInitialData()

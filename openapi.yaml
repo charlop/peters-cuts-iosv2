@@ -1,0 +1,1228 @@
+openapi: 3.0.3
+info:
+  title: Peters Cuts API
+  description: Serverless REST API for Peters Cuts barbershop appointment booking and queue management
+  version: 2.0.0
+  contact:
+    name: Peters Cuts Support
+    url: https://github.com/charlop/peters-cuts-web/issues
+
+servers:
+  - url: https://api.peterscuts.com/v2
+    description: Production server
+  - url: https://dev-api.peterscuts.com/v2
+    description: Development server
+  - url: http://localhost:4566/v2
+    description: Local development (LocalStack)
+
+tags:
+  - name: Health
+    description: API health checks
+  - name: Authentication
+    description: Customer authentication endpoints
+  - name: Appointments
+    description: Customer appointment management
+  - name: Queue
+    description: Queue status and tracking
+  - name: Admin - Auth
+    description: Admin authentication
+  - name: Admin - Queue
+    description: Admin queue management
+  - name: Admin - Schedule
+    description: Admin schedule management
+  - name: Admin - Breaks
+    description: Admin break template management
+
+paths:
+  /health:
+    get:
+      tags:
+        - Health
+      summary: Health check
+      description: Check API health and availability
+      operationId: getHealth
+      responses:
+        '200':
+          description: API is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+  /auth/send-code:
+    post:
+      tags:
+        - Authentication
+      summary: Request verification code
+      description: Send SMS verification code to customer's phone number
+      operationId: sendVerificationCode
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SendCodeRequest'
+      responses:
+        '200':
+          description: Verification code sent successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SendCodeResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /auth/verify-code:
+    post:
+      tags:
+        - Authentication
+      summary: Verify code and get JWT
+      description: Verify SMS code and receive authentication token
+      operationId: verifyCode
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerifyCodeRequest'
+      responses:
+        '200':
+          description: Verification successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerifyCodeResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /auth/check-device:
+    post:
+      tags:
+        - Authentication
+      summary: Check device trust
+      description: Check if device is trusted to skip SMS verification
+      operationId: checkDevice
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CheckDeviceRequest'
+      responses:
+        '200':
+          description: Device trust status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckDeviceResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /appointments/available:
+    get:
+      tags:
+        - Appointments
+      summary: Get available slots
+      description: Get all available appointment slots for a specific date
+      operationId: getAvailableSlots
+      parameters:
+        - name: date
+          in: query
+          required: true
+          description: Date in YYYY-MM-DD format
+          schema:
+            type: string
+            format: date
+            example: "2025-12-25"
+      responses:
+        '200':
+          description: Available slots retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AvailableSlotsResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /appointments:
+    post:
+      tags:
+        - Appointments
+      summary: Create appointment
+      description: Create a new appointment (requires authentication)
+      operationId: createAppointment
+      security:
+        - customerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAppointmentRequest'
+      responses:
+        '201':
+          description: Appointment created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateAppointmentResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /appointments/{id}:
+    delete:
+      tags:
+        - Appointments
+      summary: Cancel appointment
+      description: Cancel an existing appointment (requires authentication)
+      operationId: cancelAppointment
+      security:
+        - customerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Appointment ID (UUID)
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Appointment cancelled successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessMessage'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /queue/status:
+    get:
+      tags:
+        - Queue
+      summary: Get queue status
+      description: Get current queue status for today
+      operationId: getQueueStatus
+      responses:
+        '200':
+          description: Queue status retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueueStatus'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /queue/my-appointment:
+    get:
+      tags:
+        - Queue
+      summary: Get my appointment
+      description: Get customer's appointment and queue position (requires authentication)
+      operationId: getMyAppointment
+      security:
+        - customerAuth: []
+      responses:
+        '200':
+          description: Appointment retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MyAppointmentResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /admin/login:
+    post:
+      tags:
+        - Admin - Auth
+      summary: Admin login
+      description: Authenticate admin user via AWS Cognito
+      operationId: adminLogin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminLoginRequest'
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/AdminLoginResponse'
+                  - $ref: '#/components/schemas/AdminLoginChallenge'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /admin/queue:
+    get:
+      tags:
+        - Admin - Queue
+      summary: Get admin queue view
+      description: Get detailed queue with all appointments for today
+      operationId: getAdminQueue
+      security:
+        - cognitoAuth: []
+      responses:
+        '200':
+          description: Queue retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminQueueResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /admin/schedule:
+    get:
+      tags:
+        - Admin - Schedule
+      summary: Get schedule
+      description: Get schedule for a specific date
+      operationId: getAdminSchedule
+      security:
+        - cognitoAuth: []
+      parameters:
+        - name: date
+          in: query
+          required: false
+          description: Date in YYYY-MM-DD format
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Schedule retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Schedule'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /admin/schedules:
+    get:
+      tags:
+        - Admin - Schedule
+      summary: Get multiple schedules
+      description: Get schedules for a date range
+      operationId: getAdminSchedules
+      security:
+        - cognitoAuth: []
+      parameters:
+        - name: startDate
+          in: query
+          required: true
+          description: Start date in YYYY-MM-DD format
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          required: true
+          description: End date in YYYY-MM-DD format
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Schedules retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SchedulesResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /admin/schedules/{date}:
+    put:
+      tags:
+        - Admin - Schedule
+      summary: Update schedule
+      description: Update schedule for a specific date
+      operationId: updateAdminSchedule
+      security:
+        - cognitoAuth: []
+      parameters:
+        - name: date
+          in: path
+          required: true
+          description: Date in YYYY-MM-DD format
+          schema:
+            type: string
+            format: date
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateScheduleRequest'
+      responses:
+        '200':
+          description: Schedule updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateScheduleResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /admin/appointments/{id}:
+    patch:
+      tags:
+        - Admin - Queue
+      summary: Update appointment status
+      description: Update the status of an appointment
+      operationId: updateAppointmentStatus
+      security:
+        - cognitoAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Appointment ID (UUID)
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateAppointmentStatusRequest'
+      responses:
+        '200':
+          description: Status updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateAppointmentStatusResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /admin/shop/toggle-status:
+    post:
+      tags:
+        - Admin - Queue
+      summary: Toggle shop status
+      description: Open or close the shop
+      operationId: toggleShopStatus
+      security:
+        - cognitoAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ToggleShopStatusRequest'
+      responses:
+        '200':
+          description: Shop status updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ToggleShopStatusResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /admin/bookings:
+    post:
+      tags:
+        - Admin - Queue
+      summary: Create admin booking
+      description: Manually create an appointment as admin
+      operationId: createAdminBooking
+      security:
+        - cognitoAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAdminBookingRequest'
+      responses:
+        '201':
+          description: Booking created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateAdminBookingResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /admin/breaks/templates:
+    get:
+      tags:
+        - Admin - Breaks
+      summary: List break templates
+      description: Get all break templates
+      operationId: listBreakTemplates
+      security:
+        - cognitoAuth: []
+      responses:
+        '200':
+          description: Templates retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BreakTemplatesResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    post:
+      tags:
+        - Admin - Breaks
+      summary: Create break template
+      description: Create a recurring break template
+      operationId: createBreakTemplate
+      security:
+        - cognitoAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBreakTemplateRequest'
+      responses:
+        '201':
+          description: Template created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateBreakTemplateResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /admin/breaks/templates/{id}:
+    delete:
+      tags:
+        - Admin - Breaks
+      summary: Delete break template
+      description: Delete a break template
+      operationId: deleteBreakTemplate
+      security:
+        - cognitoAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Template ID (UUID)
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Template deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessMessage'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /admin/breaks/instances/{id}:
+    delete:
+      tags:
+        - Admin - Breaks
+      summary: Cancel break instance
+      description: Cancel a specific break instance
+      operationId: cancelBreakInstance
+      security:
+        - cognitoAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Break appointment ID (UUID)
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Break instance cancelled successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessMessage'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+components:
+  securitySchemes:
+    customerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Customer JWT token from /auth/verify-code
+    cognitoAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: AWS Cognito ID token from /admin/login
+
+  schemas:
+    # ============================================
+    # Health
+    # ============================================
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: "ok"
+        timestamp:
+          type: string
+          format: date-time
+        environment:
+          type: string
+          example: "production"
+
+    # ============================================
+    # Authentication
+    # ============================================
+    SendCodeRequest:
+      type: object
+      required:
+        - phoneNumber
+      properties:
+        phoneNumber:
+          type: string
+          pattern: '^\+1[0-9]{10}$'
+          example: "+15551234567"
+          description: Phone number in E.164 format
+
+    SendCodeResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "Verification code sent"
+        codeId:
+          type: string
+          format: uuid
+
+    VerifyCodeRequest:
+      type: object
+      required:
+        - codeId
+        - code
+      properties:
+        codeId:
+          type: string
+          format: uuid
+        code:
+          type: string
+          pattern: '^\d{6}$'
+          example: "123456"
+        name:
+          type: string
+          maxLength: 100
+          example: "John Doe"
+
+    VerifyCodeResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          description: JWT authentication token
+        phoneNumber:
+          type: string
+          example: "+15551234567"
+        message:
+          type: string
+          example: "Authentication successful"
+
+    CheckDeviceRequest:
+      type: object
+      required:
+        - phoneNumber
+        - deviceFingerprint
+      properties:
+        phoneNumber:
+          type: string
+          pattern: '^\+1[0-9]{10}$'
+        deviceFingerprint:
+          type: string
+
+    CheckDeviceResponse:
+      type: object
+      properties:
+        trusted:
+          type: boolean
+        token:
+          type: string
+          description: JWT token if device is trusted
+
+    # ============================================
+    # Appointments
+    # ============================================
+    AvailableSlotsResponse:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        availableSlots:
+          type: array
+          items:
+            $ref: '#/components/schemas/AppointmentSlot'
+        count:
+          type: integer
+
+    AppointmentSlot:
+      type: object
+      properties:
+        appointmentId:
+          type: string
+          format: uuid
+        slotId:
+          type: integer
+          minimum: 1
+          maximum: 16
+        appointmentStartTime:
+          type: string
+          format: date-time
+        appointmentEndTime:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [available]
+
+    CreateAppointmentRequest:
+      type: object
+      required:
+        - date
+        - type
+      properties:
+        date:
+          type: string
+          format: date
+          example: "2025-12-25"
+        type:
+          type: string
+          enum: [walkin, reservation]
+        slotId:
+          type: integer
+          minimum: 1
+          maximum: 16
+          description: Required for reservations
+        requestedTime:
+          type: string
+          pattern: '^[0-2][0-9]:[0-5][0-9]$'
+          example: "10:00"
+          description: Preferred time in HH:MM format
+
+    CreateAppointmentResponse:
+      type: object
+      properties:
+        appointment:
+          $ref: '#/components/schemas/Appointment'
+        message:
+          type: string
+          example: "Appointment created successfully"
+
+    Appointment:
+      type: object
+      properties:
+        appointmentId:
+          type: string
+          format: uuid
+        date:
+          type: string
+          format: date
+        slotId:
+          type: integer
+        customerName:
+          type: string
+        customerPhone:
+          type: string
+        appointmentStartTime:
+          type: string
+          format: date-time
+        appointmentEndTime:
+          type: string
+          format: date-time
+        checkinTime:
+          type: string
+          format: date-time
+        status:
+          $ref: '#/components/schemas/AppointmentStatus'
+        type:
+          $ref: '#/components/schemas/AppointmentType'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        breakTemplateId:
+          type: string
+          format: uuid
+        breakLabel:
+          type: string
+        bookedBy:
+          type: string
+        notes:
+          type: string
+
+    AppointmentStatus:
+      type: string
+      enum:
+        - available
+        - booked
+        - serving
+        - completed
+        - cancelled
+        - noshow
+
+    AppointmentType:
+      type: string
+      enum:
+        - walkin
+        - reservation
+        - break
+        - admin-booking
+
+    # ============================================
+    # Queue
+    # ============================================
+    QueueStatus:
+      type: object
+      properties:
+        currentNumber:
+          type: integer
+          description: Current position being served
+        queueLength:
+          type: integer
+          description: Total number in queue
+        estimatedWaitTime:
+          type: integer
+          description: Estimated wait in minutes
+        isOpen:
+          type: boolean
+          description: Whether shop is currently open
+        lastUpdated:
+          type: string
+          format: date-time
+
+    MyAppointmentResponse:
+      type: object
+      properties:
+        appointment:
+          $ref: '#/components/schemas/Appointment'
+        queuePosition:
+          type: integer
+        estimatedWaitTime:
+          type: integer
+
+    # ============================================
+    # Admin - Authentication
+    # ============================================
+    AdminLoginRequest:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+          example: "admin@example.com"
+        password:
+          type: string
+          format: password
+
+    AdminLoginResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+        idToken:
+          type: string
+        refreshToken:
+          type: string
+        expiresIn:
+          type: integer
+          example: 3600
+
+    AdminLoginChallenge:
+      type: object
+      properties:
+        challengeName:
+          type: string
+          example: "NEW_PASSWORD_REQUIRED"
+        session:
+          type: string
+        challengeParameters:
+          type: object
+
+    # ============================================
+    # Admin - Queue
+    # ============================================
+    AdminQueueResponse:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        appointments:
+          type: array
+          items:
+            $ref: '#/components/schemas/Appointment'
+        stats:
+          type: object
+          properties:
+            total:
+              type: integer
+            available:
+              type: integer
+            booked:
+              type: integer
+            serving:
+              type: integer
+            completed:
+              type: integer
+
+    UpdateAppointmentStatusRequest:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          $ref: '#/components/schemas/AppointmentStatus'
+
+    UpdateAppointmentStatusResponse:
+      type: object
+      properties:
+        appointment:
+          type: object
+          properties:
+            appointmentId:
+              type: string
+              format: uuid
+            status:
+              $ref: '#/components/schemas/AppointmentStatus'
+            updatedAt:
+              type: string
+              format: date-time
+        message:
+          type: string
+
+    ToggleShopStatusRequest:
+      type: object
+      required:
+        - isOpen
+      properties:
+        isOpen:
+          type: boolean
+
+    ToggleShopStatusResponse:
+      type: object
+      properties:
+        isOpen:
+          type: boolean
+        message:
+          type: string
+
+    CreateAdminBookingRequest:
+      type: object
+      required:
+        - date
+        - slotId
+        - customerName
+        - customerPhone
+      properties:
+        date:
+          type: string
+          format: date
+        slotId:
+          type: integer
+          minimum: 1
+          maximum: 16
+        customerName:
+          type: string
+        customerPhone:
+          type: string
+          pattern: '^\+1[0-9]{10}$'
+        notes:
+          type: string
+
+    CreateAdminBookingResponse:
+      type: object
+      properties:
+        appointment:
+          $ref: '#/components/schemas/Appointment'
+        message:
+          type: string
+
+    # ============================================
+    # Admin - Schedule
+    # ============================================
+    Schedule:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        isOpen:
+          type: boolean
+        openTime:
+          type: string
+          pattern: '^[0-2][0-9]:[0-5][0-9]$'
+          example: "09:00"
+        closeTime:
+          type: string
+          pattern: '^[0-2][0-9]:[0-5][0-9]$'
+          example: "17:00"
+        totalSlots:
+          type: integer
+          minimum: 0
+          maximum: 100
+        closureMessage:
+          type: string
+
+    SchedulesResponse:
+      type: object
+      properties:
+        schedules:
+          type: array
+          items:
+            $ref: '#/components/schemas/Schedule'
+
+    UpdateScheduleRequest:
+      type: object
+      required:
+        - isOpen
+        - openTime
+        - closeTime
+        - totalSlots
+      properties:
+        isOpen:
+          type: boolean
+        openTime:
+          type: string
+          pattern: '^[0-2][0-9]:[0-5][0-9]$'
+        closeTime:
+          type: string
+          pattern: '^[0-2][0-9]:[0-5][0-9]$'
+        totalSlots:
+          type: integer
+          minimum: 0
+          maximum: 100
+
+    UpdateScheduleResponse:
+      type: object
+      properties:
+        schedule:
+          $ref: '#/components/schemas/Schedule'
+        message:
+          type: string
+
+    # ============================================
+    # Admin - Breaks
+    # ============================================
+    BreakTemplate:
+      type: object
+      properties:
+        templateId:
+          type: string
+          format: uuid
+        dayOfWeek:
+          type: integer
+          minimum: -1
+          maximum: 6
+          description: "0-6 for Sunday-Saturday, -1 for every day"
+        startTime:
+          type: string
+          pattern: '^[0-2][0-9]:[0-5][0-9]$'
+        endTime:
+          type: string
+          pattern: '^[0-2][0-9]:[0-5][0-9]$'
+        label:
+          type: string
+        isActive:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    BreakTemplatesResponse:
+      type: object
+      properties:
+        templates:
+          type: array
+          items:
+            $ref: '#/components/schemas/BreakTemplate'
+
+    CreateBreakTemplateRequest:
+      type: object
+      required:
+        - dayOfWeek
+        - startTime
+        - endTime
+        - label
+      properties:
+        dayOfWeek:
+          type: integer
+          minimum: -1
+          maximum: 6
+        startTime:
+          type: string
+          pattern: '^[0-2][0-9]:[0-5][0-9]$'
+        endTime:
+          type: string
+          pattern: '^[0-2][0-9]:[0-5][0-9]$'
+        label:
+          type: string
+
+    CreateBreakTemplateResponse:
+      type: object
+      properties:
+        template:
+          $ref: '#/components/schemas/BreakTemplate'
+
+    # ============================================
+    # Common
+    # ============================================
+    SuccessMessage:
+      type: object
+      properties:
+        message:
+          type: string
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message describing what went wrong
+
+  responses:
+    BadRequest:
+      description: Bad request - invalid input
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error: "Invalid input parameters"
+
+    Unauthorized:
+      description: Unauthorized - missing or invalid authentication
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error: "Missing or invalid Authorization header"
+
+    Forbidden:
+      description: Forbidden - insufficient permissions
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error: "You do not have permission to access this resource"
+
+    NotFound:
+      description: Not found - resource doesn't exist
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error: "Resource not found"
+
+    Conflict:
+      description: Conflict - resource conflict
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error: "You already have an appointment for this date"
+
+    InternalError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error: "An internal error occurred"

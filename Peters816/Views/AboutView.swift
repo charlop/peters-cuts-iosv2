@@ -12,51 +12,74 @@ struct AboutView: View {
     @StateObject private var viewModel = AboutViewModel()
 
     var body: some View {
-        VStack(spacing: 30) {
-            Spacer()
+        ScrollView {
+            VStack(spacing: 24) {
+                // Banner image
+                Image("appBanner")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(maxWidth: 320)
+                    .padding(.top, 16)
 
-            // Shop hours
-            VStack(spacing: 8) {
-                Text("Shop Hours")
-                    .font(.headline)
+                // Shop address
+                VStack(spacing: 8) {
+                    Text("Peter's Hair Salon")
+                        .font(.title2)
+                        .fontWeight(.semibold)
 
-                Text(viewModel.shopHours)
-                    .font(.body)
-                    .multilineTextAlignment(.center)
-                    .foregroundColor(.secondary)
-            }
+                    Text("1501 Tecumseh Road East")
+                        .font(.body)
+                        .foregroundColor(.secondary)
 
-            // Action buttons
-            HStack(spacing: 20) {
-                // Call button
-                Button(action: viewModel.callShop) {
-                    VStack {
-                        Image(systemName: "phone.fill")
-                            .font(.system(size: 24))
-                        Text("Call")
-                            .font(.system(size: 20))
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding()
+                    Text("(across from Koolini's)")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
                 }
-                .buttonStyle(.borderedProminent)
+                .multilineTextAlignment(.center)
 
-                // Directions button
-                Button(action: viewModel.openDirections) {
-                    VStack {
-                        Image(systemName: "map.fill")
-                            .font(.system(size: 24))
-                        Text("Directions")
-                            .font(.system(size: 20))
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding()
+                // Shop hours
+                VStack(spacing: 8) {
+                    Text("Shop Hours")
+                        .font(.headline)
+
+                    Text(viewModel.shopHours)
+                        .font(.body)
+                        .multilineTextAlignment(.center)
+                        .foregroundColor(.secondary)
                 }
-                .buttonStyle(.borderedProminent)
+
+                // Action buttons
+                HStack(spacing: 16) {
+                    // Call button
+                    Button(action: viewModel.callShop) {
+                        Label("Call", systemImage: "phone.fill")
+                    }
+                    .buttonStyle(.borderedProminent)
+
+                    // Directions button
+                    Button(action: viewModel.openDirections) {
+                        Label("Directions", systemImage: "map.fill")
+                    }
+                    .buttonStyle(.borderedProminent)
+                }
+
+                Divider()
+                    .padding(.vertical, 8)
+
+                // Legal links
+                VStack(spacing: 16) {
+                    NavigationLink(value: NavigationDestination.termsOfUse) {
+                        Text("Terms of Use")
+                            .font(.body)
+                    }
+
+                    NavigationLink(value: NavigationDestination.privacyPolicy) {
+                        Text("Privacy Policy")
+                            .font(.body)
+                    }
+                }
             }
             .padding(.horizontal)
-
-            Spacer()
         }
         .navigationTitle("About")
         .navigationBarTitleDisplayMode(.large)
@@ -71,7 +94,7 @@ class AboutViewModel: ObservableObject {
     @Published var shopHours: String = "Loading..."
 
     private let phoneNumber = "5198162887"
-    private let addressURL = "939+Wyandotte+St+E+Windsor+ON"
+    private let addressURL = "1501+Tecumseh+Road+East+Windsor+ON"
 
     func loadShopInfo() async {
         let user = User()
