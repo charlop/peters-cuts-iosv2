@@ -648,6 +648,9 @@ components:
         environment:
           type: string
           example: "production"
+        version:
+          type: string
+          example: "1.0.0"
 
     # ============================================
     # Authentication
@@ -708,22 +711,27 @@ components:
       type: object
       required:
         - phoneNumber
-        - deviceFingerprint
       properties:
         phoneNumber:
           type: string
           pattern: '^\+1[0-9]{10}$'
-        deviceFingerprint:
-          type: string
+      description: Device fingerprint is automatically extracted from User-Agent and IP headers
 
     CheckDeviceResponse:
       type: object
       properties:
-        trusted:
+        authenticated:
           type: boolean
+          description: Whether device is trusted
+        requiresVerification:
+          type: boolean
+          description: Whether SMS verification is required
         token:
           type: string
-          description: JWT token if device is trusted
+          description: JWT token if device is authenticated
+        phoneNumber:
+          type: string
+          example: "+15551234567"
 
     # ============================================
     # Appointments
@@ -883,10 +891,15 @@ components:
       properties:
         appointment:
           $ref: '#/components/schemas/Appointment'
-        queuePosition:
+        position:
           type: integer
+          description: Position in queue
         estimatedWaitTime:
           type: integer
+          description: Estimated wait time in minutes
+        currentNumber:
+          type: integer
+          description: Current slot number being served
 
     # ============================================
     # Admin - Authentication
@@ -937,23 +950,14 @@ components:
         date:
           type: string
           format: date
-        appointments:
+        queue:
           type: array
           items:
             $ref: '#/components/schemas/Appointment'
-        stats:
-          type: object
-          properties:
-            total:
-              type: integer
-            available:
-              type: integer
-            booked:
-              type: integer
-            serving:
-              type: integer
-            completed:
-              type: integer
+          description: All appointments for the day
+        total:
+          type: integer
+          description: Total number of appointments in queue
 
     UpdateAppointmentStatusRequest:
       type: object
@@ -1001,6 +1005,8 @@ components:
       required:
         - date
         - slotId
+        - startTime
+        - endTime
         - customerName
         - customerPhone
       properties:
@@ -1010,14 +1016,27 @@ components:
         slotId:
           type: integer
           minimum: 1
-          maximum: 16
+          maximum: 100
+        startTime:
+          type: string
+          format: date-time
+          description: Appointment start time in ISO8601 format
+        endTime:
+          type: string
+          format: date-time
+          description: Appointment end time in ISO8601 format
         customerName:
           type: string
+          minLength: 1
+          maxLength: 100
         customerPhone:
           type: string
-          pattern: '^\+1[0-9]{10}$'
+          minLength: 10
+          maxLength: 15
+          description: Phone number (10-15 characters)
         notes:
           type: string
+          maxLength: 500
 
     CreateAdminBookingResponse:
       type: object

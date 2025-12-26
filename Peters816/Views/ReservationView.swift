@@ -2,8 +2,7 @@
 //  ReservationView.swift
 //  Peters816
 //
-//  Created by Claude on 2025-12-22.
-//  Reservation booking screen
+//  Reservation booking screen using API v2
 //
 
 import SwiftUI
@@ -15,6 +14,7 @@ struct ReservationView: View {
     @State private var alertTitle = ""
     @State private var alertMessage = ""
     @State private var shouldDismiss = false
+    @State private var showPhoneVerification = false
 
     var body: some View {
         Group {
@@ -38,15 +38,21 @@ struct ReservationView: View {
             } else {
                 List {
                     Section {
-                        ForEach(viewModel.availableSlots, id: \.time) { slot in
+                        ForEach(viewModel.availableSlots, id: \.slotId) { slot in
                             HStack {
-                                Text(slot.time)
+                                Text(slot.formattedTime)
                                     .font(.body)
 
                                 Spacer()
 
                                 Button("Book") {
                                     Task {
+                                        // Check auth first
+                                        if !viewModel.isAuthenticated {
+                                            showPhoneVerification = true
+                                            return
+                                        }
+
                                         let result = await viewModel.bookSlot(slot)
                                         alertTitle = result.success ? "Success" : "Error"
                                         alertMessage = result.message
@@ -58,7 +64,7 @@ struct ReservationView: View {
                             }
                         }
                     } header: {
-                        Text("Available Times")
+                        Text("Available Times for \(viewModel.selectedDate)")
                     } footer: {
                         Text("Please be on time for your appointment or give at least 1 hour notice if you can't make it.")
                             .font(.caption)
@@ -80,12 +86,30 @@ struct ReservationView: View {
         } message: {
             Text(alertMessage)
         }
+        .toast($viewModel.toast)
+        .sheet(isPresented: $showPhoneVerification) {
+            NavigationStack {
+                PhoneVerificationView()
+            }
+        }
     }
 }
 
 struct ReservationSlot {
-    let time: String
-    let id: Int
+    let slotId: Int
+    let appointmentStartTime: String
+    let appointmentEndTime: String
+
+    var formattedTime: String {
+        let formatter = ISO8601DateFormatter()
+        guard let date = formatter.date(from: appointmentStartTime) else {
+            return appointmentStartTime
+        }
+
+        let timeFormatter = DateFormatter()
+        timeFormatter.dateFormat = "h:mm a"
+        return timeFormatter.string(from: date)
+    }
 }
 
 @MainActor
@@ -93,28 +117,60 @@ class ReservationViewModel: ObservableObject {
     @Published var availableSlots: [ReservationSlot] = []
     @Published var isLoading = false
     @Published var errorMessage: String?
+    @Published var selectedDate: String = ""
+    @Published var toast: ToastMessage?
+
+    private let apiClient = APIClientV2.shared
+    private let authService = AuthService.shared
+    private var userDefaults = User()
+
+    var isAuthenticated: Bool {
+        return authService.isAuthenticated
+    }
 
     func loadAvailableSlots() async {
         isLoading = true
         errorMessage = nil
 
-        do {
-            let result = try await APIService.shared.getOpenings()
+        let dateString = getCurrentDate()
+        selectedDate = formatDateForDisplay(dateString)
 
-            if let error = result.error {
-                let errorDescription = CONSTS.getErrorDescription(errorId: error)
-                errorMessage = errorDescription.rawValue
-                availableSlots = []
-            } else {
-                availableSlots = result.availableSpotsArray.compactMap { time in
-                    if let id = result.availableSpots[time] {
-                        return ReservationSlot(time: time, id: id)
-                    }
-                    return nil
-                }
+        // Check reachability first
+        let hasConnection = await Reachability.isConnectedToNetwork()
+        if !hasConnection {
+            errorMessage = "No internet connection"
+            toast = ToastMessage(message: "No internet connection. Please check your network.", type: .error, duration: 4.0)
+            availableSlots = []
+            isLoading = false
+            return
+        }
+
+        do {
+            let response: AvailableSlotsResponse = try await apiClient.request(
+                .availableSlots(date: dateString)
+            )
+
+            availableSlots = response.availableSlots.map { slot in
+                ReservationSlot(
+                    slotId: slot.slotId,
+                    appointmentStartTime: slot.appointmentStartTime,
+                    appointmentEndTime: slot.appointmentEndTime
+                )
             }
+
+            if availableSlots.isEmpty {
+                errorMessage = "No slots available for today. Please check back later."
+            }
+        } catch let error as APIClientError {
+            let message = error.localizedDescription
+            errorMessage = message
+            toast = ToastMessage(message: message, type: .error, duration: 4.0)
+            availableSlots = []
         } catch {
-            errorMessage = "Network error: \(error.localizedDescription)"
+            let errorMsg = error.localizedDescription
+            let message = errorMsg.contains("hostname") ? "Server unavailable. Please try again later." : errorMsg
+            errorMessage = message
+            toast = ToastMessage(message: message, type: .error, duration: 4.0)
             availableSlots = []
         }
 
@@ -122,31 +178,58 @@ class ReservationViewModel: ObservableObject {
     }
 
     func bookSlot(_ slot: ReservationSlot) async -> (success: Bool, message: String) {
-        var user = User()
+        guard authService.isAuthenticated else {
+            return (false, "Please sign in first")
+        }
 
-        guard user.userInfoExists else {
+        guard let token = authService.currentToken else {
+            return (false, "Authentication required")
+        }
+
+        guard userDefaults.userInfoExists else {
             return (false, "Please enter your user info before making a reservation")
         }
 
         do {
-            let newUser = try await APIService.shared.getNumber(
-                for: user,
-                count: 1,
-                isReservation: true,
-                reservationId: slot.id
+            let request = CreateAppointmentRequest(
+                date: getCurrentDate(),
+                type: "reservation",
+                slotId: slot.slotId,
+                requestedTime: nil
             )
-            user = newUser
-            let appointment = user.getFirstAppointment()
 
-            if appointment.getIsReservation() {
-                await loadAvailableSlots() // Refresh the list
-                return (true, "Your appointment is saved for \(slot.time)")
-            } else {
-                return (false, "Failed to book reservation")
-            }
+            let _: CreateAppointmentResponse = try await apiClient.request(
+                .createAppointment,
+                body: request,
+                token: token
+            )
+
+            await loadAvailableSlots()
+            return (true, "Your appointment is saved for \(slot.formattedTime)")
+        } catch let error as APIClientError {
+            return (false, error.localizedDescription)
         } catch {
             return (false, "Network error: \(error.localizedDescription)")
         }
+    }
+
+    private func getCurrentDate() -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        return formatter.string(from: Date())
+    }
+
+    private func formatDateForDisplay(_ dateString: String) -> String {
+        let inputFormatter = DateFormatter()
+        inputFormatter.dateFormat = "yyyy-MM-dd"
+
+        guard let date = inputFormatter.date(from: dateString) else {
+            return dateString
+        }
+
+        let outputFormatter = DateFormatter()
+        outputFormatter.dateStyle = .medium
+        return outputFormatter.string(from: date)
     }
 }
 

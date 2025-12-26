@@ -14,6 +14,7 @@ struct HomeView: View {
     @State private var alertTitle = ""
     @State private var alertMessage = ""
     @State private var haircutCount = 1
+    @State private var showPhoneVerification = false
 
     var body: some View {
         ZStack {
@@ -49,6 +50,12 @@ struct HomeView: View {
                         haircutCount: $haircutCount,
                         onGetNumber: {
                             Task {
+                                // Check auth first
+                                if !viewModel.isAuthenticated {
+                                    showPhoneVerification = true
+                                    return
+                                }
+
                                 let result = await viewModel.getNumber(count: haircutCount)
                                 if result.success {
                                     showAlert(title: "Success", message: result.message)
@@ -59,6 +66,12 @@ struct HomeView: View {
                         },
                         onCancel: {
                             Task {
+                                // Check auth first
+                                if !viewModel.isAuthenticated {
+                                    showPhoneVerification = true
+                                    return
+                                }
+
                                 let result = await viewModel.cancelAppointment()
                                 showAlert(title: result.success ? "Success" : "Error", message: result.message)
                             }
@@ -101,6 +114,8 @@ struct HomeView: View {
                 TermsOfUseView()
             case .privacyPolicy:
                 PrivacyPolicyView()
+            case .phoneVerification:
+                PhoneVerificationView()
             }
         }
         .task {
@@ -116,6 +131,12 @@ struct HomeView: View {
         } message: {
             Text(alertMessage)
         }
+        .sheet(isPresented: $showPhoneVerification) {
+            NavigationStack {
+                PhoneVerificationView()
+            }
+        }
+        .toast($viewModel.toast)
     }
 
     private func showAlert(title: String, message: String) {
