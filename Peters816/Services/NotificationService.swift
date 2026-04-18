@@ -87,7 +87,7 @@ final class NotificationService: @unchecked Sendable {
 
         UNUserNotificationCenter.current().add(request) { error in
             if let error = error {
-                print("Error scheduling notification: \(error.localizedDescription)")
+                Log.error(Log.general, "Error scheduling notification: \(error.localizedDescription)")
             }
         }
     }

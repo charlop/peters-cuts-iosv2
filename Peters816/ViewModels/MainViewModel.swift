@@ -2,8 +2,7 @@
 //  MainViewModel.swift
 //  Peters816
 //
-//  Created by Claude on 2025-12-22.
-//  Main screen view model - extracts business logic from ViewController
+//  Main screen view model using API v2
 //
 
 import Foundation
@@ -18,240 +17,303 @@ class MainViewModel: ObservableObject {
     @Published var currentCustomerNumber: String = "--"
     @Published var nextAvailableNumber: String = "--"
     @Published var isLoading: Bool = false
+    @Published var toast: ToastMessage?
+    @Published var appointmentCount: Int = 0
 
     // MARK: - Private Properties
+    private let apiClient = APIClientV2.shared
+    private let authService = AuthService.shared
     private var userDefaults = User()
-    private var customGreetingMessage: String = ""
-    private var shopClosedGreeting: String = "Peter's is closed, try checking the app after 9AM.\nSee the About page for shop hours."
+    private var currentAppointmentId: String?
+    private var appointmentIds: [String] = []
 
-    // Hardcoded messages (from original ViewController)
-    private let signUpText = "Tap on User Info before you can book a haircut"
-    private let existingUserGreeting = "looking to get a haircut?"
-    private let haircut_upcoming_label = "Your spot is saved"
-    private let yourEtaLabel = "Your haircut is in"
-    private let defaultWaitTime = "Wait Time"
-    private let generalGreeting = "How's it going"
-
-    // MARK: - Public Methods
+    // MARK: - Computed Properties
+    var isAuthenticated: Bool {
+        return authService.isAuthenticated
+    }
 
     func loadInitialData() async {
         currentState = .loadingView
         greetingText = "Loading the latest schedule..."
 
-        // Load closed message and greeting in parallel
-        async let closedMessage: () = fetchClosedMessage()
-        async let greetingMessage: () = fetchGreetingMessage()
-
-        await closedMessage
-        await greetingMessage
-
-        // Check for existing appointment
-        await checkForExistingAppointment()
-
-        // Start fetching ETA
         await getWaitTime()
     }
 
     func getWaitTime() async {
+        // Check reachability first
+        let hasConnection = await Reachability.isConnectedToNetwork()
+        if !hasConnection {
+            currentState = .noUserInfo
+            greetingText = "No internet connection"
+            toast = ToastMessage(message: "No internet connection. Please check your network.", type: .error, duration: 4.0)
+            return
+        }
+
         do {
-            let etaResponse = try await APIService.shared.getEta(for: userDefaults)
-            userDefaults = User()
+            let queueStatus: QueueStatusResponse = try await apiClient.request(.queueStatus)
 
-            let errorFatalBool = CONSTS.isFatal(errorId: etaResponse.getError())
+            if !queueStatus.isOpen {
+                currentState = .shopClosed
+                greetingText = "Peter's is closed. Check back during business hours."
+                return
+            }
 
-            if etaResponse.getError() != CONSTS.ErrorNum.NO_ERROR.rawValue {
-                await handleError(errorNum: etaResponse.getError())
-
-                if errorFatalBool {
-                    return
+            if queueStatus.slotsAvailable == 0 {
+                currentState = .noSlotsAvailable
+                if let nextDay = queueStatus.nextOpenDay, nextDay != "today" {
+                    greetingText = "Peter's is fully booked. Next availability: \(nextDay)."
+                } else {
+                    greetingText = "Peter's is fully booked for today. Check back soon!"
                 }
+                return
             }
 
-            // Update UI with ETA
-            if etaResponse.getEtaMins() > 0.0 {
-                updateUIState(newState: etaResponse.getAppointmentStatus())
-
-                let etaHrs = Int(etaResponse.getEtaMins() / 60)
-                let etaMins = Int(etaResponse.getEtaMins().truncatingRemainder(dividingBy: 60))
-
-                var waitTimeString = ""
-                if etaHrs > 0 {
-                    waitTimeString += "\(etaHrs) hours "
-                }
-                waitTimeString += "\(etaMins) minutes"
-                waitTimeText = waitTimeString
+            if let currentNum = queueStatus.currentNumber {
+                currentCustomerNumber = String(currentNum)
             }
 
-            if etaResponse.getCurrentId() > 0 {
-                currentCustomerNumber = String(etaResponse.getCurrentId())
-            }
+            let estimatedMins = queueStatus.estimatedWaitTime
+            let hours = estimatedMins / 60
+            let mins = estimatedMins % 60
 
-            if etaResponse.getUpcomingId() > 0 {
-                nextAvailableNumber = String(etaResponse.getUpcomingId())
+            var waitTimeString = ""
+            if hours > 0 {
+                waitTimeString += "\(hours) hours "
             }
+            waitTimeString += "\(mins) minutes"
+            waitTimeText = waitTimeString
+
+            nextAvailableNumber = String(queueStatus.queueLength + 1)
+
+            // Check if user has an appointment
+            if authService.isAuthenticated, let token = authService.currentToken {
+                await checkMyAppointment(token: token)
+            } else if userDefaults.userInfoExists {
+                currentState = .noAppointment
+                greetingText = "Hey \(userDefaults.userName), looking to get a haircut?"
+            } else {
+                currentState = .noUserInfo
+                greetingText = "Tap on User Info before you can book a haircut"
+            }
+        } catch let error as APIClientError {
+            handleNetworkError(error)
         } catch {
-            print("Error fetching ETA: \(error)")
+            let errorMsg = error.localizedDescription
+            currentState = .noUserInfo
+            greetingText = "Unable to connect to server"
+            toast = ToastMessage(message: errorMsg.contains("hostname") ? "Server unavailable. Please try again later." : errorMsg, type: .error, duration: 5.0)
         }
     }
 
     func getNumber(count: Int) async -> (success: Bool, message: String) {
+        guard authService.isAuthenticated else {
+            return (false, "Please sign in first")
+        }
+
+        guard let token = authService.currentToken else {
+            return (false, "Authentication required")
+        }
+
         guard userDefaults.userInfoExists else {
-            updateUIState(newState: .noUserInfo)
+            currentState = .noUserInfo
             return (false, "Please enter user info first")
         }
 
-        do {
-            let newUserDefaults = try await APIService.shared.getNumber(
-                for: userDefaults,
-                count: count,
-                isReservation: false
-            )
-            userDefaults = newUserDefaults
-            let firstAppointment = userDefaults.getFirstAppointment()
+        var successCount = 0
+        var newAppointmentIds: [String] = []
 
-            if userDefaults.hasAppointment {
-                // Success
-                updateUIState(newState: firstAppointment.getAppointmentStatus())
+        // Book appointments sequentially
+        for i in 0..<count {
+            do {
+                let request = CreateAppointmentRequest(
+                    date: getCurrentDate(),
+                    type: "walkin",
+                    slotId: nil,
+                    requestedTime: nil
+                )
 
-                var notificationText = "Nice! Your haircut is in "
-                if count > 1 {
-                    notificationText = "You have reserved \(count) haircuts, first one is in "
+                let response: CreateAppointmentResponse = try await apiClient.request(
+                    .createAppointment,
+                    body: request,
+                    token: token
+                )
+
+                newAppointmentIds.append(response.appointment.appointmentId)
+                successCount += 1
+
+                // Store first appointment ID for backwards compatibility
+                if i == 0 {
+                    currentAppointmentId = response.appointment.appointmentId
                 }
-                notificationText += userDefaults.getFirstUpcomingEta().1
-
-                await getWaitTime()
-                return (true, notificationText)
-            } else {
-                // Error
-                await handleError(errorNum: firstAppointment.getError())
-                return (false, "Failed to get number")
+            } catch let error as APIClientError {
+                // Stop on first error
+                let errorMsg = error.localizedDescription
+                if successCount > 0 {
+                    // Some succeeded before error
+                    appointmentIds = newAppointmentIds
+                    appointmentCount = successCount
+                    currentState = .hasNumber
+                    greetingText = "Hey \(userDefaults.userName), you have \(successCount) appointment\(successCount > 1 ? "s" : "")"
+                    return (false, "Booked \(successCount) of \(count) appointments. Error: \(errorMsg)")
+                } else {
+                    return (false, errorMsg)
+                }
+            } catch {
+                let errorMsg = "Network error: \(error.localizedDescription)"
+                if successCount > 0 {
+                    appointmentIds = newAppointmentIds
+                    appointmentCount = successCount
+                    currentState = .hasNumber
+                    greetingText = "Hey \(userDefaults.userName), you have \(successCount) appointment\(successCount > 1 ? "s" : "")"
+                    return (false, "Booked \(successCount) of \(count) appointments. \(errorMsg)")
+                } else {
+                    return (false, errorMsg)
+                }
             }
-        } catch {
-            return (false, "Network error: \(error.localizedDescription)")
         }
+
+        // All succeeded
+        appointmentIds = newAppointmentIds
+        appointmentCount = successCount
+        currentState = .hasNumber
+        greetingText = "Hey \(userDefaults.userName), you have \(successCount) appointment\(successCount > 1 ? "s" : "")"
+
+        await getWaitTime()
+
+        var message = "Nice! Your haircut is in "
+        if count > 1 {
+            message = "You have reserved \(count) haircuts, first one is in "
+        }
+        message += waitTimeText
+
+        return (true, message)
     }
 
     func cancelAppointment() async -> (success: Bool, message: String) {
-        guard userDefaults.userInfoExists else {
-            updateUIState(newState: .noUserInfo)
-            return (false, "No user info")
+        guard authService.isAuthenticated else {
+            return (false, "Please sign in first")
         }
 
-        do {
-            let delResponse = try await APIService.shared.cancelAppointment(for: userDefaults)
+        guard let token = authService.currentToken else {
+            return (false, "Authentication required")
+        }
 
-            if delResponse == CONSTS.ErrorNum.NO_ERROR.rawValue {
-                updateUIState(newState: .noAppointment)
-                greetingText = "\(generalGreeting), \(userDefaults.userName)? \(customGreetingMessage)"
+        // Cancel all appointments
+        let idsToCancel = appointmentIds.isEmpty ? (currentAppointmentId.map { [$0] } ?? []) : appointmentIds
 
-                await getWaitTime()
-                return (true, "Appointment Cancelled")
-            } else {
-                await handleError(errorNum: delResponse)
-                return (false, "Cancellation failed")
+        guard !idsToCancel.isEmpty else {
+            return (false, "No appointment to cancel")
+        }
+
+        var cancelledCount = 0
+        for appointmentId in idsToCancel {
+            do {
+                let _: SuccessMessageResponse = try await apiClient.request(
+                    .cancelAppointment(id: appointmentId),
+                    token: token
+                )
+                cancelledCount += 1
+            } catch {
+                // Continue cancelling others even if one fails
+                continue
             }
-        } catch {
-            return (false, "Network error: \(error.localizedDescription)")
+        }
+
+        // Clear state
+        currentAppointmentId = nil
+        appointmentIds = []
+        appointmentCount = 0
+        currentState = .noAppointment
+        greetingText = "Hey \(userDefaults.userName), looking to get a haircut?"
+
+        if cancelledCount == idsToCancel.count {
+            let message = idsToCancel.count > 1 ? "All \(idsToCancel.count) appointments cancelled" : "Appointment cancelled"
+            return (true, message)
+        } else if cancelledCount > 0 {
+            return (true, "Cancelled \(cancelledCount) of \(idsToCancel.count) appointments")
+        } else {
+            return (false, "Failed to cancel appointments")
         }
     }
 
     // MARK: - Private Methods
 
-    private func checkForExistingAppointment() async {
-        if !userDefaults.userInfoExists {
-            updateUIState(newState: .noUserInfo)
-        } else if userDefaults.hasAppointment {
-            let etaLocal = userDefaults.getFirstUpcomingEta()
-            if etaLocal.0 == CONSTS.ErrorNum.NO_ERROR.rawValue {
-                greetingText = "Hey \(userDefaults.userName), Loading your latest appointment info \(customGreetingMessage)"
-                waitTimeText = etaLocal.1
-            } else {
-                await handleError(errorNum: etaLocal.0)
-            }
-        }
-    }
-
-    private func fetchClosedMessage() async {
+    private func checkMyAppointment(token: String) async {
         do {
-            let closedMessage = try await APIService.shared.getClosedMessage()
-            let msgLength = closedMessage.messageText.count
+            let response: MyAppointmentResponse = try await apiClient.request(
+                .myAppointment,
+                token: token
+            )
 
-            if closedMessage.errorNum == CONSTS.ErrorNum.NO_ERROR && msgLength >= 3 {
-                shopClosedGreeting = closedMessage.messageText
-                updateUIState(newState: .shopClosed)
+            currentAppointmentId = response.appointment.appointmentId
+
+            switch response.appointment.type {
+            case .walkin:
+                currentState = .hasNumber
+            case .reservation:
+                currentState = .hasReservation
+            default:
+                currentState = .noAppointment
+                return
             }
+
+            greetingText = "Hey \(userDefaults.userName), your spot is saved"
+
+            let estimatedMins = response.estimatedWaitTime
+            let hours = estimatedMins / 60
+            let mins = estimatedMins % 60
+
+            var waitTimeString = ""
+            if hours > 0 {
+                waitTimeString += "\(hours) hours "
+            }
+            waitTimeString += "\(mins) minutes"
+            waitTimeText = waitTimeString
         } catch {
-            print("Error fetching closed message: \(error)")
-        }
-    }
-
-    private func fetchGreetingMessage() async {
-        do {
-            let greetingMessage = try await APIService.shared.getGreetingMessage()
-            let msgLength = greetingMessage.messageText.count
-
-            if greetingMessage.errorNum == CONSTS.ErrorNum.NO_ERROR && msgLength >= 3 {
-                customGreetingMessage = greetingMessage.messageText
-
-                if !greetingText.hasSuffix(customGreetingMessage) {
-                    greetingText += customGreetingMessage
+            // Only reset state if we don't have a current appointment
+            if currentAppointmentId == nil {
+                currentState = .noAppointment
+                if userDefaults.userInfoExists {
+                    greetingText = "Hey \(userDefaults.userName), looking to get a haircut?"
                 }
             }
-        } catch {
-            print("Error fetching greeting: \(error)")
         }
     }
 
-    private func handleError(errorNum: Int) async {
-        let errorDescription = CONSTS.getErrorDescription(errorId: errorNum)
+    private func getCurrentDate() -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        return formatter.string(from: Date())
+    }
 
-        if errorNum == CONSTS.ErrorNum.NO_ERROR.rawValue {
-            return
-        }
+    private func handleNetworkError(_ error: APIClientError) {
+        currentState = .noUserInfo
+        let message: String
 
-        switch errorNum {
-        case CONSTS.ErrorNum.NO_INTERNET.rawValue:
-            greetingText = errorDescription.rawValue
-        case CONSTS.ErrorNum.SHOP_CLOSED.rawValue:
-            updateUIState(newState: .shopClosed)
-            greetingText = shopClosedGreeting + customGreetingMessage
-        case CONSTS.ErrorNum.NO_SPOTS_AVAILABLE.rawValue:
-            updateUIState(newState: .shopClosed)
-            greetingText = errorDescription.rawValue + customGreetingMessage
+        switch error {
+        case .networkError(let underlyingError):
+            let errorDescription = underlyingError.localizedDescription
+            if errorDescription.contains("hostname") {
+                message = "Server unavailable. Please try again later."
+                greetingText = "Unable to connect to server"
+            } else if errorDescription.contains("internet") || errorDescription.contains("network") {
+                message = "No internet connection. Please check your network."
+                greetingText = "No internet connection"
+            } else {
+                message = "Network error: \(errorDescription)"
+                greetingText = "Connection error"
+            }
+        case .unauthorized:
+            message = "Session expired. Please sign in again."
+            greetingText = "Session expired"
+        case .httpError(let statusCode, let serverMessage):
+            message = "Server error (\(statusCode)): \(serverMessage)"
+            greetingText = "Server error"
         default:
-            greetingText = errorDescription.rawValue + customGreetingMessage
-        }
-    }
-
-    private func updateUIState(newState: AppointmentStatus) {
-        if newState == currentState {
-            return
+            message = error.localizedDescription
+            greetingText = "Error"
         }
 
-        // Handle notification removal when state changes from has appointment
-        if (currentState == .hasNumber || currentState == .hasReservation) && newState != currentState {
-            NotificationService.shared.removeAllNotifications()
-        }
-
-        currentState = newState
-
-        // Update greeting based on state
-        switch newState {
-        case .noAppointment:
-            greetingText = "Hey \(userDefaults.userName), \(existingUserGreeting) \(customGreetingMessage)"
-        case .hasNumber:
-            greetingText = "Hey \(userDefaults.userName), \(haircut_upcoming_label)"
-        case .hasReservation:
-            greetingText = "Hey \(userDefaults.userName), \(haircut_upcoming_label)"
-        case .shopClosed:
-            // Keep existing shopClosedGreeting
-            break
-        case .noUserInfo:
-            greetingText = "Hey, \(signUpText) \(customGreetingMessage)"
-        case .loadingView:
-            greetingText = "Loading the latest schedule..." + customGreetingMessage
-            nextAvailableNumber = "--"
-            currentCustomerNumber = "--"
-        }
+        toast = ToastMessage(message: message, type: .error, duration: 5.0)
     }
 }

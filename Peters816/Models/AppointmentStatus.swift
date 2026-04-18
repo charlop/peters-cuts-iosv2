@@ -13,6 +13,7 @@ enum AppointmentStatus {
     case hasNumber
     case hasReservation
     case shopClosed
+    case noSlotsAvailable
     case noUserInfo
     case loadingView
 }

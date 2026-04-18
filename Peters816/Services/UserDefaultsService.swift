@@ -62,7 +62,7 @@ final class UserDefaultsService: @unchecked Sendable {
             withRootObject: appointments as NSArray,
             requiringSecureCoding: false
         ) else {
-            print("Failed to archive appointments")
+            Log.error(Log.general, "Failed to archive appointments")
             return
         }
         userDefaults.set(data, forKey: Keys.appointments)
@@ -81,7 +81,7 @@ final class UserDefaultsService: @unchecked Sendable {
                 return appointments
             }
         } catch {
-            print("Failed to unarchive appointments: \(error)")
+            Log.error(Log.general, "Failed to unarchive appointments: \(error.localizedDescription)")
         }
 
         return [Appointment()]

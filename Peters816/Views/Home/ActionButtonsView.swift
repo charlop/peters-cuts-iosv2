@@ -28,14 +28,41 @@ struct ActionButtonsView: View {
                     .padding()
 
             case .noAppointment:
-                // Haircut count stepper (only for walk-ins)
-                if haircutCount > 1 {
-                    HStack {
-                        Text("Number of haircuts:")
-                        Stepper("\(haircutCount)", value: $haircutCount, in: 1...10)
+                // Haircut count stepper
+                HStack(spacing: 12) {
+                    Text("Number of haircuts:")
+                        .font(.body)
+
+                    HStack(spacing: 8) {
+                        Button(action: {
+                            if haircutCount > 1 {
+                                haircutCount -= 1
+                            }
+                        }) {
+                            Image(systemName: "minus.circle.fill")
+                                .font(.title2)
+                                .foregroundColor(haircutCount > 1 ? .blue : .gray)
+                        }
+                        .disabled(haircutCount <= 1)
+
+                        Text("\(haircutCount)")
+                            .font(.title3)
+                            .fontWeight(.semibold)
+                            .frame(minWidth: 30)
+
+                        Button(action: {
+                            if haircutCount < 4 {
+                                haircutCount += 1
+                            }
+                        }) {
+                            Image(systemName: "plus.circle.fill")
+                                .font(.title2)
+                                .foregroundColor(haircutCount < 4 ? .blue : .gray)
+                        }
+                        .disabled(haircutCount >= 4)
                     }
-                    .padding(.horizontal)
                 }
+                .padding(.horizontal)
 
                 Button(action: onGetNumber) {
                     Text("Get A Number!")
@@ -66,8 +93,14 @@ struct ActionButtonsView: View {
                 .tint(.red)
                 .padding(.horizontal)
 
+            case .noSlotsAvailable:
+                Text("No slots available — check back soon!")
+                    .font(.body)
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+                    .padding()
+
             case .shopClosed:
-                // No buttons when shop is closed
                 EmptyView()
             }
         }

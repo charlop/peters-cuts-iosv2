@@ -14,4 +14,5 @@ enum NavigationDestination: Hashable {
     case reservation
     case termsOfUse
     case privacyPolicy
+    case phoneVerification
 }

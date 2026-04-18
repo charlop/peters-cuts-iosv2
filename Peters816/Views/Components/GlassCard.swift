@@ -63,7 +63,7 @@ struct GlassCard<Content: View>: View {
 
         // Glass button
         Button("Tap Me") {
-            print("Tapped")
+            Log.debug(Log.ui, "Glass button tapped")
         }
         .glassButtonStyle()
         .padding()
