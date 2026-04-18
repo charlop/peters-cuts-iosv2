@@ -58,6 +58,16 @@ class MainViewModel: ObservableObject {
                 return
             }
 
+            if queueStatus.slotsAvailable == 0 {
+                currentState = .noSlotsAvailable
+                if let nextDay = queueStatus.nextOpenDay, nextDay != "today" {
+                    greetingText = "Peter's is fully booked. Next availability: \(nextDay)."
+                } else {
+                    greetingText = "Peter's is fully booked for today. Check back soon!"
+                }
+                return
+            }
+
             if let currentNum = queueStatus.currentNumber {
                 currentCustomerNumber = String(currentNum)
             }

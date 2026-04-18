@@ -93,8 +93,14 @@ struct ActionButtonsView: View {
                 .tint(.red)
                 .padding(.horizontal)
 
+            case .noSlotsAvailable:
+                Text("No slots available — check back soon!")
+                    .font(.body)
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+                    .padding()
+
             case .shopClosed:
-                // No buttons when shop is closed
                 EmptyView()
             }
         }

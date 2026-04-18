@@ -12,5 +12,7 @@ struct QueueStatusResponse: Codable {
     let queueLength: Int
     let estimatedWaitTime: Int
     let isOpen: Bool
+    let slotsAvailable: Int
+    let nextOpenDay: String?
     let lastUpdated: String
 }

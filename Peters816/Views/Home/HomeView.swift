@@ -36,7 +36,7 @@ struct HomeView: View {
                         .multilineTextAlignment(.center)
 
                     // Queue status (when not loading or closed)
-                    if viewModel.currentState != .loadingView && viewModel.currentState != .shopClosed {
+                    if viewModel.currentState != .loadingView && viewModel.currentState != .shopClosed && viewModel.currentState != .noSlotsAvailable {
                         QueueStatusView(
                             currentNumber: viewModel.currentCustomerNumber,
                             nextNumber: viewModel.nextAvailableNumber,
