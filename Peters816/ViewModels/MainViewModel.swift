@@ -18,12 +18,14 @@ class MainViewModel: ObservableObject {
     @Published var nextAvailableNumber: String = "--"
     @Published var isLoading: Bool = false
     @Published var toast: ToastMessage?
+    @Published var appointmentCount: Int = 0
 
     // MARK: - Private Properties
     private let apiClient = APIClientV2.shared
     private let authService = AuthService.shared
     private var userDefaults = User()
     private var currentAppointmentId: String?
+    private var appointmentIds: [String] = []
 
     // MARK: - Computed Properties
     var isAuthenticated: Bool {
@@ -107,38 +109,74 @@ class MainViewModel: ObservableObject {
             return (false, "Please enter user info first")
         }
 
-        do {
-            let request = CreateAppointmentRequest(
-                date: getCurrentDate(),
-                type: "walkin",
-                slotId: nil,
-                requestedTime: nil
-            )
+        var successCount = 0
+        var newAppointmentIds: [String] = []
 
-            let response: CreateAppointmentResponse = try await apiClient.request(
-                .createAppointment,
-                body: request,
-                token: token
-            )
+        // Book appointments sequentially
+        for i in 0..<count {
+            do {
+                let request = CreateAppointmentRequest(
+                    date: getCurrentDate(),
+                    type: "walkin",
+                    slotId: nil,
+                    requestedTime: nil
+                )
 
-            currentAppointmentId = response.appointment.appointmentId
-            currentState = .hasNumber
-            greetingText = "Hey \(userDefaults.userName), your spot is saved"
+                let response: CreateAppointmentResponse = try await apiClient.request(
+                    .createAppointment,
+                    body: request,
+                    token: token
+                )
 
-            await getWaitTime()
+                newAppointmentIds.append(response.appointment.appointmentId)
+                successCount += 1
 
-            var message = "Nice! Your haircut is in "
-            if count > 1 {
-                message = "You have reserved \(count) haircuts, first one is in "
+                // Store first appointment ID for backwards compatibility
+                if i == 0 {
+                    currentAppointmentId = response.appointment.appointmentId
+                }
+            } catch let error as APIClientError {
+                // Stop on first error
+                let errorMsg = error.localizedDescription
+                if successCount > 0 {
+                    // Some succeeded before error
+                    appointmentIds = newAppointmentIds
+                    appointmentCount = successCount
+                    currentState = .hasNumber
+                    greetingText = "Hey \(userDefaults.userName), you have \(successCount) appointment\(successCount > 1 ? "s" : "")"
+                    return (false, "Booked \(successCount) of \(count) appointments. Error: \(errorMsg)")
+                } else {
+                    return (false, errorMsg)
+                }
+            } catch {
+                let errorMsg = "Network error: \(error.localizedDescription)"
+                if successCount > 0 {
+                    appointmentIds = newAppointmentIds
+                    appointmentCount = successCount
+                    currentState = .hasNumber
+                    greetingText = "Hey \(userDefaults.userName), you have \(successCount) appointment\(successCount > 1 ? "s" : "")"
+                    return (false, "Booked \(successCount) of \(count) appointments. \(errorMsg)")
+                } else {
+                    return (false, errorMsg)
+                }
             }
-            message += waitTimeText
-
-            return (true, message)
-        } catch let error as APIClientError {
-            return (false, error.localizedDescription)
-        } catch {
-            return (false, "Network error: \(error.localizedDescription)")
         }
+
+        // All succeeded
+        appointmentIds = newAppointmentIds
+        appointmentCount = successCount
+        currentState = .hasNumber
+        greetingText = "Hey \(userDefaults.userName), you have \(successCount) appointment\(successCount > 1 ? "s" : "")"
+
+        await getWaitTime()
+
+        var message = "Nice! Your haircut is in "
+        if count > 1 {
+            message = "You have reserved \(count) haircuts, first one is in "
+        }
+        message += waitTimeText
+
+        return (true, message)
     }
 
     func cancelAppointment() async -> (success: Bool, message: String) {
@@ -150,25 +188,41 @@ class MainViewModel: ObservableObject {
             return (false, "Authentication required")
         }
 
-        guard let appointmentId = currentAppointmentId else {
+        // Cancel all appointments
+        let idsToCancel = appointmentIds.isEmpty ? (currentAppointmentId.map { [$0] } ?? []) : appointmentIds
+
+        guard !idsToCancel.isEmpty else {
             return (false, "No appointment to cancel")
         }
 
-        do {
-            let _: SuccessMessageResponse = try await apiClient.request(
-                .cancelAppointment(id: appointmentId),
-                token: token
-            )
+        var cancelledCount = 0
+        for appointmentId in idsToCancel {
+            do {
+                let _: SuccessMessageResponse = try await apiClient.request(
+                    .cancelAppointment(id: appointmentId),
+                    token: token
+                )
+                cancelledCount += 1
+            } catch {
+                // Continue cancelling others even if one fails
+                continue
+            }
+        }
 
-            currentAppointmentId = nil
-            currentState = .noAppointment
-            greetingText = "Hey \(userDefaults.userName), looking to get a haircut?"
+        // Clear state
+        currentAppointmentId = nil
+        appointmentIds = []
+        appointmentCount = 0
+        currentState = .noAppointment
+        greetingText = "Hey \(userDefaults.userName), looking to get a haircut?"
 
-            return (true, "Appointment Cancelled")
-        } catch let error as APIClientError {
-            return (false, error.localizedDescription)
-        } catch {
-            return (false, "Network error: \(error.localizedDescription)")
+        if cancelledCount == idsToCancel.count {
+            let message = idsToCancel.count > 1 ? "All \(idsToCancel.count) appointments cancelled" : "Appointment cancelled"
+            return (true, message)
+        } else if cancelledCount > 0 {
+            return (true, "Cancelled \(cancelledCount) of \(idsToCancel.count) appointments")
+        } else {
+            return (false, "Failed to cancel appointments")
         }
     }
 

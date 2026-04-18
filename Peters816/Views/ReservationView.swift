@@ -78,13 +78,30 @@ struct ReservationView: View {
             await viewModel.loadAvailableSlots()
         }
         .alert(alertTitle, isPresented: $showAlert) {
-            Button("OK") {
-                if shouldDismiss {
+            if shouldDismiss && viewModel.reservationCount < 4 {
+                // Success case with option to reserve another
+                Button("Done") {
                     dismiss()
+                }
+                Button("Reserve Another") {
+                    // Just dismiss alert, stay on screen
+                }
+            } else {
+                // Error case or max reservations reached
+                Button("OK") {
+                    if shouldDismiss {
+                        dismiss()
+                    }
                 }
             }
         } message: {
-            Text(alertMessage)
+            if shouldDismiss && viewModel.reservationCount < 4 {
+                Text("\(alertMessage)\n\nReserve another appointment?")
+            } else if viewModel.reservationCount >= 4 {
+                Text("\(alertMessage)\n\nYou've reached the maximum of 4 reservations.")
+            } else {
+                Text(alertMessage)
+            }
         }
         .toast($viewModel.toast)
         .sheet(isPresented: $showPhoneVerification) {
@@ -101,14 +118,25 @@ struct ReservationSlot {
     let appointmentEndTime: String
 
     var formattedTime: String {
-        let formatter = ISO8601DateFormatter()
-        guard let date = formatter.date(from: appointmentStartTime) else {
+        // Backend sends times in EST but with a Z (UTC) indicator
+        // Strip the Z and milliseconds to parse as EST
+        let cleanedString = appointmentStartTime
+            .replacingOccurrences(of: ".000Z", with: "")
+            .replacingOccurrences(of: "Z", with: "")
+
+        let inputFormatter = DateFormatter()
+        inputFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
+        inputFormatter.timeZone = TimeZone(identifier: "America/New_York") // Parse as EST
+
+        guard let date = inputFormatter.date(from: cleanedString) else {
             return appointmentStartTime
         }
 
-        let timeFormatter = DateFormatter()
-        timeFormatter.dateFormat = "h:mm a"
-        return timeFormatter.string(from: date)
+        let outputFormatter = DateFormatter()
+        outputFormatter.dateFormat = "h:mm a"
+        outputFormatter.timeZone = TimeZone(identifier: "America/New_York") // Display in EST
+
+        return outputFormatter.string(from: date)
     }
 }
 
@@ -119,6 +147,7 @@ class ReservationViewModel: ObservableObject {
     @Published var errorMessage: String?
     @Published var selectedDate: String = ""
     @Published var toast: ToastMessage?
+    @Published var reservationCount: Int = 0
 
     private let apiClient = APIClientV2.shared
     private let authService = AuthService.shared
@@ -156,7 +185,23 @@ class ReservationViewModel: ObservableObject {
                     appointmentStartTime: slot.appointmentStartTime,
                     appointmentEndTime: slot.appointmentEndTime
                 )
+            }.sorted { slot1, slot2 in
+                let formatter = DateFormatter()
+                formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
+                formatter.timeZone = TimeZone(identifier: "America/New_York")
+
+                let clean1 = slot1.appointmentStartTime.replacingOccurrences(of: ".000Z", with: "").replacingOccurrences(of: "Z", with: "")
+                let clean2 = slot2.appointmentStartTime.replacingOccurrences(of: ".000Z", with: "").replacingOccurrences(of: "Z", with: "")
+
+                guard let date1 = formatter.date(from: clean1),
+                      let date2 = formatter.date(from: clean2) else {
+                    return false
+                }
+                return date1 < date2
             }
+
+            // Update reservation count from server
+            reservationCount = response.count
 
             if availableSlots.isEmpty {
                 errorMessage = "No slots available for today. Please check back later."
@@ -204,7 +249,12 @@ class ReservationViewModel: ObservableObject {
                 token: token
             )
 
+            // Remove the booked slot immediately (optimistic update)
+            availableSlots.removeAll { $0.slotId == slot.slotId }
+
+            // Refresh from server to get updated slot list and reservation count
             await loadAvailableSlots()
+
             return (true, "Your appointment is saved for \(slot.formattedTime)")
         } catch let error as APIClientError {
             return (false, error.localizedDescription)

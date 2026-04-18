@@ -184,42 +184,42 @@ class PhoneVerificationViewModel: ObservableObject {
     }
 
     func sendCode() async {
-        print("sendCode entry. Phone: \(phoneNumber)")
-        guard !phoneNumber.isEmpty else { return }
-        
-        print("Past guard")
+        Log.debug(Log.auth, "sendCode called for phone: \(self.phoneNumber)")
+        guard !phoneNumber.isEmpty else {
+            Log.debug(Log.auth, "Phone number empty, returning")
+            return
+        }
+
         // Check reachability first
         let hasConnection = await Reachability.isConnectedToNetwork()
-        
-        print("Has connection?")
+
         if !hasConnection {
+            Log.error(Log.auth, "No internet connection")
             toast = ToastMessage(message: "No internet connection. Please check your network.", type: .error, duration: 4.0)
             return
         }
 
-        print("Yes")
+        Log.debug(Log.auth, "Network available, proceeding with auth")
         isLoading = true
         defer { isLoading = false }
 
         do {
             // First check device trust
-            print("check device trust")
+            Log.debug(Log.auth, "Checking device trust")
             let isTrusted = try await authService.checkDeviceTrust(phoneNumber: phoneNumber)
 
-            print("isTrusted? \(isTrusted)")
             if isTrusted {
+                Log.info(Log.auth, "Device is trusted, skipping SMS")
                 isAuthenticated = true
                 return
             }
 
-            print("Continuing to SMS...")
             // Device not trusted, send SMS code
+            Log.debug(Log.auth, "Device not trusted, sending SMS code")
             codeId = try await authService.sendVerificationCode(phoneNumber: phoneNumber)
-            print("codeId \(codeId ?? "X")")
+            Log.info(Log.auth, "SMS code sent, codeId received")
             step = .codeEntry
-            print("step: codeEntry")
             startResendTimer()
-            print("timer started")
         } catch let error as APIClientError {
             let message: String
             switch error {

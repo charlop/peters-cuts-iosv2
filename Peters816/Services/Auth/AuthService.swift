@@ -50,17 +50,19 @@ class AuthService {
             phoneNumber: formatPhoneNumber(phoneNumber),
             deviceFingerprint: deviceFingerprint
         )
-        print(request)
+        Log.debug(Log.auth, "Checking device trust for \(self.formatPhoneNumber(phoneNumber))")
+
         let response: CheckDeviceResponse = try await apiClient.request(
             .checkDevice,
             body: request
         )
 
-        print(response)
+        Log.info(Log.auth, "Device trust check: authenticated=\(response.authenticated)")
 
         if response.authenticated, let token = response.token {
             _ = keychain.saveToken(token)
             _ = keychain.savePhoneNumber(phoneNumber)
+            Log.info(Log.auth, "Device trusted, token saved")
             return true
         }
 

@@ -71,9 +71,9 @@ class APIClientV2 {
         request.httpMethod = endpoint.method
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
-        
-        print(url)
-        print("requiresAuth? \(endpoint.requiresAuth)")
+        Log.debug(Log.api, "Request: \(endpoint.method) \(url)")
+        Log.debug(Log.api, "Requires auth: \(endpoint.requiresAuth)")
+
         if endpoint.requiresAuth {
             guard let token = token else {
                 throw APIClientError.missingToken
@@ -87,9 +87,11 @@ class APIClientV2 {
         if let body = body {
             do {
                 request.httpBody = try encoder.encode(body)
-                print(String(data: request.httpBody!, encoding: .utf8))
+                if let bodyString = String(data: request.httpBody!, encoding: .utf8) {
+                    Log.debug(Log.api, "Request body: \(bodyString)")
+                }
             } catch {
-                print("found the error")
+                Log.error(Log.api, "Encoding error: \(error.localizedDescription)")
                 throw APIClientError.encodingError(error)
             }
         }
@@ -98,12 +100,14 @@ class APIClientV2 {
             let (data, response) = try await session.data(for: request)
 
             guard let httpResponse = response as? HTTPURLResponse else {
-                print("bad server response")
-                print(response)
+                Log.error(Log.api, "Invalid server response type")
                 throw APIClientError.networkError(URLError(.badServerResponse))
             }
-            print("success")
-            print(String(data: data, encoding: .utf8))
+
+            Log.info(Log.api, "Response: \(httpResponse.statusCode)")
+            if let responseString = String(data: data, encoding: .utf8) {
+                Log.debug(Log.api, "Response body: \(responseString)")
+            }
             if httpResponse.statusCode == 401 {
                 throw APIClientError.unauthorized
             }
