@@ -8,6 +8,7 @@
 import Foundation
 
 struct CreateAppointmentResponse: Codable {
-    let appointment: AppointmentDTO
+    let appointments: [AppointmentDTO]
+    let count: Int
     let message: String
 }

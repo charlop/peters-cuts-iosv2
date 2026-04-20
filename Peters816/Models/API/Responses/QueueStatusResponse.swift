@@ -15,4 +15,5 @@ struct QueueStatusResponse: Codable {
     let slotsAvailable: Int
     let nextOpenDay: String?
     let lastUpdated: String
+    let closureMessage: String?
 }

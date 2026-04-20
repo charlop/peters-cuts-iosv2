@@ -12,4 +12,5 @@ struct CreateAppointmentRequest: Codable {
     let type: String // "walkin" or "reservation"
     let slotId: Int? // Required for reservations
     let requestedTime: String? // HH:MM format
+    let count: Int? // Walk-in only; 1–4 spots in one request
 }

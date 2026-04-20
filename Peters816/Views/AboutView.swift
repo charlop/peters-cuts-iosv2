@@ -27,13 +27,20 @@ struct AboutView: View {
                         .font(.title2)
                         .fontWeight(.semibold)
 
-                    Text("1501 Tecumseh Road East")
-                        .font(.body)
-                        .foregroundColor(.secondary)
+                    if let address = viewModel.address, !address.isEmpty {
+                        Text(address)
+                            .font(.body)
+                            .foregroundColor(.secondary)
+                            .multilineTextAlignment(.center)
+                    } else {
+                        Text("1501 Tecumseh Road East")
+                            .font(.body)
+                            .foregroundColor(.secondary)
 
-                    Text("(across from Koolini's)")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
+                        Text("(across from Koolini's)")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                    }
                 }
                 .multilineTextAlignment(.center)
 
@@ -92,24 +99,37 @@ struct AboutView: View {
 @MainActor
 class AboutViewModel: ObservableObject {
     @Published var shopHours: String = "Loading..."
+    @Published var address: String?
+    @Published var phone: String?
 
-    private let phoneNumber = "5198162887"
-    private let addressURL = "1501+Tecumseh+Road+East+Windsor+ON"
+    private let apiClient = APIClientV2.shared
+    private let fallbackPhone = "5198162887"
+    private let fallbackAddressURL = "1501+Tecumseh+Road+East+Windsor+ON"
 
     func loadShopInfo() async {
         let user = User()
         shopHours = user.getHoursText()
+
+        if let response: AddressResponse = try? await apiClient.request(.configAddress) {
+            address = response.address.isEmpty ? nil : response.address
+            phone = response.phone.isEmpty ? nil : response.phone
+        }
     }
 
     func callShop() {
-        if let url = URL(string: "tel://\(phoneNumber)"),
+        let digits = phone?.filter(\.isNumber) ?? fallbackPhone
+        if let url = URL(string: "tel://\(digits)"),
            UIApplication.shared.canOpenURL(url) {
             UIApplication.shared.open(url)
         }
     }
 
     func openDirections() {
-        if let url = URL(string: "http://maps.apple.com/?daddr=\(addressURL)") {
+        let encodedAddress = address?
+            .replacingOccurrences(of: "\n", with: " ")
+            .addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)
+            ?? fallbackAddressURL
+        if let url = URL(string: "http://maps.apple.com/?daddr=\(encodedAddress)") {
             UIApplication.shared.open(url)
         }
     }

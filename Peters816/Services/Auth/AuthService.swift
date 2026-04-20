@@ -96,6 +96,28 @@ class AuthService {
         _ = keychain.clearAll()
     }
 
+    // MARK: - Authenticated Requests with Silent Re-auth
+
+    func authenticatedRequest<T: Decodable>(_ endpoint: APIEndpoint, body: (any Encodable)? = nil) async throws -> T {
+        guard let token = keychain.getToken() else {
+            throw APIClientError.unauthorized
+        }
+
+        do {
+            return try await apiClient.request(endpoint, body: body, token: token)
+        } catch APIClientError.unauthorized {
+            guard let phone = keychain.getPhoneNumber(),
+                  (try? await checkDeviceTrust(phoneNumber: phone)) == true,
+                  let newToken = keychain.getToken() else {
+                signOut()
+                throw APIClientError.unauthorized
+            }
+
+            Log.info(Log.auth, "Silent re-auth succeeded, retrying request")
+            return try await apiClient.request(endpoint, body: body, token: newToken)
+        }
+    }
+
     // MARK: - Phone Number Formatting
 
     private func formatPhoneNumber(_ phoneNumber: String) -> String {

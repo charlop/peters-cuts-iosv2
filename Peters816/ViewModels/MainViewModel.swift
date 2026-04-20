@@ -19,6 +19,7 @@ class MainViewModel: ObservableObject {
     @Published var isLoading: Bool = false
     @Published var toast: ToastMessage?
     @Published var appointmentCount: Int = 0
+    @Published var shopGreeting: String?
 
     // MARK: - Private Properties
     private let apiClient = APIClientV2.shared
@@ -35,6 +36,11 @@ class MainViewModel: ObservableObject {
     func loadInitialData() async {
         currentState = .loadingView
         greetingText = "Loading the latest schedule..."
+
+        if let response: GreetingResponse = try? await apiClient.request(.configGreeting),
+           !response.greeting.isEmpty {
+            shopGreeting = response.greeting
+        }
 
         await getWaitTime()
     }
@@ -54,7 +60,7 @@ class MainViewModel: ObservableObject {
 
             if !queueStatus.isOpen {
                 currentState = .shopClosed
-                greetingText = "Peter's is closed. Check back during business hours."
+                greetingText = queueStatus.closureMessage ?? "Peter's is closed. Check back during business hours."
                 return
             }
 
@@ -86,11 +92,11 @@ class MainViewModel: ObservableObject {
             nextAvailableNumber = String(queueStatus.queueLength + 1)
 
             // Check if user has an appointment
-            if authService.isAuthenticated, let token = authService.currentToken {
-                await checkMyAppointment(token: token)
+            if authService.isAuthenticated {
+                await checkMyAppointment()
             } else if userDefaults.userInfoExists {
                 currentState = .noAppointment
-                greetingText = "Hey \(userDefaults.userName), looking to get a haircut?"
+                greetingText = shopGreeting ?? "Hey \(userDefaults.userName), looking to get a haircut?"
             } else {
                 currentState = .noUserInfo
                 greetingText = "Tap on User Info before you can book a haircut"
@@ -110,75 +116,37 @@ class MainViewModel: ObservableObject {
             return (false, "Please sign in first")
         }
 
-        guard let token = authService.currentToken else {
-            return (false, "Authentication required")
-        }
-
         guard userDefaults.userInfoExists else {
             currentState = .noUserInfo
             return (false, "Please enter user info first")
         }
 
-        var successCount = 0
-        var newAppointmentIds: [String] = []
+        do {
+            let request = CreateAppointmentRequest(
+                date: getCurrentDate(),
+                type: "walkin",
+                slotId: nil,
+                requestedTime: nil,
+                count: count
+            )
 
-        // Book appointments sequentially
-        for i in 0..<count {
-            do {
-                let request = CreateAppointmentRequest(
-                    date: getCurrentDate(),
-                    type: "walkin",
-                    slotId: nil,
-                    requestedTime: nil
-                )
+            let response: CreateAppointmentResponse = try await authService.authenticatedRequest(
+                .createAppointment,
+                body: request
+            )
 
-                let response: CreateAppointmentResponse = try await apiClient.request(
-                    .createAppointment,
-                    body: request,
-                    token: token
-                )
+            appointmentIds = response.appointments.map { $0.appointmentId }
+            currentAppointmentId = response.appointments.first?.appointmentId
+            appointmentCount = response.count
+            currentState = .hasNumber
+            greetingText = "Hey \(userDefaults.userName), you have \(response.count) appointment\(response.count > 1 ? "s" : "")"
 
-                newAppointmentIds.append(response.appointment.appointmentId)
-                successCount += 1
-
-                // Store first appointment ID for backwards compatibility
-                if i == 0 {
-                    currentAppointmentId = response.appointment.appointmentId
-                }
-            } catch let error as APIClientError {
-                // Stop on first error
-                let errorMsg = error.localizedDescription
-                if successCount > 0 {
-                    // Some succeeded before error
-                    appointmentIds = newAppointmentIds
-                    appointmentCount = successCount
-                    currentState = .hasNumber
-                    greetingText = "Hey \(userDefaults.userName), you have \(successCount) appointment\(successCount > 1 ? "s" : "")"
-                    return (false, "Booked \(successCount) of \(count) appointments. Error: \(errorMsg)")
-                } else {
-                    return (false, errorMsg)
-                }
-            } catch {
-                let errorMsg = "Network error: \(error.localizedDescription)"
-                if successCount > 0 {
-                    appointmentIds = newAppointmentIds
-                    appointmentCount = successCount
-                    currentState = .hasNumber
-                    greetingText = "Hey \(userDefaults.userName), you have \(successCount) appointment\(successCount > 1 ? "s" : "")"
-                    return (false, "Booked \(successCount) of \(count) appointments. \(errorMsg)")
-                } else {
-                    return (false, errorMsg)
-                }
-            }
+            await getWaitTime()
+        } catch let error as APIClientError {
+            return (false, error.localizedDescription)
+        } catch {
+            return (false, "Network error: \(error.localizedDescription)")
         }
-
-        // All succeeded
-        appointmentIds = newAppointmentIds
-        appointmentCount = successCount
-        currentState = .hasNumber
-        greetingText = "Hey \(userDefaults.userName), you have \(successCount) appointment\(successCount > 1 ? "s" : "")"
-
-        await getWaitTime()
 
         var message = "Nice! Your haircut is in "
         if count > 1 {
@@ -194,10 +162,6 @@ class MainViewModel: ObservableObject {
             return (false, "Please sign in first")
         }
 
-        guard let token = authService.currentToken else {
-            return (false, "Authentication required")
-        }
-
         // Cancel all appointments
         let idsToCancel = appointmentIds.isEmpty ? (currentAppointmentId.map { [$0] } ?? []) : appointmentIds
 
@@ -208,9 +172,8 @@ class MainViewModel: ObservableObject {
         var cancelledCount = 0
         for appointmentId in idsToCancel {
             do {
-                let _: SuccessMessageResponse = try await apiClient.request(
-                    .cancelAppointment(id: appointmentId),
-                    token: token
+                let _: SuccessMessageResponse = try await authService.authenticatedRequest(
+                    .cancelAppointment(id: appointmentId)
                 )
                 cancelledCount += 1
             } catch {
@@ -238,12 +201,9 @@ class MainViewModel: ObservableObject {
 
     // MARK: - Private Methods
 
-    private func checkMyAppointment(token: String) async {
+    private func checkMyAppointment() async {
         do {
-            let response: MyAppointmentResponse = try await apiClient.request(
-                .myAppointment,
-                token: token
-            )
+            let response: MyAppointmentResponse = try await authService.authenticatedRequest(.myAppointment)
 
             currentAppointmentId = response.appointment.appointmentId
 
@@ -304,6 +264,7 @@ class MainViewModel: ObservableObject {
                 greetingText = "Connection error"
             }
         case .unauthorized:
+            authService.signOut()
             message = "Session expired. Please sign in again."
             greetingText = "Session expired"
         case .httpError(let statusCode, let serverMessage):

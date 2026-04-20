@@ -227,10 +227,6 @@ class ReservationViewModel: ObservableObject {
             return (false, "Please sign in first")
         }
 
-        guard let token = authService.currentToken else {
-            return (false, "Authentication required")
-        }
-
         guard userDefaults.userInfoExists else {
             return (false, "Please enter your user info before making a reservation")
         }
@@ -240,13 +236,13 @@ class ReservationViewModel: ObservableObject {
                 date: getCurrentDate(),
                 type: "reservation",
                 slotId: slot.slotId,
-                requestedTime: nil
+                requestedTime: nil,
+                count: 1
             )
 
-            let _: CreateAppointmentResponse = try await apiClient.request(
+            let _: CreateAppointmentResponse = try await authService.authenticatedRequest(
                 .createAppointment,
-                body: request,
-                token: token
+                body: request
             )
 
             // Remove the booked slot immediately (optimistic update)

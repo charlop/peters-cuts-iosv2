@@ -17,6 +17,8 @@ enum APIEndpoint {
     case availableSlots(date: String)
     case createAppointment
     case cancelAppointment(id: String)
+    case configGreeting
+    case configAddress
 
     var path: String {
         switch self {
@@ -38,12 +40,16 @@ enum APIEndpoint {
             return "/appointments"
         case .cancelAppointment(let id):
             return "/appointments/\(id)"
+        case .configGreeting:
+            return "/config/greeting"
+        case .configAddress:
+            return "/config/address"
         }
     }
 
     var method: String {
         switch self {
-        case .health, .queueStatus, .myAppointment, .availableSlots:
+        case .health, .queueStatus, .myAppointment, .availableSlots, .configGreeting, .configAddress:
             return "GET"
         case .sendCode, .verifyCode, .checkDevice, .createAppointment:
             return "POST"
