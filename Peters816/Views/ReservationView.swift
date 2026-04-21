@@ -64,7 +64,7 @@ struct ReservationView: View {
                             }
                         }
                     } header: {
-                        Text("Available Times for \(viewModel.selectedDate)")
+                        Text("Available times for today")
                     } footer: {
                         Text("Please be on time for your appointment or give at least 1 hour notice if you can't make it.")
                             .font(.caption)
@@ -72,8 +72,8 @@ struct ReservationView: View {
                 }
             }
         }
-        .navigationTitle("Make a Reservation")
-        .navigationBarTitleDisplayMode(.large)
+        .navigationTitle("Book Now")
+        .navigationBarTitleDisplayMode(.inline)
         .task {
             await viewModel.loadAvailableSlots()
         }
@@ -133,8 +133,8 @@ struct ReservationSlot {
         }
 
         let outputFormatter = DateFormatter()
-        outputFormatter.dateFormat = "h:mm a"
-        outputFormatter.timeZone = TimeZone(identifier: "America/New_York") // Display in EST
+        outputFormatter.dateFormat = DateFormatter.dateFormat(fromTemplate: "j:mm", options: 0, locale: Locale.current)
+        outputFormatter.timeZone = TimeZone(identifier: "America/New_York")
 
         return outputFormatter.string(from: date)
     }
