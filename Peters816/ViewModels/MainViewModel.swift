@@ -162,41 +162,19 @@ class MainViewModel: ObservableObject {
             return (false, "Please sign in first")
         }
 
-        // Cancel all appointments
-        let idsToCancel = appointmentIds.isEmpty ? (currentAppointmentId.map { [$0] } ?? []) : appointmentIds
-
-        guard !idsToCancel.isEmpty else {
-            return (false, "No appointment to cancel")
+        do {
+            let _: SuccessMessageResponse = try await authService.authenticatedRequest(.cancelAppointment)
+        } catch {
+            return (false, "Failed to cancel appointments")
         }
 
-        var cancelledCount = 0
-        for appointmentId in idsToCancel {
-            do {
-                let _: SuccessMessageResponse = try await authService.authenticatedRequest(
-                    .cancelAppointment(id: appointmentId)
-                )
-                cancelledCount += 1
-            } catch {
-                // Continue cancelling others even if one fails
-                continue
-            }
-        }
-
-        // Clear state
         currentAppointmentId = nil
         appointmentIds = []
         appointmentCount = 0
         currentState = .noAppointment
         greetingText = "Hey \(userDefaults.userName), looking to get a haircut?"
 
-        if cancelledCount == idsToCancel.count {
-            let message = idsToCancel.count > 1 ? "All \(idsToCancel.count) appointments cancelled" : "Appointment cancelled"
-            return (true, message)
-        } else if cancelledCount > 0 {
-            return (true, "Cancelled \(cancelledCount) of \(idsToCancel.count) appointments")
-        } else {
-            return (false, "Failed to cancel appointments")
-        }
+        return (true, "Appointment cancelled")
     }
 
     // MARK: - Private Methods

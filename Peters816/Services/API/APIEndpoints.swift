@@ -16,7 +16,7 @@ enum APIEndpoint {
     case myAppointment
     case availableSlots(date: String)
     case createAppointment
-    case cancelAppointment(id: String)
+    case cancelAppointment
     case configGreeting
     case configAddress
 
@@ -38,8 +38,8 @@ enum APIEndpoint {
             return "/appointments/available?date=\(date)"
         case .createAppointment:
             return "/appointments"
-        case .cancelAppointment(let id):
-            return "/appointments/\(id)"
+        case .cancelAppointment:
+            return "/appointments"
         case .configGreeting:
             return "/config/greeting"
         case .configAddress:
