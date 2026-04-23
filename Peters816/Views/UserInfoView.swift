@@ -14,7 +14,7 @@ struct UserInfoView: View {
     @FocusState private var focusedField: Field?
 
     enum Field {
-        case name, phone, email
+        case name, phone
     }
 
     var body: some View {
@@ -46,15 +46,6 @@ struct UserInfoView: View {
                 }
             }
 
-            Section {
-                TextField("Email (optional)", text: $viewModel.email)
-                    .keyboardType(.emailAddress)
-                    .textContentType(.emailAddress)
-                    .autocapitalization(.none)
-                    .focused($focusedField, equals: .email)
-            } header: {
-                Text("Optional")
-            }
         }
         .navigationTitle("User Info")
         .navigationBarTitleDisplayMode(.large)
@@ -77,7 +68,6 @@ struct UserInfoView: View {
 class UserInfoViewModel: ObservableObject {
     @Published var name: String = ""
     @Published var phone: String = ""
-    @Published var email: String = ""
 
     var isNameValid: Bool {
         name.count >= 3
@@ -107,12 +97,11 @@ class UserInfoViewModel: ObservableObject {
         let user = User()
         name = user.userName
         phone = user.userPhone
-        email = user.userEmail
     }
 
     func save() {
         let user = User()
-        user.saveUserDetails(name: name, phone: phone, email: email)
+        user.saveUserDetails(name: name, phone: phone)
     }
 }
 

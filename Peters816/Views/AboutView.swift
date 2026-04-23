@@ -118,7 +118,7 @@ class AboutViewModel: ObservableObject {
 
     func callShop() {
         let digits = phone?.filter(\.isNumber) ?? fallbackPhone
-        if let url = URL(string: "tel://\(digits)"),
+        if let url = URL(string: "tel:\(digits)"),
            UIApplication.shared.canOpenURL(url) {
             UIApplication.shared.open(url)
         }

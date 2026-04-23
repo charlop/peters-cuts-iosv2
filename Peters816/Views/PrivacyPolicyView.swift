@@ -22,7 +22,6 @@ struct PrivacyPolicyView: View {
                 Information We Collect:
                 - Name
                 - Phone number
-                - Email address (optional)
                 - Appointment booking information
 
                 How We Use Your Information:

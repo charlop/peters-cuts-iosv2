@@ -16,7 +16,6 @@ final class User: @unchecked Sendable {
     // MARK: - Properties
     private var name: String
     private var phone: String
-    private var email: String
     private var appointmentArray: [Appointment]
 
     private let storage = UserDefaultsService.shared
@@ -27,7 +26,6 @@ final class User: @unchecked Sendable {
         // Load from UserDefaultsService
         self.name = storage.getUserName() ?? ""
         self.phone = storage.getUserPhone() ?? ""
-        self.email = storage.getUserEmail() ?? ""
         self.appointmentArray = storage.loadAppointments()
 
         validateIds()
@@ -43,14 +41,13 @@ final class User: @unchecked Sendable {
         saveAppointments()
     }
     
-    func saveUserDetails(name: String, phone: String, email: String = "") {
+    func saveUserDetails(name: String, phone: String) {
         removeAllAppointments() // Reset appointments when user info changes
 
         self.name = name
         self.phone = phone
-        self.email = email
 
-        storage.saveUserInfo(name: name, phone: phone, email: email)
+        storage.saveUserInfo(name: name, phone: phone)
     }
     
     func getFirstUpcomingEta() -> (CONSTS.ErrorNum.RawValue, String) {
@@ -98,7 +95,6 @@ final class User: @unchecked Sendable {
     
     var userName: String { name }
     var userPhone: String { phone }
-    var userEmail: String { email }
     
     func getFirstAppointment() -> Appointment {
         validateIds()

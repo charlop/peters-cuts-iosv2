@@ -18,7 +18,6 @@ final class UserDefaultsService: @unchecked Sendable {
     private enum Keys {
         static let userName = "name"
         static let userPhone = "phone"
-        static let userEmail = "email"
         static let appointments = "appointment"
         static let hoursText = "hoursText"
         static let addressURL = "addrUrl"
@@ -30,10 +29,9 @@ final class UserDefaultsService: @unchecked Sendable {
 
     // MARK: - User Info
 
-    func saveUserInfo(name: String, phone: String, email: String = "") {
+    func saveUserInfo(name: String, phone: String) {
         userDefaults.set(name, forKey: Keys.userName)
         userDefaults.set(phone, forKey: Keys.userPhone)
-        userDefaults.set(email, forKey: Keys.userEmail)
     }
 
     func getUserName() -> String? {
@@ -42,10 +40,6 @@ final class UserDefaultsService: @unchecked Sendable {
 
     func getUserPhone() -> String? {
         return userDefaults.string(forKey: Keys.userPhone)
-    }
-
-    func getUserEmail() -> String? {
-        return userDefaults.string(forKey: Keys.userEmail)
     }
 
     var hasUserInfo: Bool {
@@ -116,7 +110,6 @@ final class UserDefaultsService: @unchecked Sendable {
         let keys = [
             Keys.userName,
             Keys.userPhone,
-            Keys.userEmail,
             Keys.appointments,
             Keys.hoursText,
             Keys.addressURL
