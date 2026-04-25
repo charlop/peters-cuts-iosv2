@@ -56,41 +56,6 @@ class MainViewModel: ObservableObject {
         }
 
         do {
-            let queueStatus: QueueStatusResponse = try await apiClient.request(.queueStatus)
-
-            if !queueStatus.isOpen {
-                currentState = .shopClosed
-                greetingText = queueStatus.closureMessage ?? "Peter's is closed. Check back during business hours."
-                return
-            }
-
-            if queueStatus.slotsAvailable == 0 {
-                currentState = .noSlotsAvailable
-                if let nextDay = queueStatus.nextOpenDay, nextDay != "today" {
-                    greetingText = "Peter's is fully booked. Next availability: \(nextDay)."
-                } else {
-                    greetingText = "Peter's is fully booked for today. Check back soon!"
-                }
-                return
-            }
-
-            if let currentNum = queueStatus.currentNumber {
-                currentCustomerNumber = String(currentNum)
-            }
-
-            let estimatedMins = queueStatus.estimatedWaitTime
-            let hours = estimatedMins / 60
-            let mins = estimatedMins % 60
-
-            var waitTimeString = ""
-            if hours > 0 {
-                waitTimeString += "\(hours) hours "
-            }
-            waitTimeString += "\(mins) minutes"
-            waitTimeText = waitTimeString
-
-            nextAvailableNumber = String(queueStatus.queueLength + 1)
-
             // Check if user has an appointment
             if authService.isAuthenticated {
                 await checkMyAppointment()
@@ -100,6 +65,43 @@ class MainViewModel: ObservableObject {
             } else {
                 currentState = .noUserInfo
                 greetingText = "Tap on User Info before you can book a haircut"
+            }
+
+            if currentState == .noAppointment {
+                let queueStatus: QueueStatusResponse = try await apiClient.request(.queueStatus)
+
+                if !queueStatus.isOpen {
+                    currentState = .shopClosed
+                    greetingText = queueStatus.closureMessage ?? "Peter's is closed. Check back during business hours."
+                    return
+                }
+
+                if queueStatus.slotsAvailable == 0 {
+                    currentState = .noSlotsAvailable
+                    if let nextDay = queueStatus.nextOpenDay, nextDay != "today" {
+                        greetingText = "Peter's is fully booked. Next availability: \(nextDay)."
+                    } else {
+                        greetingText = "Peter's is fully booked for today. Check back soon!"
+                    }
+                    return
+                }
+
+                if let currentNum = queueStatus.currentNumber {
+                    currentCustomerNumber = String(currentNum)
+                }
+
+                let estimatedMins = queueStatus.estimatedWaitTime
+                let hours = estimatedMins / 60
+                let mins = estimatedMins % 60
+
+                var waitTimeString = ""
+                if hours > 0 {
+                    waitTimeString += "\(hours) hours "
+                }
+                waitTimeString += "\(mins) minutes"
+                waitTimeText = waitTimeString
+
+                nextAvailableNumber = String(queueStatus.queueLength + 1)
             }
         } catch let error as APIClientError {
             handleNetworkError(error)
@@ -172,8 +174,8 @@ class MainViewModel: ObservableObject {
         appointmentIds = []
         appointmentCount = 0
         currentState = .noAppointment
-        greetingText = "Hey \(userDefaults.userName), looking to get a haircut?"
-
+        await getWaitTime()
+        
         return (true, "Appointment cancelled")
     }
 
@@ -195,18 +197,34 @@ class MainViewModel: ObservableObject {
                 return
             }
 
-            greetingText = "Hey \(userDefaults.userName), your spot is saved"
-
             let estimatedMins = response.estimatedWaitTime
-            let hours = estimatedMins / 60
-            let mins = estimatedMins % 60
-
+            
             var waitTimeString = ""
-            if hours > 0 {
-                waitTimeString += "\(hours) hours "
+            if estimatedMins > 0 {
+                greetingText = "Hey \(userDefaults.userName), your spot is saved"
+                let hours = estimatedMins / 60
+                let mins = estimatedMins % 60
+
+                var waitTimeString = ""
+                if hours > 0 {
+                    waitTimeString += "\(hours) hours "
+                }
+                if mins > 0 {
+                    waitTimeString += "\(mins) minutes"
+                }
+            } else if estimatedMins >= -30 { // implies estimatedMins <= 0
+                greetingText = "Check the mirror!"
+                waitTimeString = "Happening now"
+            } else { // >30 mins since appt start time
+                greetingText = "Hope you enjoyed the haircut!"
             }
-            waitTimeString += "\(mins) minutes"
+            
+            // TODO: I THINK THIS NEEDS TO PROPAGATE? NOT SHOWING UP IN GET NUMBER ALERT
             waitTimeText = waitTimeString
+            currentCustomerNumber = String(response.currentNumber)
+            nextAvailableNumber = String(response.queuePosition)
+            
+            
         } catch {
             // Only reset state if we don't have a current appointment
             if currentAppointmentId == nil {

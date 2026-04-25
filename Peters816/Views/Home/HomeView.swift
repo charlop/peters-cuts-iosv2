@@ -40,7 +40,9 @@ struct HomeView: View {
                         QueueStatusView(
                             currentNumber: viewModel.currentCustomerNumber,
                             nextNumber: viewModel.nextAvailableNumber,
-                            waitTime: viewModel.waitTimeText
+                            waitTime: viewModel.waitTimeText,
+                            hasAppointment: viewModel.currentState == .hasNumber ||
+                                            viewModel.currentState == .hasReservation
                         )
                     }
 

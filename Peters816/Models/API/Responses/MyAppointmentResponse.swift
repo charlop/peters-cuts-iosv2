@@ -11,10 +11,12 @@ struct MyAppointmentResponse: Codable {
     let appointment: AppointmentDTO
     let queuePosition: Int
     let estimatedWaitTime: Int
+    let currentNumber: Int
 
     enum CodingKeys: String, CodingKey {
         case appointment
         case queuePosition = "position"
         case estimatedWaitTime
+        case currentNumber
     }
 }

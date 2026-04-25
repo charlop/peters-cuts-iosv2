@@ -129,7 +129,7 @@ class AboutViewModel: ObservableObject {
             .replacingOccurrences(of: "\n", with: " ")
             .addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)
             ?? fallbackAddressURL
-        if let url = URL(string: "http://maps.apple.com/?daddr=\(encodedAddress)") {
+        if let url = URL(string: "https://www.google.com/maps/dir/?api=1&destination=\(encodedAddress)") {
             UIApplication.shared.open(url)
         }
     }

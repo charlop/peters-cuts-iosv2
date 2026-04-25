@@ -12,12 +12,28 @@ struct QueueStatusView: View {
     let currentNumber: String
     let nextNumber: String
     let waitTime: String
+    let hasAppointment: Bool
 
     @Namespace private var namespace
 
     var body: some View {
         VStack(spacing: 16) {
+            // Wait time (prominent, at top)
+            let waitTitle = hasAppointment ? "Your Wait Time is" : "Estimated Wait"
+            if !waitTime.isEmpty {
+                if #available(iOS 26, *) {
+                    GlassEffectContainer {
+                        QueueNumberCard(title: waitTitle, value: waitTime)
+                            .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 12))
+                            .glassEffectID("waitTime", in: namespace)
+                    }
+                } else {
+                    QueueNumberCard(title: waitTitle, value: waitTime)
+                }
+            }
+            
             // Number display cards with Liquid Glass morphing
+            let nextTitle = hasAppointment ? "Your Number" : "Next Available #"
             if #available(iOS 26, *) {
                 GlassEffectContainer(spacing: 20) {
                     HStack(spacing: 20) {
@@ -25,7 +41,8 @@ struct QueueStatusView: View {
                             .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 12))
                             .glassEffectID("current", in: namespace)
 
-                        QueueNumberCard(title: "Next Available #", value: nextNumber)
+                        
+                        QueueNumberCard(title: nextTitle, value: nextNumber)
                             .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 12))
                             .glassEffectID("next", in: namespace)
                     }
@@ -33,15 +50,8 @@ struct QueueStatusView: View {
             } else {
                 HStack(spacing: 20) {
                     QueueNumberCard(title: "Current #", value: currentNumber)
-                    QueueNumberCard(title: "Next Available #", value: nextNumber)
+                    QueueNumberCard(title: nextTitle, value: nextNumber)
                 }
-            }
-
-            // Wait time
-            if !waitTime.isEmpty {
-                Text(waitTime)
-                    .font(.headline)
-                    .foregroundColor(.secondary)
             }
         }
         .padding()
@@ -74,7 +84,8 @@ struct QueueNumberCard: View {
     QueueStatusView(
         currentNumber: "42",
         nextNumber: "45",
-        waitTime: "15 minutes"
+        waitTime: "15 minutes",
+        hasAppointment: false
     )
     .padding()
 }

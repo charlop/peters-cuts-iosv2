@@ -118,23 +118,17 @@ struct ReservationSlot {
     let appointmentEndTime: String
 
     var formattedTime: String {
-        // Backend sends times in EST but with a Z (UTC) indicator
-        // Strip the Z and milliseconds to parse as EST
-        let cleanedString = appointmentStartTime
-            .replacingOccurrences(of: ".000Z", with: "")
-            .replacingOccurrences(of: "Z", with: "")
-
-        let inputFormatter = DateFormatter()
-        inputFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
-        inputFormatter.timeZone = TimeZone(identifier: "America/New_York") // Parse as EST
-
-        guard let date = inputFormatter.date(from: cleanedString) else {
+        // Format to user-friendly time
+        let isoFormatter = ISO8601DateFormatter()
+        isoFormatter.formatOptions = [.withInternetDateTime]
+        
+        guard let date = isoFormatter.date(from: appointmentStartTime) else {
             return appointmentStartTime
         }
 
         let outputFormatter = DateFormatter()
         outputFormatter.dateFormat = DateFormatter.dateFormat(fromTemplate: "j:mm", options: 0, locale: Locale.current)
-        outputFormatter.timeZone = TimeZone(identifier: "America/New_York")
+        //outputFormatter.timeZone = TimeZone(identifier: "America/New_York")
 
         return outputFormatter.string(from: date)
     }
@@ -200,9 +194,6 @@ class ReservationViewModel: ObservableObject {
                 return date1 < date2
             }
 
-            // Update reservation count from server
-            reservationCount = response.count
-
             if availableSlots.isEmpty {
                 errorMessage = "No slots available for today. Please check back later."
             }
@@ -240,7 +231,7 @@ class ReservationViewModel: ObservableObject {
                 count: 1
             )
 
-            let _: CreateAppointmentResponse = try await authService.authenticatedRequest(
+            let response: CreateAppointmentResponse = try await authService.authenticatedRequest(
                 .createAppointment,
                 body: request
             )
@@ -251,6 +242,9 @@ class ReservationViewModel: ObservableObject {
             // Refresh from server to get updated slot list and reservation count
             await loadAvailableSlots()
 
+            // Update reservation count from server
+            reservationCount += response.count
+            
             return (true, "Your appointment is saved for \(slot.formattedTime)")
         } catch let error as APIClientError {
             return (false, error.localizedDescription)
